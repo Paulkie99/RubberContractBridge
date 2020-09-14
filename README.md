@@ -1,5 +1,5 @@
 # group_E
-PJ Claasen 18006885
-IG Cuyler
-Jacques Human
-CM Vos
+PJ Claasen - Server, AI
+IG Cuyler - GUI
+Jacques Human - Networking
+CM Vos - Server, AI
