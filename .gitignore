@@ -1,2 +1,6 @@
 
 build-Qt_Project-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
+
+Qt_Project/Qt_Project.pro.user
+
+*.user
