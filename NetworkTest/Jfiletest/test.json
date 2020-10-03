@@ -1,0 +1,5 @@
+{
+    "Type": "CONNECT_REQUEST",
+    "Id": 2,"Password": "password123",
+    "Alias": "Player123",
+}
