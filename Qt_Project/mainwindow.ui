@@ -7,50 +7,106 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>604</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Rubber Contract Bridge</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>771</width>
-      <height>541</height>
+      <x>0</x>
+      <y>0</y>
+      <width>801</width>
+      <height>551</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="HomeScreen">
      <widget class="QPushButton" name="pushButton_Join">
       <property name="geometry">
        <rect>
-        <x>320</x>
-        <y>290</y>
-        <width>80</width>
-        <height>25</height>
+        <x>310</x>
+        <y>250</y>
+        <width>131</width>
+        <height>51</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
       </property>
       <property name="text">
        <string>Join Game</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="lblHeading">
       <property name="geometry">
        <rect>
-        <x>330</x>
-        <y>180</y>
-        <width>55</width>
-        <height>16</height>
+        <x>100</x>
+        <y>70</y>
+        <width>651</width>
+        <height>81</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>36</pointsize>
+       </font>
+      </property>
       <property name="text">
-       <string>Page 1</string>
+       <string>Rubber Contract Bridge</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_Create">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>330</y>
+        <width>131</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Create Game</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblUsername">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>507</y>
+        <width>130</width>
+        <height>33</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Username:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="leditUsername">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>510</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
       </property>
      </widget>
     </widget>
@@ -58,8 +114,8 @@
      <widget class="QPushButton" name="pushButton_Check">
       <property name="geometry">
        <rect>
-        <x>320</x>
-        <y>290</y>
+        <x>380</x>
+        <y>400</y>
         <width>80</width>
         <height>25</height>
        </rect>
@@ -68,17 +124,25 @@
        <string>2</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="lblHostIP">
       <property name="geometry">
        <rect>
-        <x>330</x>
-        <y>190</y>
-        <width>55</width>
-        <height>16</height>
+        <x>191</x>
+        <y>171</y>
+        <width>72</width>
+        <height>24</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
       <property name="text">
-       <string>Page 2</string>
+       <string>Host IP:</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit">
@@ -89,6 +153,201 @@
         <width>113</width>
         <height>24</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblPort">
+      <property name="geometry">
+       <rect>
+        <x>192</x>
+        <y>211</y>
+        <width>43</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>Port:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_Join_2">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>320</y>
+        <width>131</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Join Game</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="sbPort">
+      <property name="geometry">
+       <rect>
+        <x>410</x>
+        <y>211</y>
+        <width>46</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>260</y>
+        <width>271</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="lblHostIP_3">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>Server Password:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="leditPassword"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QLineEdit" name="leditHostIP">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>171</y>
+        <width>108</width>
+        <height>24</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="ConfigureServer">
+     <widget class="QLineEdit" name="leditCreatePassword">
+      <property name="geometry">
+       <rect>
+        <x>369</x>
+        <y>230</y>
+        <width>108</width>
+        <height>24</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblCreatePassword">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>230</y>
+        <width>91</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>Password:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblAI">
+      <property name="geometry">
+       <rect>
+        <x>211</x>
+        <y>190</y>
+        <width>201</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>Number of AI Players:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="sbAI">
+      <property name="geometry">
+       <rect>
+        <x>429</x>
+        <y>190</y>
+        <width>46</width>
+        <height>25</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>270</y>
+        <width>421</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>To allow others to join, give them your IP address, port number &amp; password (available on the next screen)</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_Join_3">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>380</y>
+        <width>131</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Create Server</string>
       </property>
      </widget>
     </widget>
@@ -104,8 +363,14 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuBridge">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="cursor">
+     <cursorShape>BlankCursor</cursorShape>
+    </property>
     <property name="title">
-     <string>Bridge</string>
+     <string>Home Screen</string>
     </property>
    </widget>
    <addaction name="menuBridge"/>
