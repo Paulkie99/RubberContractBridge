@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,13 +10,15 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    dialog.cpp \
+    server.cpp
 
 HEADERS += \
-    mainwindow.h
+    dialog.h \
+    server.h
 
 FORMS += \
-    mainwindow.ui
+    dialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
