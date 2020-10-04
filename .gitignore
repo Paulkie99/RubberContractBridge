@@ -1,2 +1,12 @@
 
 build-Qt_Project-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
+
+*.stash
+
+*.o
+
+build-Server-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/debug/
+
+build-Server-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
+
+*.user
