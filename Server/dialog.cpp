@@ -6,7 +6,7 @@ Dialog::Dialog(QWidget *parent, quint16 port)
     , ui(new Ui::Dialog)
 {
     ui->setupUi(this);
-    bridgeServer = new Server("Bridge Server", QWebSocketServer::NonSecureMode, this);
+    bridgeServer = new Server("Bridge Server", QWebSocketServer::SecureMode, this);
     bridgeServer->listen(QHostAddress::Any, port);
     connect(bridgeServer, SIGNAL(messageReceived(QString)),
             this, SLOT(messageReceived(QString)));
