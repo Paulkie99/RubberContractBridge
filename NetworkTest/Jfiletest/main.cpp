@@ -42,13 +42,13 @@ QJsonObject GenerateMessage(QString type)
 {
     QString val;
     QFile file;
-    QString path = "C:/Users/User/Documents/JFILES/"; //this path needs to change to where the json files are stored
-    path= path + type+".json";   //full path is created here by passing in the parameter
+    QString path = "../JFILES/"; //this path needs to change to where the json files are stored
+    path = path + type+".json";   //full path is created here by passing in the parameter
     file.setFileName(path);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     val = file.readAll();
     file.close();
-   qWarning() << val;
+    qWarning() << val;
     QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
     QJsonObject jObject = d.object();
     return(jObject);
