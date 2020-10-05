@@ -2,6 +2,7 @@
 #define GAMESCREEN_H
 
 #include <QDialog>
+#include <QLabel>
 
 namespace Ui {
 class GameScreen;
@@ -21,6 +22,10 @@ private slots:
     void on_pushButton_Score_clicked();
 
     void on_pushButton_Play_clicked();
+
+    void loadCards(QLabel *, QString);
+
+    void on_pushButton_Abandon_clicked();
 
 private:
     Ui::GameScreen *ui;
