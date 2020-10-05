@@ -216,9 +216,37 @@ void Server::ValidateInput(QString message)
     QJsonObject msg = Convert_Message_To_Json(message);
     QString type = msg["Type"].toString();
     qInfo() << "Validating message: " << type;
+     QStringList msgTypes;
+     msgTypes << "CONNECT_REQUEST" << "BID_SEND" << "MOVE_SEND" << "PING" << "PONG" ;
 
-    if(type == "CONNECT_REQUEST")
-    {
+     switch(msgTypes.indexOf(type))
+     {
+     case 0:
+     {
         Authenticate(msg["Alias"].toString(), msg["Password"].toString(), msg["Id"].toInt());
-    }
+
+       break;
+     }
+     case 1:
+     {
+         QJsonObject te = Convert_Message_To_Json(GenerateMessage("BID_END"));
+            int iz = 5;
+         SendMessage(iz, te);
+
+       break;
+     }
+   case 2:
+
+     break;
+
+     case 3:
+
+       break;
+
+   case 4:
+
+     break;
+     }
+
+
 }
