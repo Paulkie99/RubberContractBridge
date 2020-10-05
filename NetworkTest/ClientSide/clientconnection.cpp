@@ -40,9 +40,84 @@ For example a MOVE REQUEST can be received from the server, the function can cal
  */
 void clientconnection::onTextMessageReceived(QString message)
 {
-    if (debugOn)
-        qDebug() << "Message received:" << message;
+   // if (debugOn)
+    //    qDebug() << "Message received:" << message;
+    QJsonObject msgr = CreateJObject(message);
+    QString type = msgr["Type"].toString();
+   // qDebug() << "Message Type: " << type;
+    QStringList msgTypes;
+    msgTypes <<"CONNECT_UNSUCCESSFUL" <<"CONNECT_SUCCESSFUL" << "LOBBY_UPDATE" << "BID_START" << "BID_REQUEST" << "BID_UPDATE" << "BID_END" << "PLAY_START" << "MOVE_REQUEST" << "MOVE_UPDATE" << "TRICK_END" <<"PLAY_END" <<"SCORE" << "PING"<<"PONG" <<"DISCONNECT_PLAYER";
 
+    switch(msgTypes.indexOf(type))
+    {
+      case 0:
+        qDebug() << "Message Type: " << msgTypes[0];
+        break;
+
+      case 1:
+        qDebug() << "Message Type: " << msgTypes[1];
+        break;
+
+      case 2:
+        qDebug() << "Message Type: " << msgTypes[2];
+        break;
+
+    case 3:
+        qDebug() << "Message Type: " << msgTypes[3];
+      break;
+
+    case 4:
+        qDebug() << "Message Type: " << msgTypes[4];
+      break;
+
+    case 5:
+        qDebug() << "Message Type: " << msgTypes[5];
+      break;
+
+    case 6:
+        qDebug() << "Message Type: " << msgTypes[6];
+      break;
+
+    case 7:
+        qDebug() << "Message Type: " << msgTypes[7];
+      break;
+
+    case 8:
+        qDebug() << "Message Type: " << msgTypes[8];
+      break;
+
+    case 9:
+        qDebug() << "Message Type: " << msgTypes[9];
+      break;
+
+    case 10:
+        qDebug() << "Message Type: " << msgTypes[10];
+      break;
+
+    case 11:
+        qDebug() << "Message Type: " << msgTypes[11];
+      break;
+
+    case 12:
+        qDebug() << "Message Type: " << msgTypes[12];
+      break;
+
+    case 13:
+        qDebug() << "Message Type: " << msgTypes[13];
+      break;
+
+    case 14:
+        qDebug() << "Message Type: " << msgTypes[14];
+      break;
+
+    case 15:
+        qDebug() << "Message Type: " << msgTypes[15];
+      break;
+
+    case 16:
+        qDebug() << "Message Type: " << msgTypes[16];
+      break;
+    }
 }
 
 /*
@@ -58,6 +133,9 @@ void clientconnection::onConnected()
     connect(&clientSocket, &QWebSocket::textMessageReceived,
             this, &clientconnection::onTextMessageReceived);
     SendMessageToServer("Hello There");
+
+
+
 }
 
 /*
