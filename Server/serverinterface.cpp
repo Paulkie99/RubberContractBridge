@@ -1,9 +1,9 @@
-#include "dialog.h"
+#include "serverinterface.h"
 #include "ui_dialog.h"
 
-Dialog::Dialog(QWidget *parent, quint16 port)
+ServerInterface::ServerInterface(QWidget *parent, quint16 port)
     : QDialog(parent)
-    , ui(new Ui::Dialog)
+    , ui(new Ui::Server_Dialog)
 {
     ui->setupUi(this);
     bridgeServer = new Server("Bridge Server", QWebSocketServer::SecureMode, this);
@@ -12,15 +12,12 @@ Dialog::Dialog(QWidget *parent, quint16 port)
             this, SLOT(messageReceived(QString)));
 }
 
-Dialog::~Dialog()
+ServerInterface::~ServerInterface()
 {
     delete ui;
 }
 
-void Dialog::messageReceived(const QString &message)
+void ServerInterface::messageReceived(const QString &message)
 {
     ui->listWidget->addItem(message);
 }
-
-
-

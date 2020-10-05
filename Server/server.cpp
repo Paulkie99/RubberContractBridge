@@ -6,70 +6,41 @@
 
 //Code used to implement the server for the bridge game of EPE321
 //Author: Paul Claasen 18006885
-//Last update: 04/10/2020 Revision 1
+//Last update: 05/10/2020 Revision 2
 
 #include "server.h"
 
+//path for Json temlpate files
 const QString JPath = "../JFILES/";
 
 //Constructor for the server, including server name, sslmode and parent object
 Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) : QWebSocketServer(serverName, secureMode, parent)
 {
     qInfo() << "Constructing server";
-    ConnectedClients = NULL; //no users connected yet
-    connectedClients = 0;
+    numConnectedClients = 0;
     connect(this, SIGNAL(newConnection()), //connect the QWebSocketServer::newConnection() signal to the acceptConnection() slot, to store connecting QWebSockets
             this, SLOT(acceptConnection()));
+
+    //Initialise deck
+    qInfo() << "Constructing deck";
+    int count = 0;
+    for(int suit = Clubs; suit <= Spades; suit++)
+        for(int value = Two; value <= Ace; value++)
+            Deck[count++] = Card(value, suit);
+//    PrintDeck();
+//    Shuffle();
+//    PrintDeck();
+//    Deal();
 }
 
 //Adapted from J Human's networking code
 //This function is used to convert received messages to Json objects
 QJsonObject Server::Convert_Message_To_Json(QString msg)
 {
-        qInfo() << "Converting message to Json: " << msg;
-        QJsonDocument d = QJsonDocument::fromJson(msg.toUtf8());
-        QJsonObject jObject = d.object();
-        return jObject;
-}
-
-bool Server::Authenticate(QString username, QString password)
-{
-    //criteria for username and password?
-    if(username != "" && password != "")
-        return true;
-    return false;
-}
-
-//This function accepts a new connection by storing the corresponding QWebSocket in an array
-void Server::acceptConnection()
-{
-    qInfo() << "Client " << connectedClients << " connecting.";
-
-    //if no users have connected before, create the QWebSocket array
-    if(ConnectedClients == NULL)
-        ConnectedClients = new QWebSocket*[4];
-
-    ConnectedClients[connectedClients] = nextPendingConnection(); //add the connecting QWebSocket to the array
-    connect(ConnectedClients[connectedClients++], SIGNAL(textMessageReceived(QString)),
-            this, SLOT(ValidateInput(QString))); //connect the connecting QWebSocket textMessageReceived function to the validateInput function
-}
-
-//This function receives messages from clients and calls the relevant validation function based on the message type
-void Server::ValidateInput(QString message)
-{
-        emit messageReceived(message);
-        QJsonObject msg = Convert_Message_To_Json(message);
-        QString type = msg["Type"].toString();
-        qInfo() << "Validating message: " << type;
-
-        if(type == "CONNECT_REQUEST")
-        {
-            if(!Authenticate(msg["Alias"].toString(), msg["Password"].toString()))
-            {
-                QJsonObject error = Convert_Message_To_Json(GenerateMessage("CONNECT_UNSUCCESSFUL"));
-                error["Description"] = "Username/password invalid";
-            }
-        }
+    qInfo() << "Converting message to Json: " << msg;
+    QJsonDocument d = QJsonDocument::fromJson(msg.toUtf8());
+    QJsonObject jObject = d.object();
+    return jObject;
 }
 
 //Adapted from J Human's networking code
@@ -87,7 +58,167 @@ QString Server::GenerateMessage(QString type)
     file.close();
     qInfo() << "Generating message: " << val;
     return val;
-//    QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
-//    QJsonObject jObject = d.object();
-//    return(jObject);
+}
+
+// authenticate username and password of connecting client
+void Server::Authenticate(QString username, QString password, int id)
+{
+    bool valid;
+
+    //criteria for username and password?
+    if(username != "" && password != "")
+        valid = true;
+    else
+        valid = false;
+
+    if(!valid)
+    {
+        QJsonObject error = Convert_Message_To_Json(GenerateMessage("AUTH_UNSUCCESSFUL"));
+        error["Description"] = "Username/password invalid";
+        SendMessage(id, error);
+    }
+    else //valid
+    {
+        ConnectedClients[id].isAuthenticated = true;
+        SendMessage(id, Convert_Message_To_Json(GenerateMessage("AUTH_SUCCESSFUL")));
+    }
+}
+
+// Shuffle the deck
+void Server::Shuffle(unsigned seed)
+{
+    if(seed == 1) //seed not given (or just a really lame one)
+        seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+    qInfo() << "Shuffling deck...";
+    std::shuffle(Deck.begin(), Deck.end(), std::default_random_engine(seed));
+}
+
+// Deal the deck to connected players
+void Server::Deal()
+{
+    //first assign cards one at a time
+    int count = 0; //keep track of card in deck
+    for(int card = 0; card < hand_size; ++card)
+    {
+        for(int player = 0; player < num_players; ++player)
+        {
+            Player_Hands[card][player] = &Deck[count++];
+        }
+    }
+
+    //construct and send a message to each client with their cards
+    for(int player = 0; player < num_players; ++player)
+    {
+        QJsonArray client_cards;
+        for(int card = 0; card < hand_size; ++card)
+        {
+            Card* card_ptr = Player_Hands[card][player];
+            auto card_to_int = QJsonObject({
+                                               qMakePair(QString("Suit"), QJsonValue(card_ptr->suit)),
+                                               qMakePair(QString("Value"), QJsonValue(card_ptr->value))
+                                           });
+            client_cards.push_back(card_to_int);
+        }
+        QJsonObject hand = Convert_Message_To_Json(GenerateMessage("HAND_DEALT"));
+        hand["Cards"] = client_cards;
+        SendMessage(player, hand);
+    }
+
+    PrintHands();
+}
+
+//Print every card in the deck
+void Server::PrintDeck()
+{
+    QTextStream out(stdout);
+    for(int card = 0; card < deck_size; card++)
+    {
+        Deck[card].print(out);
+        out << "\n";
+    }
+}
+
+//Print current player hands
+void Server::PrintHands()
+{
+    QTextStream out(stdout);
+    out << "North                       \t" << "South                       \t" << "East                        \t" << "West                        \n";
+    for(int card = 0; card < hand_size; ++card)
+    {
+        for(int player = 0; player < num_players; ++player)
+        {
+            Player_Hands[card][player]->print(out);
+            out << "\t";
+        }
+        out << "\n";
+    }
+}
+
+//perform necessary functions to connect a client
+void Server::ConnectClient(int pos)
+{
+    ConnectedClients[pos].clientSocket = nextPendingConnection(); //add the connecting QWebSocket
+    ConnectedClients[pos].id = pos; //assign id based on pos in ConnectedClients array
+    connect(ConnectedClients[pos].clientSocket, SIGNAL(textMessageReceived(QString)),
+            this, SLOT(ValidateInput(QString))); //connect the connecting QWebSocket textMessageReceived function to the validateInput function
+
+    QJsonObject success_msg = Convert_Message_To_Json(GenerateMessage("CONNECT_SUCCESSFUL"));
+    SendMessage(pos, success_msg);
+}
+
+//send a message to a client based on id
+void Server::SendMessage(int id, QJsonObject msg)
+{
+    msg["Id"] = id;
+    QString strFromObj = QJsonDocument(msg).toJson(QJsonDocument::Compact);
+    ConnectedClients[id].clientSocket->sendTextMessage(strFromObj);
+}
+
+//This function accepts a new connection by storing the corresponding QWebSocket in an array
+void Server::acceptConnection()
+{
+    qInfo() << "Client connecting.";
+
+    if(numConnectedClients == num_players) //client connecting, but max clients already connected
+    {
+        int id = 0;
+        bool isFreeSpace = false;
+        for(; id < num_players; id++)
+        {
+            if(!ConnectedClients[id].isAuthenticated) //if an unauthenticated client exists
+            {
+                //send a message to that client informing them of their disconnect
+                QJsonObject unath = Convert_Message_To_Json(GenerateMessage("CONNECT_UNSUCCESSFUL"));
+                unath["Description"] = "Authentication not received after connection, another client has replaced you";
+                SendMessage(id, unath);
+
+                ConnectClient(id); //replace that client with the new one
+                isFreeSpace = true;
+            }
+        }
+        if(!isFreeSpace)
+        {
+            QJsonObject lobbby_full = Convert_Message_To_Json(GenerateMessage("CONNECT_UNSUCCESSFUL"));
+            SendMessage(100, lobbby_full);
+        }
+    }
+    else
+    {
+    ConnectClient(numConnectedClients++);
+    }
+}
+
+//This function receives messages from clients and calls the relevant validation function based on the message type
+void Server::ValidateInput(QString message)
+{
+    emit messageReceived(message);
+    QJsonObject msg = Convert_Message_To_Json(message);
+    QString type = msg["Type"].toString();
+    qInfo() << "Validating message: " << type;
+
+    if(type == "CONNECT_REQUEST")
+    {
+        Authenticate(msg["Alias"].toString(), msg["Password"].toString(), msg["Id"].toInt());
+    }
 }

@@ -6,7 +6,7 @@
 
 //Code used to implement the server for the bridge game of EPE321
 //Author: Paul Claasen 18006885
-//Last update: 04/10/2020 Revision 1
+//Last update: 05/10/2020 Revision 2
 
 #ifndef SERVER_H
 #define SERVER_H
@@ -17,36 +17,52 @@
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
-#include <map>
+#include <QJsonArray>
+#include <card.h>       // for Deckk and Player_Hands
+#include <random>       // std::default_random_engine
+#include <serverclient.h>
 
-class AI;
-class Card;
-struct GS
+class AI;               // AI Class to be integrated
+struct GS{};            // Gamestate to be finalized
+const int deck_size = 52;   // standard deck size
+const int num_players = 4;  // bridge players
+const int hand_size = deck_size/num_players;   // bridge hand size
+
+enum players
 {
-
+    North,
+    South,
+    East,
+    West
 };
 
 class Server : public QWebSocketServer
 {
     Q_OBJECT
 public:
-    explicit Server(const QString &serverName, SslMode secureMode, QObject *parent);
+    explicit Server(const QString &serverName = "Bridge Server", SslMode secureMode = SecureMode, QObject *parent = NULL);
 
 signals:
-    void messageReceived(QString);
+    void messageReceived(QString); //signal to the server-interface that a message has been received
 
 private:
-    QWebSocket** ConnectedClients = NULL;
+    ServerClient ConnectedClients[num_players];
     AI* AI_Instances;
-    Card** Player_Hands;
-    Card* Deck;
+    Card* Player_Hands[hand_size][num_players];
+    std::array<Card, deck_size> Deck;
     GS  GameState;
-    int connectedClients;
+    int numConnectedClients;
     std::map<std::string, int> message_types;
 
     QString GenerateMessage(QString);
     QJsonObject Convert_Message_To_Json(QString);
-    bool Authenticate(QString username, QString password);
+    void Authenticate(QString username, QString password, int id);
+    void Shuffle(unsigned seed = 1);
+    void Deal();
+    void PrintDeck();
+    void PrintHands();
+    void ConnectClient(int pos);
+    void SendMessage(int id, QJsonObject);
 
 private slots:
     void acceptConnection();
