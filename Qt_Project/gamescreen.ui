@@ -1166,13 +1166,13 @@
         <string>Abandon match</string>
        </property>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>800</y>
          <width>220</width>
-         <height>71</height>
+         <height>79</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">

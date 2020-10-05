@@ -8,8 +8,8 @@ GameScreen::GameScreen(QWidget *parent) :
     ui(new Ui::GameScreen)
 {
     ui->setupUi(this);
-    //this->setWindowState(Qt::WindowFullScreen);
-    //showMaximized();
+    // Prevent the window from being resized
+    QWidget::setFixedSize(size());
 
     // Set QDialog flags to that of a normal window
     this->setWindowFlags(Qt::Window);
@@ -19,6 +19,7 @@ GameScreen::GameScreen(QWidget *parent) :
     // Set the title of the dialog
     QWidget::setWindowTitle("Auction");
     ui->stackedWidget->setCurrentIndex(0);
+    ui->pushButton_Play->setVisible(false);
    // ui->tableBids->editItem()
 
 //    QFont tableFont;

@@ -23,6 +23,18 @@ private slots:
 
     void on_pushButton_Check_clicked();
 
+    void on_pushButton_JoinServer_clicked();
+
+    void on_pushButton_Create_clicked();
+
+    void on_cbShowPassword_clicked();
+
+    void on_pushButton_BackJoin_clicked();
+
+    void on_pushButton_BackConf_clicked();
+
+    void on_pushButton_CreateConf_clicked();
+
 private:
     Ui::MainWindow *ui;
     // Create instance of GameScreen
