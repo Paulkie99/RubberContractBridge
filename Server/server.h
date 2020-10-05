@@ -6,7 +6,7 @@
 
 //Code used to implement the server for the bridge game of EPE321
 //Author: Paul Claasen 18006885
-//Last update: 05/10/2020 Revision 2
+//Last update: 06/10/2020 Revision 3
 
 #ifndef SERVER_H
 #define SERVER_H
@@ -47,12 +47,12 @@ signals:
 
 private:
     ServerClient ConnectedClients[num_players];
-    AI* AI_Instances;
+    AI* AI_Instances = NULL;
     Card* Player_Hands[hand_size][num_players];
     std::array<Card, deck_size> Deck;
     GS  GameState;
-    int numConnectedClients;
-    std::map<std::string, int> message_types;
+    int numConnectedClients = 0;
+    int numAuthenticatedUsers = 0;
 
     QString GenerateMessage(QString);
     QJsonObject Convert_Message_To_Json(QString);
@@ -63,10 +63,16 @@ private:
     void PrintHands();
     void ConnectClient(int pos);
     void SendMessage(int id, QJsonObject);
+    bool isValidSocketId(int id, bool isFirstConnection=false);
+    bool isValidBid(int id, int val, int suit);
+    bool isValidMove(int id, int val, int suit);
+    bool isEnumsContainCard(int val, int suit);
+    bool isValidCardInHand(int id, int val, int suit);
 
 private slots:
     void acceptConnection();
     void ValidateInput(QString message);
+    void socketDisconnect(int);
 };
 
 #endif // SERVER_H

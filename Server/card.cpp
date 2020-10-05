@@ -10,21 +10,33 @@
 
 #include "card.h"
 
+/*
+ * Default Card Constructor
+ * */
 Card::Card()
 {
 
 }
 
+/*
+ * Card Constructor, given int value and suit
+ * */
 Card::Card(int val, int suit_) : value(val), suit(suit_)
 {
 
 }
 
+/*
+ * Print the int value and suit of a card
+ * */
 void Card::print(QTextStream& out)
 {
     out << "Value: " << ValToString(value) << ", Suit: " << SuitToString(suit);
 }
 
+/*
+ * Return the String representing the value of a card
+ * */
 QString Card::ValToString(int val)
 {
     switch(val)
@@ -72,6 +84,9 @@ QString Card::ValToString(int val)
     return "";
 }
 
+/*
+ * Return the String representing the suit of a card
+ * */
 QString Card::SuitToString(int suit)
 {
     switch(suit)
