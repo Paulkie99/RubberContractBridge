@@ -16,7 +16,7 @@ const QString JPath = "../JFILES/";
 /*
  * Constructor for the server, including server name, sslmode and parent object
  * */
-Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) : QWebSocketServer(serverName, secureMode, parent)
+Server::Server(const QString &serverName, SslMode secureMode, QObject *parent, bool shuffle) : QWebSocketServer(serverName, secureMode, parent)
 {
     qInfo() << "Constructing server";
     connect(this, SIGNAL(newConnection()), //connect the QWebSocketServer::newConnection() signal to the acceptConnection() slot, to store connecting QWebSockets
@@ -33,7 +33,8 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) :
         for(int value = Two; value <= Ace; value++)
             Deck[count++] = Card(value, suit);
 //    PrintDeck();
-    Shuffle();
+    if(shuffle)
+        Shuffle();
 //    PrintDeck();
 //    Deal();
 
@@ -53,7 +54,7 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) :
  * */
 QJsonObject Server::Convert_Message_To_Json(QString msg)
 {
-    qInfo() << "Converting message to Json: " << msg;
+//    qInfo() << "Converting message to Json: " << msg;
     QJsonDocument d = QJsonDocument::fromJson(msg.toUtf8());
     QJsonObject jObject = d.object();
     return jObject;
@@ -74,7 +75,7 @@ QString Server::GenerateMessage(QString type)
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     val = file.readAll();
     file.close();
-    qInfo() << "Generating message: " << val;
+//    qInfo() << "Generating message: " << val;
     return val;
 }
 
@@ -230,6 +231,7 @@ void Server::SendMessage(int id, QJsonObject msg)
 
     qInfo() << "Sending message: " << strFromObj;
 
+    emit messageSent(strFromObj);
     ConnectedClients[id].clientSocket->sendTextMessage(strFromObj);
 }
 
@@ -441,7 +443,7 @@ void Server::socketDisconnect(int id)
 {
     if(!isValidSocketId(id))
         return;
-    emit messageReceived("Client " + QString(id) + " disconnected");
+    emit messageReceived("Client " + QString::number(id) + " disconnected");
     ConnectedClients[id].isAuthenticated = false;
     ConnectedClients[id].clientSocket = NULL;
     --numConnectedClients;

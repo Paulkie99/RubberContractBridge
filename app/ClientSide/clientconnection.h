@@ -26,6 +26,7 @@ class clientconnection : public QObject
      Q_OBJECT
 public:
     explicit clientconnection(const QUrl &url, bool debug = false, QObject *parent = nullptr);
+    friend class TestServer;
 
 private:
     QWebSocket* clientSocket;
@@ -43,6 +44,7 @@ private Q_SLOTS:
     void closed();
 
 signals:
+    void messageReceived(QString message);
 };
 
 #endif // CLIENTCONNECTION_H

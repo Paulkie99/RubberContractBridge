@@ -40,6 +40,8 @@ For example a MOVE REQUEST can be received from the server, the function can cal
  */
 void clientconnection::onTextMessageReceived(QString message)
 {
+    emit messageReceived(message);
+
    // if (debugOn)
     //    qDebug() << "Message received:" << message;
     QJsonObject msgr = CreateJObject(message);
@@ -51,12 +53,12 @@ void clientconnection::onTextMessageReceived(QString message)
     switch(msgTypes.indexOf(type))
     {
       case 0:
-        qDebug() << "Message Type: " << msgTypes[0];
+        qDebug() << "Client Received Message Type: " << msgTypes[0];
         break;
 
       case 1: //CONNECT_SUCCESSFUL
     {
-        qDebug() << "Message Type: " << msgTypes[1];
+        qDebug() << "Client Received Message Type: " << msgTypes[1];
 //        SendMessageToServer()
         id = msgr["Id"].toInt();
         QJsonObject connect = CreateJObject(GenerateMessage("CONNECT_REQUEST"));
@@ -66,75 +68,75 @@ void clientconnection::onTextMessageReceived(QString message)
     }
 
       case 2:
-        qDebug() << "Message Type: " << msgTypes[2];
+        qDebug() << "Client Received Message Type: " << msgTypes[2];
         break;
 
     case 3:
-        qDebug() << "Message Type: " << msgTypes[3];
+        qDebug() << "Client Received Message Type: " << msgTypes[3];
       break;
 
     case 4:
-        qDebug() << "Message Type: " << msgTypes[4];
+        qDebug() << "Client Received Message Type: " << msgTypes[4];
       break;
 
     case 5:
-        qDebug() << "Message Type: " << msgTypes[5];
+        qDebug() << "Client Received Message Type: " << msgTypes[5];
       break;
 
     case 6:
-        qDebug() << "Message Type: " << msgTypes[6];
+        qDebug() << "Client Received Message Type: " << msgTypes[6];
       break;
 
     case 7:
-        qDebug() << "Message Type: " << msgTypes[7];
+        qDebug() << "Client Received Message Type: " << msgTypes[7];
       break;
 
     case 8:
-        qDebug() << "Message Type: " << msgTypes[8];
+        qDebug() << "Client Received Message Type: " << msgTypes[8];
       break;
 
     case 9:
-        qDebug() << "Message Type: " << msgTypes[9];
+        qDebug() << "Client Received Message Type: " << msgTypes[9];
       break;
 
     case 10:
-        qDebug() << "Message Type: " << msgTypes[10];
+        qDebug() << "Client Received Message Type: " << msgTypes[10];
       break;
 
     case 11:
-        qDebug() << "Message Type: " << msgTypes[11];
+        qDebug() << "Client Received Message Type: " << msgTypes[11];
       break;
 
     case 12:
-        qDebug() << "Message Type: " << msgTypes[12];
+        qDebug() << "Client Received Message Type: " << msgTypes[12];
       break;
 
     case 13:
-        qDebug() << "Message Type: " << msgTypes[13];
+        qDebug() << "Client Received Message Type: " << msgTypes[13];
       break;
 
     case 14:
-        qDebug() << "Message Type: " << msgTypes[14];
+        qDebug() << "Client Received Message Type: " << msgTypes[14];
       break;
 
     case 15:
-        qDebug() << "Message Type: " << msgTypes[15];
+        qDebug() << "Client Received Message Type: " << msgTypes[15];
       break;
 
     case 16:
-        qDebug() << "Message Type: " << msgTypes[16];
+        qDebug() << "Client Received Message Type: " << msgTypes[16];
       break;
 
     case 17:
-        qDebug() << "Message Type: " << msgTypes[17];
+        qDebug() << "Client Received Message Type: " << msgTypes[17];
       break;
 
     case 18:
-        qDebug() << "Message Type: " << msgTypes[18];
+        qDebug() << "Client Received Message Type: " << msgTypes[18];
       break;
 
     case 19:
-        qDebug() << "Message Type: " << msgTypes[19];
+        qDebug() << "Client Received Message Type: " << msgTypes[19];
         qDebug() << "Message: " << CreateJString(msgr);
       break;
     }
@@ -164,6 +166,7 @@ void clientconnection::onConnected()
  */
 void clientconnection::SendMessageToServer(QString msg)
 {
+    qDebug() << "Client sending message: " << msg;
     clientSocket->sendTextMessage(msg);
 }
 
@@ -192,7 +195,7 @@ QString clientconnection::GenerateMessage(QString type)
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     val = file.readAll();
     file.close();
-    qInfo() << "Generating message: " << val;
+//    qInfo() << "Generating message: " << val;
     return val;
 //    QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
 //    QJsonObject jObject = d.object();
