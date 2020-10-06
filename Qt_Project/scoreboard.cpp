@@ -7,9 +7,10 @@ ScoreBoard::ScoreBoard(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Disable resizing of window
     ui->tableWidgetScore->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableWidgetScore->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
+    // Set window title
     QWidget::setWindowTitle("Scoreboard");
 }
 

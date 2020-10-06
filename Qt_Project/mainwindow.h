@@ -21,8 +21,6 @@ private slots:
 
     void on_pushButton_Join_clicked();
 
-    void on_pushButton_Check_clicked();
-
     void on_pushButton_JoinServer_clicked();
 
     void on_pushButton_Create_clicked();
