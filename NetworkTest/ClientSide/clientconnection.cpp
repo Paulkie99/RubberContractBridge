@@ -48,10 +48,11 @@ void clientconnection::onTextMessageReceived(QString message)
     QStringList msgTypes;
     msgTypes <<"CONNECT_UNSUCCESSFUL" <<"CONNECT_SUCCESSFUL" << "LOBBY_UPDATE" << "BID_START" << "BID_REQUEST" << "BID_UPDATE" << "BID_END" << "PLAY_START" << "MOVE_REQUEST" << "MOVE_UPDATE" << "TRICK_END" <<"PLAY_END" <<"SCORE" << "PING"<<"PONG" <<"DISCONNECT_PLAYER";
 
-    switch(msgTypes.indexOf(type))
+    switch(msgTypes.indexOf(type)) //Switch block that determines the type of message that was received.
     {
       case 0:
         qDebug() << "Message Type: " << msgTypes[0];
+        //code added here to handle CONNECT_UNSUCCESSFUL
         break;
 
       case 1:
@@ -144,6 +145,7 @@ void clientconnection::onConnected()
  */
 void clientconnection::SendMessageToServer(QString msg)
 {
+    qDebug() <<"Sending message" <<msg;
     clientSocket.sendTextMessage(msg);
 }
 
