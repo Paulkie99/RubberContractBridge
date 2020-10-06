@@ -18,7 +18,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <card.h>       // for Deckk and Player_Hands
+#include <card.h>       // for Deck and Player_Hands
 #include <random>       // std::default_random_engine
 #include <serverclient.h>
 
@@ -40,10 +40,13 @@ class Server : public QWebSocketServer
 {
     Q_OBJECT
 public:
-    explicit Server(const QString &serverName = "Bridge Server", SslMode secureMode = SecureMode, QObject *parent = NULL);
+    explicit Server(const QString &serverName = "Bridge Server", SslMode secureMode = SecureMode, QObject *parent = NULL, bool shuffle=true);
+    friend class TestServer;
+    friend class ServerInterface;
 
 signals:
     void messageReceived(QString); //signal to the server-interface that a message has been received
+    void messageSent(QString);
 
 private:
     ServerClient ConnectedClients[num_players];
