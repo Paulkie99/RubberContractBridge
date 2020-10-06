@@ -4,7 +4,7 @@
 //printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
 //departmental requirements.
 
-//Code used to implement the server for the bridge game of EPE321
+//Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
 //Last update: 02/10/2020 Revision 2
 #ifndef GAMESTATE_H
@@ -26,6 +26,8 @@ class GameState : public QObject
     Q_OBJECT
 public:
     explicit GameState(QObject *parent = nullptr);
+    GameState(const GameState& gs, QObject *parent = nullptr);
+//    ~GameState();
 
     void PrintGS();
     void SetBidStage(bool BS);
@@ -38,7 +40,7 @@ private:
     bool BidStage;
     int PassCount;
     int TrickScore[2];
-    Card *CurrentTrick[4];
+    Card* CurrentTrick[4];
     int Contract;
     int Trump;
     int GameScore[2];
@@ -46,6 +48,7 @@ private:
     int PlayerTurn;
     int Declarer;
     bool Double;
+    bool IsVulnerable[2];
 
 
 signals:
