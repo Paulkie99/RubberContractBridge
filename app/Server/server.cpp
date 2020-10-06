@@ -1,12 +1,12 @@
-//Declaration
-//1. I understand what plagiarism is and am aware of the University’s policy in this regard.
-//2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
-//printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
-//departmental requirements.
+/* Declaration
+ * 1. I understand what plagiarism is and am aware of the University’s policy in this regard.
+ * 2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
+ * printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
+ * departmental requirements.*/
 
-//Code used to implement the server for the bridge game of EPE321
-//Author: Paul Claasen 18006885
-//Last update: 06/10/2020 Revision 3
+/* Code used to implement the server for the bridge game of EPE321
+ * Author: Paul Claasen 18006885
+ * Last update: 06/10/2020 Revision 3*/
 
 #include "server.h"
 
@@ -14,7 +14,7 @@
 const QString JPath = "../JFILES/";
 
 /*
- * Constructor for the server, including server name, sslmode and parent object
+ * Constructor for the server, including server name, sslmode and parent object. Also can be specified whether shuffle should be called on construction, which is useful for testing.
  * */
 Server::Server(const QString &serverName, SslMode secureMode, QObject *parent, bool shuffle) : QWebSocketServer(serverName, secureMode, parent)
 {
@@ -220,7 +220,9 @@ void Server::ConnectClient(int pos)
     SendMessage(pos, success_msg);
 }
 
-//send a message to a client based on id
+/*
+ * Send a message to a client based on id
+ **/
 void Server::SendMessage(int id, QJsonObject msg)
 {
     if(!isValidSocketId(id))
@@ -322,7 +324,8 @@ bool Server::isValidCardInHand(int id, int val, int suit)
 }
 
 /*
- * This function accepts a new connection by storing the corresponding QWebSocket in an array
+ * This function accepts a new connection by storing the corresponding QWebSocket in an array,
+ * it also handles the case of a full lobby with a new pending connection attempt
  * */
 void Server::acceptConnection()
 {
@@ -352,7 +355,7 @@ void Server::acceptConnection()
                 isFreeSpace = true;
             }
         }
-        if(!isFreeSpace)
+        if(!isFreeSpace) // Lobby is full and everyone is authenticated
         {
             nextPendingConnection()->sendTextMessage(GenerateMessage("CONNECT_UNSUCCESSFUL"));
         }

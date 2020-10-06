@@ -1,12 +1,12 @@
-//Declaration
-//1. I understand what plagiarism is and am aware of the University’s policy in this regard.
-//2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
-//printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
-//departmental requirements.
+/* Declaration
+ * 1. I understand what plagiarism is and am aware of the University’s policy in this regard.
+ * 2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
+ * printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
+ * departmental requirements.*/
 
-//Code used to implement the server for the bridge game of EPE321
-//Author: Paul Claasen 18006885
-//Last update: 06/10/2020 Revision 3
+/* Code used to implement the server for the bridge game of EPE321
+ * Author: Paul Claasen 18006885
+ * Last update: 06/10/2020 Revision 3*/
 
 #ifndef SERVER_H
 #define SERVER_H
@@ -28,6 +28,7 @@ const int deck_size = 52;   // standard deck size
 const int num_players = 4;  // bridge players
 const int hand_size = deck_size/num_players;   // bridge hand size
 
+// Note that player with id 0 == North, 1 == South, etc.
 enum players
 {
     North,
@@ -71,6 +72,7 @@ private:
     bool isValidMove(int id, int val, int suit);
     bool isEnumsContainCard(int val, int suit);
     bool isValidCardInHand(int id, int val, int suit);
+    void UpdateGameState(int card_val, int card_suit, bool isBid);
 
 private slots:
     void acceptConnection();
