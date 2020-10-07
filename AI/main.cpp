@@ -6,7 +6,7 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 07/10/2020 Revision 2
+//Last update: 07/10/2020 Revision 4
 #include "mainwindow.h"
 #include <iostream>
 #include <QApplication>
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 //    gs->ClearPassCount();
 //    gs->PrintGS();
 
-    cout << "\nStart Code\n";
+    cout << "\nStart Code\n\n";
 
 //    cout << "Value: " << AI->cards[0][0] << ", Suit: " << AI->cards[0][1] << endl;
 
@@ -52,16 +52,19 @@ int main(int argc, char *argv[])
 //    cout << AI->Player_Hand[0] << endl;
 //    cout << AI->Player_Hand[1] << endl;
 
-    cout << AI->DetermineMove(true).toStdString();
+    cout << AI->DetermineMove(true, NULL).toStdString();
 //    cout << AI->DetermineMove(true);
     cout << endl;
 
-//    cout << "Change to play stage";
+    cout << "\nChange to play stage\n\n";
 //    gs.SetBidStage(false);
 //    gs->PrintGS();
-//    cout << "\n\n";
 
-//    cout << AI.DetermineMove(gs).toStdString();
+    // Trick cards in form [value][suit]
+    int trick[4][2] = {{8,1},{-1,-1},{-1,-1},{-1,-1}};
+    AI->TrumpSuit = 0;
+
+    cout << AI->DetermineMove(false, trick).toStdString();
 //    cout << AI->DetermineMove(gs);
 
     cout << "\n\n";

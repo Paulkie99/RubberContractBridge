@@ -6,13 +6,15 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 07/10/2020 Revision 3
+//Last update: 07/10/2020 Revision 4
 #include "aiplayer.h"
 
 AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
 {
     PID = ID;
     Vulnerable = false;
+    NumInHand = 13;
+    TrumpSuit = -1;
 //    for(int card = 0; card < hand_size; ++card)
 //    {
 //        Player_Hand[card] = nullptr;
@@ -20,26 +22,31 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
 
     cout << "Creating AIPlayer " << PID << endl;
 
+//    for (int i = 0; i < NumInHand; i++)
+//    {
+//        cards[i] = new int[2];
+//    }
+
     // Populate the cards in hand with known values
     // value is the number on the card-2, with Jack = 9, Queen = 10, King = 11, Ace = 12
     // suit is the suit, with Clubs = 0, Diamonds = 1, Hearts = 2, Spades = 3
     cards[0][0] = 5; // value
-    cards[0][1] = 1; // suit
+    cards[0][1] = 2; // suit
 
     cards[1][0] = 9; // value
-    cards[1][1] = 1; // suit
+    cards[1][1] = 3; // suit
 
     cards[2][0] = 11; // value
-    cards[2][1] = 1; // suit
+    cards[2][1] = 2; // suit
 
     cards[3][0] = 4; // value
     cards[3][1] = 2; // suit
 
-    cards[4][0] = 8; // value
-    cards[4][1] = 0; // suit
+    cards[4][0] = 5; // value
+    cards[4][1] = 3; // suit
 
     cards[5][0] = 12; // value
-    cards[5][1] = 0; // suit
+    cards[5][1] = 2; // suit
 
     cards[6][0] = 10; // value
     cards[6][1] = 3; // suit
@@ -62,6 +69,13 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
     cards[12][0] = 11; // value
     cards[12][1] = 3; // suit
 
+    cout << "After cards init\n";
+
+    for (int i = 0; i < 4; i++)
+    {
+        trick[i][0] = 0;
+        trick[i][1] = 0;
+    }
 
     /*
      * This following portion is used to generate a deck of cards.
@@ -87,6 +101,16 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
 //    PrintHand();
 }
 
+// Destructor to delete the dynamic pointer array
+//AIPlayer::~AIPlayer()
+//{
+//    cout << "Hello From Destructor!\n";
+//    for (int i = 0; i < NumInHand; i++)
+//    {
+//        delete []cards[i];
+//    }
+//    delete []cards;
+//};
 
 /*
  * A function to set the hand of the AI from the Server directly.
@@ -166,9 +190,166 @@ int AIPlayer::GetPID()
     return PID;
 };
 
-QString AIPlayer::Play()
+
+/*
+ * When the GameState indicates that the bid phase is over,
+ * the AI player will begin play when it is indicated that it needs to
+ * make a move by the server.
+ */
+QString AIPlayer::Play(int trk[][2])
 {
-    return "Currently Playing";
+/*
+    for (int i = 0; i < hand_size; i++)
+    {
+        cout << "Index: " << i;
+        cout << "\tCard Value: " << cards[i][0];
+        cout << "\tCard Suit: " << cards[i][1] << endl;
+    }
+    cout << "\nTrump Suit " << TrumpSuit << endl;
+    cout << "\nTrick Array:\n";
+    for (int i = 0; i < 4; i++)
+    {
+        cout << trk[i][0];
+        cout << trk[i][1];
+        cout << endl;
+    }
+*/
+
+    int SelectedCard[2];
+
+    /*
+     * If the AI is starting the trick, play the highest value card.
+    */
+    if (trk[0][0] == -1){
+        int MaxIndex = 0;
+        for (int i = 0; i < NumInHand; i++)
+        {
+            if (cards[MaxIndex][0] <= cards[i][0]){
+                MaxIndex = i;
+            }
+        }
+        SelectedCard[0] = cards[MaxIndex][0];
+        SelectedCard[1] = cards[MaxIndex][1];
+
+        // implement when array is made dynamic
+//        for (int i = MaxIndex; i < NumInHand; i++)
+//        {
+//            cards[i] = cards[i+1];
+//        }
+
+    } else {
+        /*
+         * If it is not the first to go, it should follow the lead suit, unless it can't,
+         * then it will go for the trump suit and if it does not have that, it will go for
+         * the lowest value card.
+        */
+        int LeadSuit = trk[0][1];
+        // indexes of cards that are the same as the lead suit
+        int LeadIndexes[NumInHand];
+        for (int i = 0; i < NumInHand; i++)
+        {
+            LeadIndexes[i] = -1;
+        }
+
+        int count = 0; // number of indexes
+        for (int i = 0; i < NumInHand; i++)
+        {
+            if (cards[i][1] == LeadSuit) {
+                LeadIndexes[count] = i;
+                count++;
+//                cout << "index: " << i << endl;
+            }
+        }
+
+        int MaxIndex = -1;
+
+//        for (int i = 0; i < count; i++)
+//        {
+//            cout << "Bleh: " << cards[LeadIndexes[i]][0]<<endl;
+//        }
+
+//        cout << "Bleh 2.0: " << cards[LeadIndexes[MaxIndex]][0]<<endl;
+
+        int count2 = 0;
+        for (int i = 0; i < count; i++)
+        {
+            if (cards[LeadIndexes[count2]][0] <= cards[LeadIndexes[i]][0]) {
+                MaxIndex = LeadIndexes[i];
+                count2 = i;
+//                cout << "Max: " << MaxIndex << endl;
+            }
+        }
+
+//        cout << "MaxIndex: " << MaxIndex << endl;
+
+        /*
+         * If there are cards from the lead suit, play the highest card
+        */
+        if (MaxIndex != -1) {
+            SelectedCard[0] = cards[MaxIndex][0];
+            SelectedCard[1] = cards[MaxIndex][1];
+        } else
+        {
+            /*
+             * If there are no suit of the lead suit in hand, check if there is a trump card
+             * and play the smallest trump card
+            */
+            int TrumpIndexes[NumInHand];
+            for (int i = 0; i < NumInHand; i++)
+            {
+                TrumpIndexes[i] = -1;
+            }
+            int count3 = 0; // number of indexes
+            for (int i = 0; i < NumInHand; i++)
+            {
+                if (cards[i][1] == TrumpSuit) {
+                    TrumpIndexes[count3] = i;
+                    count3++;
+//                    cout << "index: " << i << endl;
+                }
+            }
+            int MinIndex = -1;
+            int count4 = 0;
+            for (int i = 0; i < count3; i++)
+            {
+                if (cards[TrumpIndexes[count4]][0] >= cards[TrumpIndexes[i]][0]) {
+                    MinIndex = TrumpIndexes[i];
+                    count4 = i;
+//                    cout << "Min: " << MinIndex << endl;
+                }
+            }
+            /*
+             * If a trump card is found:
+            */
+            if (MinIndex != -1) {
+                SelectedCard[0] = cards[MinIndex][0];
+                SelectedCard[1] = cards[MinIndex][1];
+            } else {
+                /*
+                 * If no trump card is found, play the smallest card in the hand
+                */
+                MinIndex = 0;
+                for (int i = 1; i < NumInHand; i++)
+                {
+                    if (cards[MinIndex][0] >= cards[i][0]) {
+                        MinIndex = i;
+                    }
+                }
+                SelectedCard[0] = cards[MinIndex][0];
+                SelectedCard[1] = cards[MinIndex][1];
+            }
+        }
+
+    }
+
+    // Return the QString object
+    QString str = "Play; Selected Card: Value = ";
+    str.append(QString::number(SelectedCard[0]));
+    str.append(", Suit = ");
+    str.append(QString::number(SelectedCard[1]));
+
+
+    return str;
 };
 
 
@@ -198,6 +379,9 @@ QString AIPlayer::Bid()
     // The value of the bid, from 1 to 7, or 0 for a pass
     int BidValue = 0;
 
+    /*
+     * This is the same as the loop below, except it uses the random Card objects array.
+    */
 /*    for (int i = 0; i < hand_size; i++)
     {
 //        cout << "Card Value: " << Player_Hand[i]->value << endl;
@@ -347,8 +531,8 @@ QString AIPlayer::Bid()
 //    cout << "BidValue: " << BidValue << endl;
 //    cout << "ChosenSuit: " << ChosenSuit << endl;
 
-    QString str = "Bid";
-    str.append(", Tricks: ");
+    QString str = "Bid; ";
+    str.append("Tricks: ");
     str.append(QString::number(BidValue));
     str.append(", Trump: ");
     str.append(QString::number(ChosenSuit));
@@ -357,16 +541,14 @@ QString AIPlayer::Bid()
 };
 
 
-QString AIPlayer::DetermineMove(bool bid)
+QString AIPlayer::DetermineMove(bool bid, int trk[][2])
 {
-//    cout << "Heya\n";
     if (bid)
     {
-//        cout << "Hi There\n";
         return Bid();
     }else
     {
-        return Play();
+        return Play(trk);
     }
 };
 

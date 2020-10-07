@@ -6,7 +6,7 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 02/10/2020 Revision 2
+//Last update: 02/10/2020 Revision 3
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 

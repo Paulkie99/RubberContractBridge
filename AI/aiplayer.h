@@ -6,7 +6,7 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 07/10/2020 Revision 3
+//Last update: 07/10/2020 Revision 4
 #ifndef AIPLAYER_H
 #define AIPLAYER_H
 
@@ -31,9 +31,10 @@ class AIPlayer : public QObject
     Q_OBJECT
 public:
     explicit AIPlayer(int ID,QObject *parent = nullptr);
+//    ~AIPlayer();
 //    string DetermineMove(GameState gs);
 //    QString DetermineMove(GameState *gs);
-    QString DetermineMove(bool bid);
+    QString DetermineMove(bool bid, int trk[][2]);
 
     void SetHand(Card* PH);
     void SetStatus(bool vul);
@@ -44,8 +45,14 @@ public:
     int GetPID();
     Card* Player_Hand[hand_size];
 
-    // array to simulate cards in hand;
+    // array to simulate cards in hand
     int cards[hand_size][2];
+
+//    int** cards = new int*[2];
+
+    // array to simulate the current trick
+    int trick[4][2];
+    int TrumpSuit;
 
 private:
     int PID;
@@ -53,9 +60,10 @@ private:
 //    Card* Player_Hand[hand_size];
     std::array<Card, deck_size> Deck;
     bool Vulnerable;
+    int NumInHand;
 
 
-    QString Play();
+    QString Play(int trk[][2]);
     QString Bid();
 
 signals:
