@@ -63,6 +63,10 @@ void clientconnection::onTextMessageReceived(QString message)
         id = msgr["Id"].toInt();
         QJsonObject connect = CreateJObject(GenerateMessage("CONNECT_REQUEST"));
         connect["Id"] = id;
+        if(debugOn)
+        {
+            connect["Password"] = "";
+        }
         SendMessageToServer(CreateJString(connect));
         break;
     }

@@ -398,6 +398,7 @@ void Server::ValidateInput(QString message)
             if(valid)
                 //TODO: Update GS based on bid
                 qInfo() << "Bid Valid";
+            emit messageReceived("Bid received");
          }
          break;
 
@@ -409,6 +410,7 @@ void Server::ValidateInput(QString message)
             if(valid)
                 //TODO: Update GS based on move
                 qInfo() << "Move Valid";
+            emit messageReceived("Move received");
          }
          break;
 
@@ -424,6 +426,7 @@ void Server::ValidateInput(QString message)
          case 4: // PONG
          {
             qInfo() << "Pong received from id: " << msg["Id"];
+            emit messageReceived("Pong received");
          }
          break;
 
@@ -447,8 +450,9 @@ void Server::socketDisconnect(int id)
     if(!isValidSocketId(id))
         return;
     emit messageReceived("Client " + QString::number(id) + " disconnected");
+    if(ConnectedClients[id].isAuthenticated)
+        --numAuthenticatedUsers;
     ConnectedClients[id].isAuthenticated = false;
     ConnectedClients[id].clientSocket = NULL;
     --numConnectedClients;
-    --numAuthenticatedUsers;
 }
