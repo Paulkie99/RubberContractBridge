@@ -1,0 +1,11 @@
+{
+	"Type": "BID_START",
+	"Id": 15,
+	"Cards": [
+	{"Suit" : "H", "Rank" : ["2", "7"] },
+	{"Suit" : "S", "Rank" : ["5", "A"] },
+	{"Suit" : "C", "Rank" : ["6", "J", "Q", "K"] },
+	{"Suit" : "D", "Rank" : ["2", "9", "10", "A"] }
+	],
+	"Dealer": "N"
+}
