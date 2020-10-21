@@ -1,6 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include <QMessageBox>
+#include <iostream>
+using namespace std;
+
+// Establish a clientconnection object for communicating over the network
+clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), true);
+
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,11 +27,63 @@ MainWindow::MainWindow(QWidget *parent)
     ui->leditPassword->setEchoMode(QLineEdit::Password);
     // Set the focus to the heading
     ui->lblHeading->setFocus();
+
+    // Connect the various signals and slots
+    connect(&client, &clientconnection::serverFullSignal, this, &MainWindow::serverFullSlot);
+    connect(&client, &clientconnection::connectSuccessfullSignal, this, &MainWindow::connectSuccessfulSlot);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::ServerFull()
+{
+    cout<<"Hello"<<endl;
+    QMessageBox err;
+    err.critical(0,"Error","Server is full");
+    err.setFixedSize(500,200);
+    //ui->leditHostIP->setFocus();
+
+}
+
+void MainWindow::customslot()
+{
+    cout<<"4545"<<endl;
+
+}
+
+void MainWindow::serverFullSlot()
+{
+    QMessageBox err;
+    err.critical(0,"Error","Server is full");
+    err.setFixedSize(500,200);
+    ui->leditHostIP->setFocus();
+}
+
+void MainWindow::otherSlot()
+{
+    QMessageBox err;
+    err.critical(0,"Error","Unable to join server. Check the server credentials");
+    err.setFixedSize(500,200);
+    ui->leditHostIP->setFocus();
+}
+
+void MainWindow::connectSuccessfulSlot()
+{
+    //  CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS
+    // TO THE SERVER
+    // Modelless approach
+    // Hide main window
+    hide();
+    // Set stacked widget index to main window for when the user returns
+    ui->stackedWidget->setCurrentIndex(0);
+
+    // Create a new instance of GameScreen
+    // Set parent of gameScreen as this class (main window)
+    gameScreen = new GameScreen(this);
+    gameScreen->show();
 }
 
 // If the user wishes to join an existing game, the stacked widget's
@@ -51,33 +111,26 @@ void MainWindow::on_pushButton_JoinServer_clicked()
     QString IP = ui->leditHostIP->text();
     QString Port = ui->sbPort->text();
     QString Password = ui->leditPassword->text();
+    QString Username = ui->leditUsername->text();
 
-    // Once integration starts, these values will be sent to the
-    // game server.
-    // CLIENT-SIDE LOGIC FOLLOWS HERE
+    // Create a new clientconnection object
+    //clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), true);
+    QString mes = client.GenerateMessage("CONNECT_REQUEST");
+    QJsonObject request = client.CreateJObject(mes);
+    request["Password"] = Password;
+    request["Alias"] = Username;
+    cout<<client.CreateJString(request).toStdString()<<endl;
+    //Send the updated message to the server
+    client.SendMessageToServer(client.CreateJString(request));
 
-//    if (server credentials invalid) {
-//            QMessageBox err;
-//            err.critical(0,"Error","Invalid server credentials!");
-//            err.setFixedSize(500,200);
-//            ui->leditHostIP->setFocus();
-//    }
-//  else { server credentials valid
-//      ... continue below
+    //connect(&client, &clientconnection::customsignal, this, &MainWindow::customslot);
+    mes = client.GenerateMessage("CONNECT_SUCCESSFUL");
+    client.onTextMessageReceived(mes);
 
-    //  CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS
-    // TO THE SERVER
-    // Modelless approach
-    // Hide main window
-    hide();
-    // Set stacked widget index to main window for when the user returns
-    ui->stackedWidget->setCurrentIndex(0);
-
-    // Create a new instance of GameScreen
-    // Set parent of gameScreen as this class (main window)
-    gameScreen = new GameScreen(this);
-    gameScreen->show();
+    //connect(client, SIGNAL(customsignal), this, customslot());
 }
+
+
 
 // The user opts to create a new server
 void MainWindow::on_pushButton_Create_clicked()

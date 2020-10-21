@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include "gamescreen.h"
+#include "clientconnection.h"
+
+class clientconnection;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -11,6 +14,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    friend class clientconnection;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -32,6 +36,16 @@ private slots:
     void on_pushButton_BackConf_clicked();
 
     void on_pushButton_CreateConf_clicked();
+
+    static void ServerFull();
+
+    void customslot();
+
+    void serverFullSlot();
+
+    void otherSlot();
+
+    void connectSuccessfulSlot();
 
 private:
     Ui::MainWindow *ui;

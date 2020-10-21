@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     //QCoreApplication a(argc, argv);
-    clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), true); //example of how object is created
+    //clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), true); //example of how object is created
     w.show();
     return a.exec();
 }
