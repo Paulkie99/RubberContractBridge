@@ -25,6 +25,7 @@ public:
     QWebSocket* clientSocket = nullptr; // reference to a connected QWebSocket
     bool isAuthenticated = false; // has the connected client been authenticated?
     int id = 100; // client id, used to index Server::ConnectedClients[]
+    QString alias = "";
 
 signals:
     void socketDisconnect(int);

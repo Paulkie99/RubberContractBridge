@@ -19,6 +19,7 @@ HEADERS +=  ../Server/card.h
 HEADERS += ../ClientSide/clientconnection.h
 
 SOURCES +=  tst_testserver.cpp \
+    ../Server/inputvalidator.cpp \
     ../Server/serverclient.cpp
 SOURCES +=  ../Server/serverinterface.cpp
 SOURCES +=  ../Server/server.cpp

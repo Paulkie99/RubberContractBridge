@@ -11,31 +11,18 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QObject>
 #include <QWebSocketServer>
-#include <QWebSocket>
+
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <card.h>       // for Deck and Player_Hands
+
 #include <random>       // std::default_random_engine
-#include <serverclient.h>
+#include <inputvalidator.h>
+#include <gamestate.h>
 
 class AI;               // AI Class to be integrated
-struct GS{};            // Gamestate to be finalized
-const int deck_size = 52;   // standard deck size
-const int num_players = 4;  // bridge players
-const int hand_size = deck_size/num_players;   // bridge hand size
-
-// Note that player with id 0 == North, 1 == South, etc.
-enum players
-{
-    North,
-    South,
-    East,
-    West
-};
 
 class Server : public QWebSocketServer
 {
@@ -44,6 +31,7 @@ public:
     explicit Server(const QString &serverName = "Bridge Server", SslMode secureMode = SecureMode, QObject *parent = NULL, bool shuffle=true);
     friend class TestServer;
     friend class ServerInterface;
+    friend class InputValidator;
 
 signals:
     void messageReceived(QString); //signal to the server-interface that a message has been received
@@ -53,25 +41,26 @@ private:
     ServerClient ConnectedClients[num_players];
     AI* AI_Instances = NULL;
     Card* Player_Hands[hand_size][num_players];
+    GameState  GS;
+    InputValidator validator;
+
     std::array<Card, deck_size> Deck;
-    GS  GameState;
     int numConnectedClients = 0;
     int numAuthenticatedUsers = 0;
+    int numReady = 0;
+    QStringList msgTypes;
+    const QString JPath = "C:/Users/pj/Documents/Y3S2/EPE321/Project/group_e/app/JFILES/"; //path for Json temlpate files
 
     QString GenerateMessage(QString);
     QJsonObject Convert_Message_To_Json(QString);
     void Authenticate(QString username, QString password, int id);
     void Shuffle(unsigned seed = 1);
-    void Deal();
+    void Deal(int dealer=-1);
     void PrintDeck();
     void PrintHands();
     void ConnectClient(int pos);
     void SendMessage(int id, QJsonObject);
-    bool isValidSocketId(int id, bool isFirstConnection=false);
-    bool isValidBid(int id, int val, int suit);
-    bool isValidMove(int id, int val, int suit);
-    bool isEnumsContainCard(int val, int suit);
-    bool isValidCardInHand(int id, int val, int suit);
+    void BroadcastMessage(QJsonObject);
     void UpdateGameState(int card_val, int card_suit, bool isBid);
 
 private slots:

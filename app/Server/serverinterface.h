@@ -31,6 +31,7 @@ public:
 
 private slots:
     void messageReceived(const QString &message);
+    void messageSent(const QString& message);
 
 private:
     Ui::Server_Dialog *ui;

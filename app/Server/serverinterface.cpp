@@ -23,6 +23,8 @@ ServerInterface::ServerInterface(bool shuffle, QWidget *parent, quint16 port)
     bridgeServer->listen(QHostAddress::Any, port);
     connect(bridgeServer, SIGNAL(messageReceived(QString)),
             this, SLOT(messageReceived(QString)));
+    connect(bridgeServer, SIGNAL(messageSent(QString)),
+            this, SLOT(messageSent(QString)));
 }
 
 /*
@@ -39,4 +41,9 @@ ServerInterface::~ServerInterface()
 void ServerInterface::messageReceived(const QString &message)
 {
     ui->listWidget->addItem("Message received: " + message); // add an item to the list widget so that the message may be displayed
+}
+
+void ServerInterface::messageSent(const QString &message)
+{
+    ui->listWidget->addItem("Message sent: " + message); // add an item to the list widget so that the message may be displayed
 }

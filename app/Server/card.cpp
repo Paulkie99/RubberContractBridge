@@ -42,43 +42,43 @@ QString Card::ValToString(int val)
     switch(val)
     {
         case Two:
-            return "Two";
+            return "2";
         break;
         case Three:
-            return "Three";
+            return "3";
         break;
         case Four:
-            return "Four";
+            return "4";
         break;
         case Five:
-            return "Five";
+            return "5";
         break;
         case Six:
-            return "Six";
+            return "6";
         break;
         case Seven:
-            return "Seven";
+            return "7";
         break;
         case Eight:
-            return "Eight";
+            return "8";
         break;
         case Nine:
-            return "Nine";
+            return "9";
         break;
         case Ten:
-            return "Ten";
+            return "10";
         break;
         case Jack:
-            return "Jack";
+            return "J";
         break;
         case Queen:
-            return "Queen";
+            return "Q";
         break;
         case King:
-            return "King";
+            return "K";
         break;
         case Ace:
-            return "Ace";
+            return "A";
         break;
     }
     return "";
@@ -92,16 +92,16 @@ QString Card::SuitToString(int suit)
     switch(suit)
     {
         case Clubs:
-            return "Clubs";
+            return "C";
         break;
         case Diamonds:
-            return "Diamonds";
+            return "D";
         break;
         case Hearts:
-            return "Hearts";
+            return "H";
         break;
         case Spades:
-            return "Spades";
+            return "S";
         break;
 
     }

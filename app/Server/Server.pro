@@ -10,6 +10,8 @@ CONFIG += c++11
 
 SOURCES += \
     card.cpp \
+    gamestate.cpp \
+    inputvalidator.cpp \
     main.cpp \
     server.cpp \
     serverclient.cpp \
@@ -17,6 +19,8 @@ SOURCES += \
 
 HEADERS += \
     card.h \
+    gamestate.h \
+    inputvalidator.h \
     server.h \
     serverclient.h \
     serverinterface.h

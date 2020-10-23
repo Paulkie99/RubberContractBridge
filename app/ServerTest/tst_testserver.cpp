@@ -8,6 +8,7 @@
  * Author: Paul Claasen 18006885
  * Last update: 06/10/2020 Revision 1*/
 
+#include <inputvalidator.h>
 #include <serverinterface.h>
 #include <clientconnection.h>
 #include <QtTest>

@@ -10,13 +10,10 @@
 
 #include "server.h"
 
-//path for Json temlpate files
-const QString JPath = "../JFILES/";
-
 /*
  * Constructor for the server, including server name, sslmode and parent object. Also can be specified whether shuffle should be called on construction, which is useful for testing.
  * */
-Server::Server(const QString &serverName, SslMode secureMode, QObject *parent, bool shuffle) : QWebSocketServer(serverName, secureMode, parent)
+Server::Server(const QString &serverName, SslMode secureMode, QObject *parent, bool shuffle) : QWebSocketServer(serverName, secureMode, parent), GS(this), validator(this)
 {
     qInfo() << "Constructing server";
     connect(this, SIGNAL(newConnection()), //connect the QWebSocketServer::newConnection() signal to the acceptConnection() slot, to store connecting QWebSockets
@@ -46,6 +43,8 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent, b
             Player_Hands[card][player] = NULL;
         }
     }
+
+    msgTypes << "CONNECT_REQUEST" << "BID_SEND" << "MOVE_SEND" << "PING" << "PONG" << "DISCONNECT_PLAYER" << "PLAYER_READY"; // Messages the server might receive
 }
 
 /*
@@ -99,20 +98,34 @@ void Server::Authenticate(QString username, QString password, int id)
         QJsonObject error = Convert_Message_To_Json(GenerateMessage("AUTH_UNSUCCESSFUL"));
         error["Description"] = "Username/password invalid";
 
-        if(isValidSocketId(id)) // send a message only if the received id is in range and has a non-null websocket
+        if(validator.isValidSocketId(id)) // send a message only if the received id is in range and has a non-null websocket
             SendMessage(id, error);
     }
     else //valid
     {
-        if(isValidSocketId(id))
+        if(validator.isValidSocketId(id))
         {
             ++numAuthenticatedUsers;
             ConnectedClients[id].isAuthenticated = true;
+            ConnectedClients[id].alias = username;
             SendMessage(id, Convert_Message_To_Json(GenerateMessage("AUTH_SUCCESSFUL")));
-        }
 
-        if(numAuthenticatedUsers == num_players) // Four users are connected and authenticated, the game may commence.
-            Deal();
+            QJsonObject lobby_update = Convert_Message_To_Json(GenerateMessage("LOBBY_UPDATE"));
+            QJsonArray player_positions;
+            for (int player = 0; player < numAuthenticatedUsers; ++player)
+            {
+                if(ConnectedClients[player].alias != "")
+                {
+                    QJsonObject player_loc = QJsonObject({
+                                                       qMakePair(QString("Position"), QJsonValue(GS.getPlayerFromId(player))),
+                                                       qMakePair(QString("Alias"), QJsonValue(ConnectedClients[player].alias))
+                                                   });
+                    player_positions.push_back(player_loc);
+                }
+            }
+            lobby_update["PlayerPositions"] = player_positions;
+            BroadcastMessage(lobby_update);
+        }
     }
 }
 
@@ -129,9 +142,9 @@ void Server::Shuffle(unsigned seed)
 }
 
 /*
- * Deal the deck to connected players
+ * Deal the deck to connected players, dealer passed is the int index of the client in ConnectedClients[] who should be the dealer
  * */
-void Server::Deal()
+void Server::Deal(int dealer)
 {
     //first assign cards one at a time to each player
     int count = 0; //keep track of card in deck
@@ -143,24 +156,41 @@ void Server::Deal()
         }
     }
 
-    //construct and send a message to each client with their cards
+    //determine who is the dealer
+    if(GS.getDealer() == NULL)
+    {
+        if(dealer == -1)
+            dealer = rand() % num_players;
+    }
+    else
+    {
+        if(dealer == -1)
+            dealer = (GS.getDealer()->id + 1) % num_players;
+    }
+    GS.setDealer(&ConnectedClients[dealer]);
+
+    //construct and send a message to each client with their cards, and whether or not they are the dealer
     for(int player = 0; player < num_players; ++player)
     {
         QJsonArray client_cards;
         for(int card = 0; card < hand_size; ++card) // iterate row (card) first, then column
         {
+            // TODO: Format this according to BID_START
             Card* card_ptr = Player_Hands[card][player];
-            auto card_to_int = QJsonObject({
+            QJsonObject card_to_int = QJsonObject({
                                                qMakePair(QString("Suit"), QJsonValue(card_ptr->suit)),
                                                qMakePair(QString("Value"), QJsonValue(card_ptr->value))
                                            });
             client_cards.push_back(card_to_int);
         }
-        QJsonObject hand = Convert_Message_To_Json(GenerateMessage("HAND_DEALT"));
+        QJsonObject hand = Convert_Message_To_Json(GenerateMessage("BID_START"));
         hand["Cards"] = client_cards;
-        if(isValidSocketId(player))
+        hand["Dealer"] = GS.getPlayerFromId(GS.getDealer()->id);
+        if(validator.isValidSocketId(player))
             SendMessage(player, hand);
     }
+
+    GS.SetBidStage(true);
 
     PrintHands();
 }
@@ -184,7 +214,7 @@ void Server::PrintDeck()
 void Server::PrintHands()
 {
     QTextStream out(stdout);
-    out << "North                       \t" << "South                       \t" << "East                        \t" << "West                        \n";
+    out << "North                       \t" << "East                        \t" << "South                       \t" << "West                        \n";
     for(int card = 0; card < hand_size; ++card)
     {
         for(int player = 0; player < num_players; ++player)
@@ -201,7 +231,7 @@ void Server::PrintHands()
  * */
 void Server::ConnectClient(int pos)
 {
-    if(!isValidSocketId(pos, true))
+    if(!validator.isValidSocketId(pos, true))
     {
         qWarning() << "Tried to connect invalid id: " << pos;
         return;
@@ -225,7 +255,7 @@ void Server::ConnectClient(int pos)
  **/
 void Server::SendMessage(int id, QJsonObject msg)
 {
-    if(!isValidSocketId(id))
+    if(!validator.isValidSocketId(id))
         return;
 
     msg["Id"] = id;
@@ -237,91 +267,14 @@ void Server::SendMessage(int id, QJsonObject msg)
     ConnectedClients[id].clientSocket->sendTextMessage(strFromObj);
 }
 
-/*
- * This function checks if the given id is in range, and if the websocket at the specified id is non-null
- * */
-bool Server::isValidSocketId(int id, bool isFirstConnection)
+void Server::BroadcastMessage(QJsonObject msg)
 {
-    if(isFirstConnection)
+    for (int player = 0; player < num_players; ++player)
     {
-        if(0 <= id && id < num_players)
-            return true;
+        SendMessage(player, msg);
     }
-    else if(0 <= id && id < num_players && ConnectedClients[id].clientSocket)
-            return true;
-
-    qWarning() << "Invalid socket id: " << id;
-    return false;
 }
 
-/*
- * Function used to validate a bid
- * */
-bool Server::isValidBid(int id, int val, int suit)
-{
-    if(!isValidSocketId(id))
-        return false;
-
-    if(!isEnumsContainCard(val, suit))
-        return false;
-
-    //TODO: Add validation logic based on GS (last bid, number of passes, etc)
-
-    //else
-    return true;
-}
-
-/*
- * Function used to validate a move (played card)
- * */
-bool Server::isValidMove(int id, int val, int suit)
-{
-    if(!isValidCardInHand(id, val, suit))
-        return false;
-
-    //TODO: Add validation logic based on GS (trump card, lead suit, etc)
-
-    //else
-    return true;
-}
-
-/*
- * Function to check whether card values are valid
- * */
-bool Server::isEnumsContainCard(int val, int suit)
-{
-    if(val > Ace || val < Two) // check if the value is within the values enum
-        return false;
-
-    if(suit > Spades || suit < Clubs) // check if the suit is within the suits enum
-        return false;
-
-    //else
-    return true;
-}
-
-/*
- * Function to check whether the given card is in the given player's (specified by id) hand
- * */
-bool Server::isValidCardInHand(int id, int val, int suit)
-{
-    if(!isValidSocketId(id))
-        return false;
-
-    if(!isEnumsContainCard(val, suit))
-        return false;
-
-    bool found = false;
-    int player = id;
-    for(int card = 0; card <= Ace; ++card)
-    {
-        if(Player_Hands[card][player])
-            if(Player_Hands[card][player]->value == val)
-                if(Player_Hands[card][player]->suit == suit)
-                    return true;
-    }
-    return found;
-}
 
 /*
  * This function accepts a new connection by storing the corresponding QWebSocket in an array,
@@ -379,65 +332,85 @@ void Server::ValidateInput(QString message)
 
      qInfo() << "Validating message: " << type;
 
-     QStringList msgTypes;
-     msgTypes << "CONNECT_REQUEST" << "BID_SEND" << "MOVE_SEND" << "PING" << "PONG" << "DISCONNECT_PLAYER"; // Messages the server might receive
+     if(!validator.isValidSocketId(msg["Id"].toInt()))
+         return;
 
      switch(msgTypes.indexOf(type))
      {
-         case 0: // CONNECT_REQUEST
-         {
-           Authenticate(msg["Alias"].toString(), msg["Password"].toString(), msg["Id"].toInt());
-         }
-         break;
+        case 0: // CONNECT_REQUEST
+        {
+            Authenticate(msg["Alias"].toString(), msg["Password"].toString(), msg["Id"].toInt());
+        }
+        break;
 
-         case 1: // BID_SEND
-         {
+        case 1: // BID_SEND
+        {
             QJsonObject card = msg["Bid"].toObject();
-            bool valid = isValidBid(msg["Id"].toInt(), card["Rank"].toInt(), card["Suit"].toInt());
+            bool valid = validator.isValidBid(msg["Id"].toInt(), card["Rank"].toInt(), card["Suit"].toInt());
 
             if(valid)
                 //TODO: Update GS based on bid
                 qInfo() << "Bid Valid";
             emit messageReceived("Bid received");
-         }
-         break;
+        }
+        break;
 
-         case 2: // MOVE_SEND
-         {
+        case 2: // MOVE_SEND
+        {
             QJsonObject card = msg["Move"].toObject();
-            bool valid = isValidMove(msg["Id"].toInt(), card["Rank"].toInt(), card["Suit"].toInt());
+            bool valid = validator.isValidMove(msg["Id"].toInt(), card["Rank"].toInt(), card["Suit"].toInt());
 
             if(valid)
                 //TODO: Update GS based on move
                 qInfo() << "Move Valid";
             emit messageReceived("Move received");
-         }
-         break;
+        }
+        break;
 
-         case 3: // PING
-         {
+        case 3: // PING
+        {
             //reply with a pong
             QJsonObject pong = Convert_Message_To_Json(GenerateMessage("PONG"));
             pong["Id"] = 100;
             SendMessage(msg["Id"].toInt(), pong);
-         }
-         break;
+        }
+        break;
 
-         case 4: // PONG
-         {
+        case 4: // PONG
+        {
             qInfo() << "Pong received from id: " << msg["Id"];
             emit messageReceived("Pong received");
-         }
-         break;
+        }
+        break;
 
-         case 5: // DISCONNECT_PLAYER
-         {
+        case 5: // DISCONNECT_PLAYER
+        {
             if(ConnectedClients[msg["Id"].toInt()].clientSocket)
                 socketDisconnect(msg["Id"].toInt());
-         }
-         break;
+        }
+        break;
 
-         default:
+        case 6:
+        {
+            if(ConnectedClients[msg["Id"].toInt()].isAuthenticated)
+            {
+                ++numReady;
+            }
+            else
+            {
+                QJsonObject not_ready = Convert_Message_To_Json(GenerateMessage("NOT_READY"));
+                SendMessage(msg["Id"].toInt(), not_ready);
+            }
+
+            if(numReady == num_players) // Four users are connected and authenticated, the game may commence.
+            {
+                Shuffle();
+                Deal();
+            }
+        }
+        break;
+
+        default:
             qWarning() << "Message type not found: " << type;
      }
 }
@@ -447,7 +420,7 @@ void Server::ValidateInput(QString message)
  * */
 void Server::socketDisconnect(int id)
 {
-    if(!isValidSocketId(id))
+    if(!validator.isValidSocketId(id))
         return;
     emit messageReceived("Client " + QString::number(id) + " disconnected");
     if(ConnectedClients[id].isAuthenticated)

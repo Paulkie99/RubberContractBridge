@@ -193,7 +193,7 @@ QString clientconnection::GenerateMessage(QString type)
 {
     QString val;
     QFile file;
-    QString path = "../JFILES/";
+    QString path = "C:/Users/pj/Documents/Y3S2/EPE321/Project/group_e/app/JFILES/";
     path = path + type + ".json";
     file.setFileName(path);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
