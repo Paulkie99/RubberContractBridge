@@ -46,6 +46,19 @@ signals:
     void bidRequestSignal();
     void bidUpdateSignal(QJsonObject);
 
+    void lobbyUpdateSignal(QJsonObject);
+    void authUnsuccessfulSignal();
+    void authSuccessfulSignal();
+    void bidEndSignal();
+    void playStartSignal();
+    void moveRequestSignal();
+    void moveUpdateSignal();
+    void trickEndSignal();
+    void playEndSignal();
+    void scoreSignal();
+    void disconnectPlayerSignal();
+    void connectUnsuccessfulSignal();
+
 private Q_SLOTS:
     void onConnected();
     void onTextMessageReceived(QString message);

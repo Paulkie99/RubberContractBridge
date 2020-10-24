@@ -522,3 +522,43 @@ void GameScreen::addToTable(QString bid, int col)
     selectedItem->setTextAlignment(4);
     ui->tableSequence->setItem(row,col,selectedItem);
 }
+
+void GameScreen::bidEndSlot()
+{
+
+}
+
+void GameScreen::playStartSlot()
+{
+
+}
+
+void GameScreen::moveRequestSlot()
+{
+
+}
+
+void GameScreen::moveUpdateSlot()
+{
+
+}
+
+void GameScreen::trickEndSlot()
+{
+
+}
+
+void GameScreen::playEndSlot()
+{
+
+}
+
+void GameScreen::scoreSlot()
+{
+
+}
+
+void GameScreen::disconnectPlayerSlot()
+{
+
+}

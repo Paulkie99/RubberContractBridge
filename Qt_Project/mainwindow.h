@@ -49,6 +49,13 @@ private slots:
 
     void connectSuccessfulSlot();
 
+    void lobbyUpdateSlot();
+
+    void authSuccessfulSlot();
+
+    void authUnsuccessfulSlot();
+    void connectUnsuccessfulSlot();
+
 signals:
     /* clientconnection * is a pointer to the client object created in mainwindow.
        This allows us to have only one client object per session, and thus a new

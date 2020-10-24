@@ -201,3 +201,25 @@ void MainWindow::on_pushButton_CreateConf_clicked()
     gameScreen = new GameScreen(this);
     gameScreen->show();
 }
+
+//Function to handle a received lobby update signal
+void MainWindow::lobbyUpdateSlot()
+{
+
+}
+
+void MainWindow::authSuccessfulSlot()
+{
+
+}
+
+void MainWindow::authUnsuccessfulSlot()
+{
+
+}
+
+void MainWindow::connectUnsuccessfulSlot()
+{
+
+}
+

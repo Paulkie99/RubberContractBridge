@@ -44,7 +44,7 @@ void clientconnection::onTextMessageReceived(QString message)
     QString type = msgr["Type"].toString();
     // qDebug() << "Message Type: " << type;
     QStringList msgTypes;
-    msgTypes <<"CONNECT_UNSUCCESSFUL" <<"CONNECT_SUCCESSFUL" << "LOBBY_UPDATE" << "BID_START" << "BID_REQUEST" << "BID_UPDATE" << "BID_END" << "PLAY_START" << "MOVE_REQUEST" << "MOVE_UPDATE" << "TRICK_END" <<"PLAY_END" <<"SCORE" << "PING"<<"PONG" <<"DISCONNECT_PLAYER";
+    msgTypes <<"CONNECT_UNSUCCESSFUL" <<"CONNECT_SUCCESSFUL" << "LOBBY_UPDATE" << "BID_START" << "BID_REQUEST" << "BID_UPDATE" << "BID_END" << "PLAY_START" << "MOVE_REQUEST" << "MOVE_UPDATE" << "TRICK_END" <<"PLAY_END" <<"SCORE" << "PING"<<"PONG" <<"DISCONNECT_PLAYER"<<"AUTH_SUCCESSFUL"<<"AUTH_UNSUCCESSFUL";
 
     switch(msgTypes.indexOf(type)) //Switch block that determines the type of message that was received.
     {
@@ -77,6 +77,7 @@ void clientconnection::onTextMessageReceived(QString message)
       case 2:
     {
         qDebug() << "Message Type: " << msgTypes[2];
+        emit lobbyUpdateSignal(CreateJObject(message));
         break;
     }
     case 3:
@@ -106,44 +107,51 @@ void clientconnection::onTextMessageReceived(QString message)
     case 6:
     {
         qDebug() << "Message Type: " << msgTypes[6];
+        emit bidEndSignal();
       break;
     }
     case 7:
     {
         qDebug() << "Message Type: " << msgTypes[7];
+        emit playStartSignal();
       break;
     }
     case 8:
     {
         qDebug() << "Message Type: " << msgTypes[8];
+        emit moveRequestSignal();
       break;
     }
     case 9:
     {
         qDebug() << "Message Type: " << msgTypes[9];
+        emit moveUpdateSignal();
       break;
     }
     case 10:
     {
         qDebug() << "Message Type: " << msgTypes[10];
+        emit trickEndSignal();
       break;
     }
     case 11:
     {
         qDebug() << "Message Type: " << msgTypes[11];
+        emit playEndSignal();
       break;
     }
     case 12:
     {
         qDebug() << "Message Type: " << msgTypes[12];
+        emit scoreSignal();
       break;
     }
-    case 13:
+    case 13: //ping
     {
         qDebug() << "Message Type: " << msgTypes[13];
       break;
     }
-    case 14:
+    case 14: //pong
     {
         qDebug() << "Message Type: " << msgTypes[14];
       break;
@@ -151,15 +159,25 @@ void clientconnection::onTextMessageReceived(QString message)
     case 15:
     {
         qDebug() << "Message Type: " << msgTypes[15];
+        emit disconnectPlayerSignal();
       break;
     }
     case 16:
     {
         qDebug() << "Message Type: " << msgTypes[16];
+        emit authSuccessfulSignal();
       break;
-    }}
-}
+    }
+    case 17:
+    {
+        qDebug() << "Message Type: " << msgTypes[16];
+        emit authUnsuccessfulSignal();
+      break;
+    }
 
+
+    }
+}
 /*
 This function is triggered when the client successfully connected to the server. This function further links the socket properties with functions
 in this class. This function will also display connected if the debug mode is enabled. At the moment the function also sends Hello There to the server

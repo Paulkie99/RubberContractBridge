@@ -63,6 +63,15 @@ private slots:
 
     void addToTable(QString, int);
 
+    void bidEndSlot();
+    void playStartSlot();
+    void moveRequestSlot();
+    void moveUpdateSlot();
+    void trickEndSlot();
+    void playEndSlot();
+    void scoreSlot();
+    void disconnectPlayerSlot();
+
 signals:
     void bidStartSignal();
 
