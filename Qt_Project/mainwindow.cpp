@@ -38,6 +38,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+// Temp debug, delete with time
 void MainWindow::ServerFull()
 {
     cout<<"Hello"<<endl;
@@ -72,18 +74,27 @@ void MainWindow::otherSlot()
 
 void MainWindow::connectSuccessfulSlot()
 {
-    //  CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS
-    // TO THE SERVER
+    //  CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS TO THE SERVER
     // Modelless approach
     // Hide main window
     hide();
     // Set stacked widget index to main window for when the user returns
     ui->stackedWidget->setCurrentIndex(0);
 
+
     // Create a new instance of GameScreen
     // Set parent of gameScreen as this class (main window)
     gameScreen = new GameScreen(this);
     gameScreen->show();
+
+    // For some reason the only way to pass information along via signals & slots is to use
+    // the SIGNAL and SLOT method
+    //connect(this, &MainWindow::serverInfoSignal(&QString , QString, QString), &gameScreen, &GameScreen::serverInfoSlot(QString, QString, QString));
+    connect(this, SIGNAL(serverInfoSignal(QString, QString, QString, clientconnection *)), gameScreen, SLOT(serverInfoSlot(QString, QString, QString, clientconnection *)));
+    emit serverInfoSignal(ui->leditHostIP->text(),ui->sbPort->text(),ui->leditPassword->text(), &client);
+
+
+    //emit bid start signal ?
 }
 
 // If the user wishes to join an existing game, the stacked widget's
@@ -113,21 +124,18 @@ void MainWindow::on_pushButton_JoinServer_clicked()
     QString Password = ui->leditPassword->text();
     QString Username = ui->leditUsername->text();
 
-    // Create a new clientconnection object
-    //clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), true);
+
     QString mes = client.GenerateMessage("CONNECT_REQUEST");
     QJsonObject request = client.CreateJObject(mes);
     request["Password"] = Password;
     request["Alias"] = Username;
-    cout<<client.CreateJString(request).toStdString()<<endl;
+
     //Send the updated message to the server
     client.SendMessageToServer(client.CreateJString(request));
 
-    //connect(&client, &clientconnection::customsignal, this, &MainWindow::customslot);
+    // Temp debug code to test successful login
     mes = client.GenerateMessage("CONNECT_SUCCESSFUL");
     client.onTextMessageReceived(mes);
-
-    //connect(client, SIGNAL(customsignal), this, customslot());
 }
 
 

@@ -10,6 +10,7 @@
 #include <QJsonDocument>
 
 class MainWindow;
+class GameScreen;
 
 /*
  This header file shows the creation of the clientconnection class. This class servers as the medium through which the
@@ -22,7 +23,8 @@ class MainWindow;
 class clientconnection : public QObject
 {
      Q_OBJECT
-    friend class MainWindow;
+   friend class MainWindow;
+   friend class GameScreen;
 public:
     explicit clientconnection(const QUrl &url, bool debug = false, QObject *parent = nullptr);
 
@@ -40,6 +42,9 @@ signals:
     void serverFullSignal();
     void otherSignal();
     void connectSuccessfullSignal();
+    void bidStartSignal(QJsonObject);
+    void bidRequestSignal();
+    void bidUpdateSignal(QJsonObject);
 
 private Q_SLOTS:
     void onConnected();

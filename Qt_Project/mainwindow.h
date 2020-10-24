@@ -5,7 +5,8 @@
 #include "gamescreen.h"
 #include "clientconnection.h"
 
-class clientconnection;
+//class clientconnection;
+class GameScreen;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,8 +15,8 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    friend class clientconnection;
-
+//    friend class clientconnection;
+    friend class GameScreen;
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -37,6 +38,7 @@ private slots:
 
     void on_pushButton_CreateConf_clicked();
 
+    // temp, delete with time
     static void ServerFull();
 
     void customslot();
@@ -47,8 +49,15 @@ private slots:
 
     void connectSuccessfulSlot();
 
+signals:
+    /* clientconnection * is a pointer to the client object created in mainwindow.
+       This allows us to have only one client object per session, and thus a new
+       object doesn't have to be created for each interface.*/
+    void serverInfoSignal(QString, QString, QString, clientconnection *);
+
 private:
     Ui::MainWindow *ui;
+
     // Create instance of GameScreen
     GameScreen *gameScreen;
 };
