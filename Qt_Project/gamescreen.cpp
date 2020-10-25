@@ -24,8 +24,6 @@ QString SouthAlias;
 QString WestAlias;
 QString EastAlias;
 QString UserPosition;
-// allCards stores the cards of each pb_X, where X is the push button number related to the array index
-QString allCards[26];
 QString Declarer;
 QString Dummy;
 QString Trump;
@@ -66,6 +64,7 @@ GameScreen::GameScreen(QWidget *parent) :
     // Prevent the QTableWidget object cells from being resized
     ui->tableBids->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableBids->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->tableSequence->horizontalHeader()->setVisible(true);
     // Set the title of the window
     QWidget::setWindowTitle("Auction");
     // Ensure that the correct interface is displayed when joining a game
@@ -392,6 +391,7 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(gameEndSignal(QJsonObject)), this, SLOT(gameEndSlot(QJsonObject)));
     connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
     connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
+    connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
 
     QString mes = clientgs->GenerateMessage("BID_START");
     // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
@@ -909,6 +909,7 @@ void GameScreen::playEndSlot(QJsonObject play)
 
     ui->lblRoundInfo->setVisible(false);
     ui->tableSequence->clear();
+    ui->tableSequence->horizontalHeader()->setVisible(true);
 
     ui->tableBids->setEnabled(false);
     ui->pushButton_Bid->setEnabled(false);

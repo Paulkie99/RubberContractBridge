@@ -14,6 +14,7 @@ class ScoreBoard : public QDialog
 public:
     explicit ScoreBoard(QWidget *parent = nullptr);
     ~ScoreBoard();
+    void updateScores(QJsonObject);
 
 private slots:
     void on_ScoreBoard_finished(int result);

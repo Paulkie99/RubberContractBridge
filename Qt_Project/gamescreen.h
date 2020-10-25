@@ -75,7 +75,7 @@ private slots:
     void moveUpdateSlot(QJsonObject);
     void trickEndSlot(QJsonObject);
     void playEndSlot(QJsonObject);
-    void scoreSlot();
+    void scoreSlot(QJsonObject);
     void disconnectPlayerSlot(QJsonObject);
     void lobbyUpdateSlot(QJsonObject);
     void gameEndSlot(QJsonObject);
