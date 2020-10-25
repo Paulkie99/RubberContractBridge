@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Set the focus to the heading
     ui->lblHeading->setFocus();
 
+
     // Connect the various signals and slots
     connect(&client, &clientconnection::serverFullSignal, this, &MainWindow::serverFullSlot);
     connect(&client, &clientconnection::connectSuccessfullSignal, this, &MainWindow::connectSuccessfulSlot);
@@ -90,8 +91,8 @@ void MainWindow::connectSuccessfulSlot()
     // For some reason the only way to pass information along via signals & slots is to use
     // the SIGNAL and SLOT method
     //connect(this, &MainWindow::serverInfoSignal(&QString , QString, QString), &gameScreen, &GameScreen::serverInfoSlot(QString, QString, QString));
-    connect(this, SIGNAL(serverInfoSignal(QString, QString, QString, clientconnection *)), gameScreen, SLOT(serverInfoSlot(QString, QString, QString, clientconnection *)));
-    emit serverInfoSignal(ui->leditHostIP->text(),ui->sbPort->text(),ui->leditPassword->text(), &client);
+    connect(this, SIGNAL(serverInfoSignal(QString, QString, QString, clientconnection *, QString)), gameScreen, SLOT(serverInfoSlot(QString, QString, QString, clientconnection *, QString)));
+    emit serverInfoSignal(ui->leditHostIP->text(),ui->sbPort->text(),ui->leditPassword->text(), &client, ui->leditUsername->text());
 
 
     //emit bid start signal ?

@@ -1,0 +1,94 @@
+// Update Dummy Game Screen UI elements
+    if (Dummy == "N" && UserPosition[0] != Dummy) {
+        ui->lblDummyPlayer->setText("North (Dummy)");
+        ui->lblNameDummy->setText(NorthAlias);
+    }
+    if (Dummy == "E" && UserPosition[0] != Dummy) {
+        ui->lblDummyPlayer->setText("East (Dummy)");
+        ui->lblNameDummy->setText(EastAlias);
+    }
+    if (Dummy == "S" && UserPosition[0] != Dummy) {
+        ui->lblDummyPlayer->setText("South (Dummy)");
+        ui->lblNameDummy->setText(SouthAlias);
+    }
+    if (Dummy == "W" && UserPosition[0] != Dummy) {
+        ui->lblDummyPlayer->setText("West (Dummy)");
+        ui->lblNameDummy->setText(WestAlias);
+    }
+
+
+    if (Declarer == "N") {
+        NDeclarer = " (Declarer)";
+    }
+    if (Declarer == "E") {
+        EDeclarer = " (Declarer)";
+    }
+    if (Declarer == "S") {
+        SDeclarer = " (Declarer)";
+    }
+    if (Declarer == "W") {
+        WDeclarer = " (Declarer)";
+    }
+    // (if) User is the dummy, so all cards must be disabled and nothing else viewable
+    if (UserPosition[0] == Dummy) {
+        // Disable user's cards
+        bool en = false;
+        ui->lblP_1->setEnabled(en);
+        ui->lblP_2->setEnabled(en);
+        ui->lblP_3->setEnabled(en);
+        ui->lblP_4->setEnabled(en);
+        ui->lblP_5->setEnabled(en);
+        ui->lblP_6->setEnabled(en);
+        ui->lblP_7->setEnabled(en);
+        ui->lblP_8->setEnabled(en);
+        ui->lblP_9->setEnabled(en);
+        ui->lblP_10->setEnabled(en);
+        ui->lblP_11->setEnabled(en);
+        ui->lblP_12->setEnabled(en);
+        ui->lblP_13->setEnabled(en);
+
+        // Change the user's name label
+        ui->lblPlayer->setText(ui->lblPlayer->text() + " (Dummy)");
+
+        // If the user is the Dummy, then his teammate is the Declarer
+        if (Declarer == "N") {
+            ui->lblDummyPlayer->setText("North (Declarer)");
+            ui->lblNameDummy->setText(NorthAlias);
+        }
+        if (Declarer == "E") {
+            ui->lblDummyPlayer->setText("East (Declarer)");
+            ui->lblNameDummy->setText(EastAlias);
+        }
+        if (Declarer == "S") {
+            ui->lblDummyPlayer->setText("South (Declarer)");
+            ui->lblNameDummy->setText(SouthAlias);
+        }
+        if (Declarer == "W") {
+            ui->lblDummyPlayer->setText("West (Declarer)");
+            ui->lblNameDummy->setText(WestAlias);
+        }
+    }
+
+    // (if) User is the declarer, then the dummy will be at the top the
+    // user's teammate
+    if (UserPosition[0] == Declarer){
+        ui->lblPlayer->setText(UserPosition + " (Declarer)");
+    }
+
+    if (UserPosition[0] == "N" || UserPosition[0] == "S") {
+        ui->lblRightPlayer->setText("East" + EDeclarer);
+        ui->lblNameRight->setText(EastAlias);
+        ui->lblLeftPlayer->setText("West" + WDeclarer);
+        ui->lblNameLeft->setText(WestAlias);
+    }
+    if (UserPosition[0] == "E" || UserPosition[0] == "W") {
+
+        if (Dummy != "N") {
+            ui->lblRightPlayer->setText("North" + NDeclarer);
+            ui->lblNameRight->setText(NorthAlias);
+        }
+        if (Dummy != "S") {
+            ui->lblLeftPlayer->setText("South" + SDeclarer);
+            ui->lblNameLeft->setText(SouthAlias);
+        }
+    }

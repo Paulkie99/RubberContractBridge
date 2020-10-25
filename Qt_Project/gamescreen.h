@@ -29,17 +29,21 @@ private slots:
 
     void on_pushButton_Play_clicked();
 
-    void loadCards(QLabel *, QString);
+    void loadCards(QPushButton *, QString);
 
     void on_pushButton_Abandon_clicked();
 
     void on_pushButton_Bid_clicked();
 
-    void showCards();
+    void showCards(int);
+
+    void disableCards(int, bool);
 
     void sendBid(QString, QString);
 
-    void serverInfoSlot(QString, QString, QString, clientconnection *);
+    void sendMove(QString, QString);
+
+    void serverInfoSlot(QString, QString, QString, clientconnection *, QString);
 
     void bidStartSlot(QJsonObject);
 
@@ -63,17 +67,76 @@ private slots:
 
     void addToTable(QString, int);
 
-    void bidEndSlot();
-    void playStartSlot();
-    void moveRequestSlot();
-    void moveUpdateSlot();
-    void trickEndSlot();
-    void playEndSlot();
+    void visibleAll(bool vis = true);
+
+    void bidEndSlot(QJsonObject);
+    void playStartSlot(QJsonObject);
+    void moveRequestSlot(QJsonObject);
+    void moveUpdateSlot(QJsonObject);
+    void trickEndSlot(QJsonObject);
+    void playEndSlot(QJsonObject);
     void scoreSlot();
-    void disconnectPlayerSlot();
+    void disconnectPlayerSlot(QJsonObject);
+    void lobbyUpdateSlot(QJsonObject);
+    void gameEndSlot(QJsonObject);
+    void ping();
+    void pongSlot(QJsonObject);
+
+    void on_pb_1_clicked();
+
+    void on_pb_2_clicked();
+
+    void on_pb_3_clicked();
+
+    void on_pb_4_clicked();
+
+    void on_pb_5_clicked();
+
+    void on_pb_6_clicked();
+
+    void on_pb_7_clicked();
+
+    void on_pb_8_clicked();
+
+    void on_pb_9_clicked();
+
+    void on_pb_10_clicked();
+
+    void on_pb_11_clicked();
+
+    void on_pb_12_clicked();
+
+    void on_pb_13_clicked();
+
+    void on_pb_14_clicked();
+
+    void on_pb_15_clicked();
+
+    void on_pb_16_clicked();
+
+    void on_pb_17_clicked();
+
+    void on_pb_18_clicked();
+
+    void on_pb_19_clicked();
+
+    void on_pb_20_clicked();
+
+    void on_pb_21_clicked();
+
+    void on_pb_22_clicked();
+
+    void on_pb_23_clicked();
+
+    void on_pb_24_clicked();
+
+    void on_pb_25_clicked();
+
+    void on_pb_26_clicked();
 
 signals:
-    void bidStartSignal();
+    //void bidStartSignal();
+    void pingSignal(QJsonObject);
 
 private:
     Ui::GameScreen *ui;

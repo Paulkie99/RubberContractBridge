@@ -1,9 +1,9 @@
 {	"Type": "PLAY_START",
 	"Id": 32,
 	"DummyCards": [
-	{"Suit" : "H", "Rank" : ["2", "7"] },
-	{"Suit" : "S", "Rank" : ["5", "A"] },
-	{"Suit" : "C", "Rank" : ["4", "6", "J", "Q"] },
-	{"Suit" : "D", "Rank" : ["2", "9", "10", "A"] }
+	{"Suit" : "H", "Rank" : ["J", "7"] },
+	{"Suit" : "S", "Rank" : ["7", "K"] },
+	{"Suit" : "C", "Rank" : ["9", "6", "A", "Q"] },
+	{"Suit" : "D", "Rank" : ["2", "9", "K", "A"] }
 	]
 }

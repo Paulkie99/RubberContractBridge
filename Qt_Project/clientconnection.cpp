@@ -44,12 +44,12 @@ void clientconnection::onTextMessageReceived(QString message)
     QString type = msgr["Type"].toString();
     // qDebug() << "Message Type: " << type;
     QStringList msgTypes;
-    msgTypes <<"CONNECT_UNSUCCESSFUL" <<"CONNECT_SUCCESSFUL" << "LOBBY_UPDATE" << "BID_START" << "BID_REQUEST" << "BID_UPDATE" << "BID_END" << "PLAY_START" << "MOVE_REQUEST" << "MOVE_UPDATE" << "TRICK_END" <<"PLAY_END" <<"SCORE" << "PING"<<"PONG" <<"DISCONNECT_PLAYER"<<"AUTH_SUCCESSFUL"<<"AUTH_UNSUCCESSFUL";
+    msgTypes <<"CONNECT_UNSUCCESSFUL" <<"CONNECT_SUCCESSFUL" << "LOBBY_UPDATE" << "BID_START" << "BID_REQUEST" << "BID_UPDATE" << "BID_END" << "PLAY_START" << "MOVE_REQUEST" << "MOVE_UPDATE" << "TRICK_END" <<"PLAY_END" <<"SCORE" << "PING"<<"PONG" <<"DISCONNECT_PLAYER"<<"AUTH_SUCCESSFUL"<<"AUTH_UNSUCCESSFUL"<<"GAME_END";
 
     switch(msgTypes.indexOf(type)) //Switch block that determines the type of message that was received.
     {
       case 0:
-        {
+        { // CONNECT_UNSUCCESSFUL
         qDebug() << "Message Type: " << msgTypes[0];
         //code added here to handle CONNECT_UNSUCCESSFUL
 
@@ -76,6 +76,7 @@ void clientconnection::onTextMessageReceived(QString message)
     }
       case 2:
     {
+        // LOBBY_UPDATE
         qDebug() << "Message Type: " << msgTypes[2];
         emit lobbyUpdateSignal(CreateJObject(message));
         break;
@@ -106,38 +107,44 @@ void clientconnection::onTextMessageReceived(QString message)
     }
     case 6:
     {
+        // BID_END
         qDebug() << "Message Type: " << msgTypes[6];
-        emit bidEndSignal();
+        emit bidEndSignal(CreateJObject(message));
       break;
     }
     case 7:
     {
+        // PLAY_START
         qDebug() << "Message Type: " << msgTypes[7];
-        emit playStartSignal();
+        emit playStartSignal(CreateJObject(message));
       break;
     }
     case 8:
     {
+        // MOVE_REQUEST
         qDebug() << "Message Type: " << msgTypes[8];
-        emit moveRequestSignal();
+        emit moveRequestSignal(CreateJObject(message));
       break;
     }
     case 9:
     {
+        // MOVE_UPDATE
         qDebug() << "Message Type: " << msgTypes[9];
-        emit moveUpdateSignal();
+        emit moveUpdateSignal(CreateJObject(message));
       break;
     }
     case 10:
     {
+        // TRICK_END
         qDebug() << "Message Type: " << msgTypes[10];
-        emit trickEndSignal();
+        emit trickEndSignal(CreateJObject(message));
       break;
     }
     case 11:
     {
+        // PLAY_END
         qDebug() << "Message Type: " << msgTypes[11];
-        emit playEndSignal();
+        emit playEndSignal(CreateJObject(message));
       break;
     }
     case 12:
@@ -146,20 +153,24 @@ void clientconnection::onTextMessageReceived(QString message)
         emit scoreSignal();
       break;
     }
-    case 13: //ping
+    case 13:
     {
+        // PING
         qDebug() << "Message Type: " << msgTypes[13];
-      break;
+        break;
     }
-    case 14: //pong
+    case 14:
     {
+        // PONG
         qDebug() << "Message Type: " << msgTypes[14];
-      break;
+        emit pongSignal(CreateJObject(message));
+        break;
     }
     case 15:
     {
+        // DISCONNECT_PLAYER
         qDebug() << "Message Type: " << msgTypes[15];
-        emit disconnectPlayerSignal();
+        emit disconnectPlayerSignal(CreateJObject(message));
       break;
     }
     case 16:
@@ -173,6 +184,13 @@ void clientconnection::onTextMessageReceived(QString message)
         qDebug() << "Message Type: " << msgTypes[16];
         emit authUnsuccessfulSignal();
       break;
+    }
+    case 18:
+    {
+        //GAME_END
+        qDebug() << "Message Type: " << msgTypes[17];
+        emit gameEndSignal(CreateJObject(message));
+        break;
     }
 
 

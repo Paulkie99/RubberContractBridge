@@ -49,15 +49,17 @@ signals:
     void lobbyUpdateSignal(QJsonObject);
     void authUnsuccessfulSignal();
     void authSuccessfulSignal();
-    void bidEndSignal();
-    void playStartSignal();
-    void moveRequestSignal();
-    void moveUpdateSignal();
-    void trickEndSignal();
-    void playEndSignal();
+    void bidEndSignal(QJsonObject);
+    void playStartSignal(QJsonObject);
+    void moveRequestSignal(QJsonObject);
+    void moveUpdateSignal(QJsonObject);
+    void trickEndSignal(QJsonObject);
+    void playEndSignal(QJsonObject);
     void scoreSignal();
-    void disconnectPlayerSignal();
+    void disconnectPlayerSignal(QJsonObject);
     void connectUnsuccessfulSignal();
+    void gameEndSignal(QJsonObject);
+    void pongSignal(QJsonObject);
 
 private Q_SLOTS:
     void onConnected();
