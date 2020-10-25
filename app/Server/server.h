@@ -33,6 +33,11 @@ public:
     friend class ServerInterface;
     friend class InputValidator;
 
+    void Next_Bid();
+
+    QJsonArray* Construct_Cards_Message(int player);
+    int getTeamy(int otherTeamy);
+
 signals:
     void messageReceived(QString); //signal to the server-interface that a message has been received
     void messageSent(QString);
@@ -62,6 +67,7 @@ private:
     void SendMessage(int id, QJsonObject);
     void BroadcastMessage(QJsonObject);
     void UpdateGameState(int card_val, int card_suit, bool isBid);
+    Card* findCardInHand(int player, int val, int suit);
 
 private slots:
     void acceptConnection();

@@ -17,6 +17,7 @@
 // Enum of the card ranks in ascending order -> this makes a statement like Ace > Ten valid.
 enum Card_Vals
 {
+    One,
     Two,
     Three,
     Four,
@@ -38,7 +39,11 @@ enum Suit_Vals
     Clubs,
     Diamonds,
     Hearts,
-    Spades
+    Spades,
+    NT,
+    Double,
+    Redouble,
+    Pass
 };
 
 class Card
@@ -47,12 +52,17 @@ public:
     Card();
     Card(int val, int suit_);
 
-    int value;
-    int suit;
+    int value = -1;
+    int suit = -1;
+    int owner = -1;
+    bool isDoubled = false;
+    bool isRedoubled = false;
 
     void print(QTextStream& out);
-    QString ValToString(int val);
-    QString SuitToString(int suit);
+    QString ValToString(int val = -1);
+    QString SuitToString(int suit = -1);
+    static int StringToValue(QString str);
+    static int StringToSuit(QString str);
 };
 
 #endif // CARD_H

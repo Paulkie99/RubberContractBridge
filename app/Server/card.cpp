@@ -39,8 +39,14 @@ void Card::print(QTextStream& out)
  * */
 QString Card::ValToString(int val)
 {
+    if(val == -1)
+        val = this->value;
+
     switch(val)
     {
+        case One:
+            return "1";
+        break;
         case Two:
             return "2";
         break;
@@ -89,6 +95,9 @@ QString Card::ValToString(int val)
  * */
 QString Card::SuitToString(int suit)
 {
+    if(suit == -1)
+        suit = this->suit;
+
     switch(suit)
     {
         case Clubs:
@@ -106,4 +115,58 @@ QString Card::SuitToString(int suit)
 
     }
     return "";
+}
+
+int Card::StringToValue(QString str)
+{
+    if(str == "1")
+        return One;
+    else if(str == "2")
+        return Two;
+    else if(str == "3")
+        return Three;
+    else if(str == "4")
+        return Four;
+    else if(str == "5")
+        return Five;
+    else if(str == "6")
+        return Six;
+    else if(str == "7")
+        return Seven;
+    else if(str == "8")
+        return Eight;
+    else if(str == "9")
+        return Nine;
+    else if(str == "10")
+        return Ten;
+    else if(str == "J")
+        return Jack;
+    else if(str == "Q")
+        return Queen;
+    else if(str == "K")
+        return King;
+    else if(str == "A")
+        return Ace;
+    return -1;
+}
+
+int Card::StringToSuit(QString str)
+{
+    if(str == "C")
+        return Clubs;
+    else if(str == "H")
+        return Hearts;
+    else if(str == "D")
+        return Diamonds;
+    else if(str == "S")
+        return Spades;
+    else if(str == "NT")
+        return NT;
+    else if(str == "DOUBLE")
+        return Double;
+    else if(str == "REDOUBLE")
+        return Redouble;
+    else if(str == "PASS")
+        return Pass;
+    return -1;
 }

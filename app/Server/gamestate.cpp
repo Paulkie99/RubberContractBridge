@@ -21,22 +21,19 @@ GameState::GameState(QObject *parent) : QObject(parent)
     {
         CurrentTrick[i] = NULL;
     }
-    Contract = 0;
-    Trump = 0;
     for (int i = 0; i < int(sizeof(GameScore)); i++)
     {
         GameScore[i] = 0;
     }
-//    for (int i = 0; i < int(sizeof(Teams)); i++)
-//    {
-//        for (int j = 0; j < int(sizeof(Teams[i])); j++)
-//        {
-//            Teams[i][j] = NULL;
-//        }
-//    }
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            firstDenominationBids[i][j] = -1;
+        }
+    }
     PlayerTurn = 0;
     Declarer = 0;
-    Double = false;
     for (int i = 0; i < int(sizeof(IsVulnerable)); i++)
     {
         IsVulnerable[i] = false;
@@ -58,8 +55,6 @@ GameState::GameState(const GameState& gs, QObject *parent) : QObject(parent)
 
         CurrentTrick[i] = gs.CurrentTrick[i];
     }
-    Contract = gs.Contract;
-    Trump = gs.Trump;
     for (int i = 0; i < int(sizeof(GameScore)); i++)
     {
         GameScore[i] = gs.GameScore[i];
@@ -73,7 +68,6 @@ GameState::GameState(const GameState& gs, QObject *parent) : QObject(parent)
 //    }
     PlayerTurn = gs.PlayerTurn;
     Declarer = gs.Declarer;
-    Double = gs.Double;
     for (int i = 0; i < int(sizeof(IsVulnerable)); i++)
     {
         IsVulnerable[i] = gs.IsVulnerable[i];
@@ -137,6 +131,14 @@ QString GameState::getPlayerFromId(int id)
     }
 }
 
+QString GameState::getTeamFromId(int id)
+{
+    if(id % 2 == 0)
+        return "NS";
+    else
+        return "EW";
+}
+
 ServerClient *GameState::getDealer() const
 {
     return dealer;
@@ -155,4 +157,69 @@ int GameState::getDeclarer() const
 void GameState::setDeclarer(int value)
 {
     Declarer = value;
+}
+
+int GameState::getPlayerTurn() const
+{
+    return PlayerTurn;
+}
+
+void GameState::setPlayerTurn(int value)
+{
+    PlayerTurn = value;
+}
+
+Card *GameState::getCurrentBid() const
+{
+    return CurrentBid;
+}
+
+void GameState::setCurrentBid(Card *value)
+{
+    CurrentBid = value;
+}
+
+int GameState::getPassCount() const
+{
+    return PassCount;
+}
+
+void GameState::setPassCount(int value)
+{
+    PassCount = value;
+}
+
+int GameState::getBidRoundCount() const
+{
+    return bidRoundCount;
+}
+
+void GameState::setBidRoundCount(int value)
+{
+    bidRoundCount = value;
+}
+
+void GameState::Reset(int dealer)
+{
+    SetBidStage(true);
+    setPlayerTurn(dealer);
+    setBidRoundCount(0);
+    setCurrentBid(NULL);
+    setDeclarer(-1);
+    setPassCount(0);
+}
+
+int GameState::nextPlayerTurn()
+{
+    return (PlayerTurn + 1) % 4;
+}
+
+int GameState::getTrickCount() const
+{
+    return trickCount;
+}
+
+void GameState::setTrickCount(int value)
+{
+    trickCount = value;
 };

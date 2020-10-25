@@ -13,12 +13,14 @@ INCLUDEPATH += ../Server
 INCLUDEPATH += ../ClientSide
 
 HEADERS += ../Server/serverinterface.h \
+    ../Server/gamestate.h \
     ../Server/serverclient.h
 HEADERS += ../Server/server.h
 HEADERS +=  ../Server/card.h
 HEADERS += ../ClientSide/clientconnection.h
 
 SOURCES +=  tst_testserver.cpp \
+    ../Server/gamestate.cpp \
     ../Server/inputvalidator.cpp \
     ../Server/serverclient.cpp
 SOURCES +=  ../Server/serverinterface.cpp

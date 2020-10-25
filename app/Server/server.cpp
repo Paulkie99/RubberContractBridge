@@ -27,7 +27,7 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent, b
     qInfo() << "Constructing deck";
     int count = 0;
     for(int suit = Clubs; suit <= Spades; suit++)   // step through the values of the card value and suit enums and add each combination to the deck
-        for(int value = Two; value <= Ace; value++)
+        for(int value = One; value < Ace; value++)
             Deck[count++] = Card(value, suit);
 //    PrintDeck();
     if(shuffle)
@@ -85,13 +85,21 @@ void Server::Authenticate(QString username, QString password, int id)
 {
     qInfo() << "Authenticating " << username << ", " << password;
 
-    bool valid;
+    bool valid = true;
 
     //criteria for username and password?
     if(username != "" && password != "")
-        valid = true;
+    {
+        for(int i = 0; i < num_players; ++i)
+        {
+            if(username == ConnectedClients[i].alias)
+                valid = false;
+        }
+    }
     else
+    {
         valid = false;
+    }
 
     if(!valid)
     {
@@ -144,6 +152,69 @@ void Server::Shuffle(unsigned seed)
 /*
  * Deal the deck to connected players, dealer passed is the int index of the client in ConnectedClients[] who should be the dealer
  * */
+QJsonArray* Server::Construct_Cards_Message(int player)
+{
+    QJsonArray* client_cards = new QJsonArray();
+
+    QJsonArray Hearts_arr;
+    QJsonArray Spades_arr;
+    QJsonArray Clubs_arr;
+    QJsonArray Diamonds_arr;
+
+    for(int card = 0; card < hand_size; ++card) // iterate row (card) first, then column
+    {
+        // TODO: Format this according to BID_START
+        Card* card_ptr = Player_Hands[card][player];
+
+        switch (card_ptr->suit)
+        {
+            case Hearts:
+                Hearts_arr.push_back(card_ptr->ValToString());
+            break;
+
+            case Spades:
+                Spades_arr.push_back(card_ptr->ValToString());
+            break;
+
+            case Diamonds:
+                Diamonds_arr.push_back(card_ptr->ValToString());
+            break;
+
+            case Clubs:
+                Clubs_arr.push_back(card_ptr->ValToString());
+            break;
+        }
+
+    }
+    QJsonObject hearts_entry = QJsonObject({
+                                       qMakePair(QString("Suit"), QJsonValue("H")),
+                                       qMakePair(QString("Rank"), QJsonValue(Hearts_arr))
+                                   });
+    QJsonObject spades_entry = QJsonObject({
+                                       qMakePair(QString("Suit"), QJsonValue("S")),
+                                       qMakePair(QString("Rank"), QJsonValue(Spades_arr))
+                                   });
+    QJsonObject diamonds_entry = QJsonObject({
+                                       qMakePair(QString("Suit"), QJsonValue("D")),
+                                       qMakePair(QString("Rank"), QJsonValue(Diamonds_arr))
+                                   });
+    QJsonObject clubs_entry = QJsonObject({
+                                       qMakePair(QString("Suit"), QJsonValue("C")),
+                                       qMakePair(QString("Rank"), QJsonValue(Clubs_arr))
+                                   });
+    client_cards->push_back(hearts_entry);
+    client_cards->push_back(spades_entry);
+    client_cards->push_back(diamonds_entry);
+    client_cards->push_back(clubs_entry);
+
+    return client_cards;
+}
+
+int Server::getTeamy(int otherTeamy)
+{
+    return (otherTeamy + 2) % num_players;
+}
+
 void Server::Deal(int dealer)
 {
     //first assign cards one at a time to each player
@@ -152,6 +223,7 @@ void Server::Deal(int dealer)
     {
         for(int player = 0; player < num_players; ++player) // iterate column (player) first, then row
         {
+            Deck[count].owner = player;
             Player_Hands[card][player] = &Deck[count++];
         }
     }
@@ -172,25 +244,18 @@ void Server::Deal(int dealer)
     //construct and send a message to each client with their cards, and whether or not they are the dealer
     for(int player = 0; player < num_players; ++player)
     {
-        QJsonArray client_cards;
-        for(int card = 0; card < hand_size; ++card) // iterate row (card) first, then column
-        {
-            // TODO: Format this according to BID_START
-            Card* card_ptr = Player_Hands[card][player];
-            QJsonObject card_to_int = QJsonObject({
-                                               qMakePair(QString("Suit"), QJsonValue(card_ptr->suit)),
-                                               qMakePair(QString("Value"), QJsonValue(card_ptr->value))
-                                           });
-            client_cards.push_back(card_to_int);
-        }
+        QJsonArray client_cards = *Construct_Cards_Message(player);
+
         QJsonObject hand = Convert_Message_To_Json(GenerateMessage("BID_START"));
         hand["Cards"] = client_cards;
-        hand["Dealer"] = GS.getPlayerFromId(GS.getDealer()->id);
-        if(validator.isValidSocketId(player))
-            SendMessage(player, hand);
+        hand["Dealer"] = GS.getPlayerFromId(dealer);
+        SendMessage(player, hand);
     }
 
-    GS.SetBidStage(true);
+    GS.Reset(dealer);
+
+    QJsonObject bid_req = Convert_Message_To_Json(GenerateMessage("BID_REQUEST"));
+    SendMessage(dealer, bid_req);
 
     PrintHands();
 }
@@ -275,6 +340,22 @@ void Server::BroadcastMessage(QJsonObject msg)
     }
 }
 
+Card *Server::findCardInHand(int player, int val, int suit)
+{
+    for(int card = 0; card < Ace; ++card)
+    {
+        if(Player_Hands[card][player])
+            if(Player_Hands[card][player]->value == val)
+                if(Player_Hands[card][player]->suit == suit)
+                {
+                    Card* to_ret = Player_Hands[card][player];
+                    Player_Hands[card][player] = NULL;
+                    return to_ret;
+                }
+    }
+    return NULL;
+}
+
 
 /*
  * This function accepts a new connection by storing the corresponding QWebSocket in an array,
@@ -323,6 +404,15 @@ void Server::acceptConnection()
 /*
  * This function receives messages from clients and calls the relevant validation function based on the message type
  * */
+void Server::Next_Bid()
+{
+    GS.setPlayerTurn((GS.getPlayerTurn() + 1) % num_players);
+    if(GS.getPlayerTurn() == GS.getDealer()->id)
+        GS.setBidRoundCount(GS.getBidRoundCount() + 1);
+    QJsonObject bid_req = Convert_Message_To_Json(GenerateMessage("BID_REQUEST"));
+    SendMessage(GS.getPlayerTurn(), bid_req);
+}
+
 void Server::ValidateInput(QString message)
 {
      emit messageReceived(message); // add message to ui listwidget
@@ -346,11 +436,104 @@ void Server::ValidateInput(QString message)
         case 1: // BID_SEND
         {
             QJsonObject card = msg["Bid"].toObject();
-            bool valid = validator.isValidBid(msg["Id"].toInt(), card["Rank"].toInt(), card["Suit"].toInt());
+
+            int value;
+            if(card["Rank"].isNull())
+                value = -1;
+            else
+                value = Card::StringToValue(card["Rank"].toString());
+
+            int suit = Card::StringToSuit(card["Suit"].toString());
+            int id = msg["Id"].toInt();
+
+            bool valid = validator.isValidBid(id, value, suit);
 
             if(valid)
-                //TODO: Update GS based on bid
+            {
+                QJsonObject bid_update = Convert_Message_To_Json(GenerateMessage("BID_UPDATE"));
+                bid_update["Bid"] = msg["Bid"];
+                bid_update["Player"] = GS.getPlayerFromId(id);
+                BroadcastMessage(bid_update);
+
                 qInfo() << "Bid Valid";
+                Card* bid = new Card(value, suit);
+                bid->owner = id;
+
+                if(suit == Double)
+                {
+                    GS.getCurrentBid()->isDoubled = true;
+                    GS.ClearPassCount();
+
+                    Next_Bid();
+                }
+                else if(suit == Redouble)
+                {
+                    GS.getCurrentBid()->isRedoubled = true;
+                    GS.ClearPassCount();
+
+                    Next_Bid();
+                }
+                else if(suit != Pass)
+                {
+                    GS.ClearPassCount();
+                    GS.setCurrentBid(bid);
+
+                    if(GS.firstDenominationBids[suit][id % 2] == -1)
+                        GS.firstDenominationBids[suit][id % 2] = id;
+
+                    Next_Bid();
+                }
+                else if(GS.getBidRoundCount() > 0) // passed, but not first round
+                {
+                    GS.IncreasePassCount();
+                    if(GS.getPassCount() == 3) // three consecutive passses, play should commence
+                    {// start play stage
+                        GS.SetBidStage(false);
+                        GS.setDeclarer(GS.firstDenominationBids[GS.getCurrentBid()->suit][GS.getCurrentBid()->owner % 2]);
+                        GS.setPlayerTurn((GS.getDeclarer() + 1) % num_players);
+
+                        QJsonObject bid_end = Convert_Message_To_Json(GenerateMessage("BID_END"));
+                        bid_end["Trump"] = GS.getCurrentBid()->SuitToString();
+                        bid_end["Declarer"] = GS.getPlayerFromId(GS.getDeclarer());
+                        bid_end["Dummy"] = GS.getPlayerFromId((GS.getDeclarer() + 2) % num_players);
+
+                        QJsonObject contract;
+                        contract["Suit"] = GS.getCurrentBid()->SuitToString();
+                        contract["Rank"] = GS.getCurrentBid()->ValToString();
+                        contract["IsDouble"] = GS.getCurrentBid()->isDoubled;
+                        contract["IsRedouble"] = GS.getCurrentBid()->isRedoubled;
+
+                        bid_end["Contract"] = contract;
+                        BroadcastMessage(bid_end);
+
+                        QJsonObject play_start = Convert_Message_To_Json(GenerateMessage("PLAY_START"));
+                        QJsonArray dummy_cards = *Construct_Cards_Message((GS.getDeclarer() + 2) % num_players);
+                        play_start["DummyCards"] = dummy_cards;
+                        BroadcastMessage(play_start);
+
+                        QJsonObject move_req = Convert_Message_To_Json(GenerateMessage("MOVE_REQUEST"));
+                        SendMessage(GS.getPlayerTurn(), move_req);
+                    }
+                    else
+                    {
+                        Next_Bid();
+                    }
+                }
+                else // passed in first round
+                {
+                    GS.IncreasePassCount();
+                    if(GS.getPassCount() == 4) // everyone passed in first round
+                    {
+                        // deal passed out
+                        Shuffle();
+                        Deal();
+                    }
+                    else
+                    {
+                        Next_Bid();
+                    }
+                }
+            }
             emit messageReceived("Bid received");
         }
         break;
@@ -358,11 +541,100 @@ void Server::ValidateInput(QString message)
         case 2: // MOVE_SEND
         {
             QJsonObject card = msg["Move"].toObject();
-            bool valid = validator.isValidMove(msg["Id"].toInt(), card["Rank"].toInt(), card["Suit"].toInt());
+
+            int id = msg["Id"].toInt();
+            int value = card["Rank"].toInt();
+            int suit = card["Suit"].toInt();
+
+            bool valid = validator.isValidMove(id, value, suit);
 
             if(valid)
-                //TODO: Update GS based on move
+            {
                 qInfo() << "Move Valid";
+
+
+                QJsonObject move_update = Convert_Message_To_Json(GenerateMessage("MOVE_UPDATE"));
+                move_update["Move"] = card;
+                move_update["Player"] = GS.getPlayerFromId(id);
+                BroadcastMessage(move_update);
+
+                GS.CurrentTrick.push_back(findCardInHand(id, value, suit));
+                GS.setPlayerTurn(GS.nextPlayerTurn());
+
+                if(GS.CurrentTrick.size() == num_players) // end trick
+                {
+                    int lead_suit = GS.CurrentTrick[0]->suit;
+                    int trump_suit = GS.getCurrentBid()->suit;
+
+                    Card* best_card = GS.CurrentTrick[0];
+                    for(int card = 1; card < num_players; ++card)
+                    {
+                        if(GS.CurrentTrick[card]->suit == trump_suit)
+                        {
+                            if(best_card->suit == trump_suit)
+                            {
+                                if(GS.CurrentTrick[card]->value > best_card->value)
+                                    best_card = GS.CurrentTrick[card];
+                            }
+                            else
+                            {
+                                best_card = GS.CurrentTrick[card];
+                            }
+                        }
+                        else if(GS.CurrentTrick[card]->suit == lead_suit)
+                        {
+                            if(best_card->suit == lead_suit)
+                            {
+                                if(GS.CurrentTrick[card]->value > best_card->value)
+                                    best_card = GS.CurrentTrick[card];
+                            }
+                        }
+                    }
+
+                    QString winning_partnership = GS.getTeamFromId(best_card->owner);
+                    GS.TrickScore[best_card->owner % 2] += 1;
+
+                    QJsonObject trick_end = Convert_Message_To_Json(GenerateMessage("TRICK_END"));
+                    trick_end["WinningPartnership"] = winning_partnership;
+                    BroadcastMessage(trick_end);
+
+                    GS.setTrickCount(GS.getTrickCount() + 1);
+
+                    if(GS.getTrickCount() == hand_size) // end play
+                    {
+                        if(GS.TrickScore[NS] > GS.TrickScore[EW])
+                            winning_partnership = "NS";
+                        else
+                            winning_partnership = "EW";
+
+
+                        QJsonObject play_end = Convert_Message_To_Json(GenerateMessage("PLAY_END"));
+                        trick_end["WinningPartnership"] = winning_partnership;
+                        BroadcastMessage(trick_end);
+
+                        //TODO scoring
+
+                        // TODO next game
+
+                    }
+
+                    GS.CurrentTrick.clear();
+                }
+                else
+                {
+                    QJsonObject move_req = Convert_Message_To_Json(GenerateMessage("MOVE_REQUEST"));\
+                    if(GS.getPlayerTurn() == getTeamy(GS.getDeclarer()))
+                    {
+                        move_req["MoveDummy"] = true;
+                        SendMessage(GS.getDeclarer(), move_req);
+                    }
+                    else
+                    {
+                        move_req["MoveDummy"] = false;
+                        SendMessage(GS.getPlayerTurn(), move_req);
+                    }
+                }
+            }
             emit messageReceived("Move received");
         }
         break;
@@ -390,7 +662,7 @@ void Server::ValidateInput(QString message)
         }
         break;
 
-        case 6:
+        case 6: // PLAYER_READY
         {
             if(ConnectedClients[msg["Id"].toInt()].isAuthenticated)
             {
@@ -427,5 +699,6 @@ void Server::socketDisconnect(int id)
         --numAuthenticatedUsers;
     ConnectedClients[id].isAuthenticated = false;
     ConnectedClients[id].clientSocket = NULL;
+    ConnectedClients[id].alias = "";
     --numConnectedClients;
 }

@@ -18,6 +18,7 @@ public:
     bool isValidMove(int id, int val, int suit);
     bool isEnumsContainCard(int val, int suit);
     bool isValidCardInHand(int id, int val, int suit);
+    bool isValidFollowSuit(int id, int suit);
 
 private:
     Server* server;

@@ -34,7 +34,43 @@ bool InputValidator::isValidBid(int id, int val, int suit)
     if(!isEnumsContainCard(val, suit))
         return false;
 
+    if(val > Seven)
+        return false;
+
     //TODO: Add validation logic based on GS (last bid, number of passes, etc)
+    if(id != server->GS.getPlayerTurn())
+        return false;
+
+    if(!server->GS.GetBidStage())
+        return false;
+
+    Card* currentBid = server->GS.getCurrentBid();
+
+    if(suit == Double)
+    {
+        if(currentBid == NULL)
+            return false;
+        if(currentBid->owner == (id + 2) % num_players || currentBid->suit > NT)
+            return false;
+    }
+    else if(suit == Redouble)
+    {
+        if(currentBid == NULL)
+            return false;
+        if(!currentBid->isDoubled)
+            return false;
+    }
+    else if(suit != Pass)
+    {
+        if(val == -1)
+            return false;
+        if(currentBid)
+        {
+            if(val <= currentBid->value)
+                if(suit <= currentBid->suit)
+                    return false;
+        }
+    }
 
     //else
     return true;
@@ -49,7 +85,7 @@ bool InputValidator::isValidMove(int id, int val, int suit)
     {
         if(server->GS.getDeclarer() == id)
         {
-            if(!isValidCardInHand((id + 2) % num_players, val, suit))
+            if(!isValidCardInHand(server->getTeamy(id), val, suit))
                 return false;
         }
         else
@@ -57,6 +93,9 @@ bool InputValidator::isValidMove(int id, int val, int suit)
             return false;
         }
     }
+
+    if(!isValidFollowSuit(id, suit))
+        return false;
 
     //TODO: Add validation logic based on GS (trump card, lead suit, etc)
 
@@ -70,10 +109,20 @@ bool InputValidator::isValidMove(int id, int val, int suit)
 bool InputValidator::isEnumsContainCard(int val, int suit)
 {
     if(val > Ace || val < Two) // check if the value is within the values enum
-        return false;
+    {
+        if(!server->GS.GetBidStage())
+            return false;
+        else if(val != One)
+            return false;
+    }
 
     if(suit > Spades || suit < Clubs) // check if the suit is within the suits enum
-        return false;
+    {
+        if(!server->GS.GetBidStage())
+            return false;
+        else if(suit > Pass)
+            return false;
+    }
 
     //else
     return true;
@@ -92,7 +141,7 @@ bool InputValidator::isValidCardInHand(int id, int val, int suit)
 
     bool found = false;
     int player = id;
-    for(int card = 0; card <= Ace; ++card)
+    for(int card = 0; card < Ace; ++card)
     {
         if(server->Player_Hands[card][player])
             if(server->Player_Hands[card][player]->value == val)
@@ -100,4 +149,26 @@ bool InputValidator::isValidCardInHand(int id, int val, int suit)
                     return true;
     }
     return found;
+}
+
+bool InputValidator::isValidFollowSuit(int id, int suit)
+{
+    if(server->GS.CurrentTrick.empty())
+        return true;
+
+    if(suit == server->GS.CurrentTrick[0]->suit)
+        return true;
+    else
+    {
+        bool foundSuit = false;
+        for(int card = 0; card < Ace; ++card)
+        {
+            if(server->Player_Hands[card][id])
+                if(server->Player_Hands[card][id]->suit == server->GS.CurrentTrick[0]->suit)
+                    foundSuit = true;
+        }
+        if(foundSuit)
+            return false;
+    }
+    return true;
 }

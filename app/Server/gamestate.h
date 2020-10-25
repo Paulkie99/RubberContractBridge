@@ -44,7 +44,7 @@ public:
     void IncreasePassCount();
     void ClearPassCount();
     QString getPlayerFromId(int id);
-
+    QString getTeamFromId(int id);
 
     ServerClient *getDealer() const;
     void setDealer(ServerClient *value);
@@ -52,18 +52,39 @@ public:
     int getDeclarer() const;
     void setDeclarer(int value);
 
+    int getPlayerTurn() const;
+    void setPlayerTurn(int value);
+
+    Card *getCurrentBid() const;
+    void setCurrentBid(Card *value);
+
+    int getPassCount() const;
+    void setPassCount(int value);
+
+    int getBidRoundCount() const;
+    void setBidRoundCount(int value);
+
+    int firstDenominationBids[5][2];
+    std::vector<Card*> CurrentTrick;
+    int TrickScore[2];
+
+    void Reset(int dealer);
+
+    int nextPlayerTurn();
+
+    int getTrickCount() const;
+    void setTrickCount(int value);
+
 private:
     bool BidStage;
+    int bidRoundCount = 0;
     int PassCount;
-    int TrickScore[2];
-    Card* CurrentTrick[4];
+    Card* CurrentBid = NULL;
     ServerClient* dealer = NULL;
-    int Contract;
-    int Trump;
     int GameScore[2];
     int PlayerTurn;
     int Declarer;
-    bool Double;
+    int trickCount = 0;
     bool IsVulnerable[2];
 
 
