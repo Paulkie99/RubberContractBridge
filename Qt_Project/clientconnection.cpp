@@ -143,7 +143,7 @@ void clientconnection::onTextMessageReceived(QString message)
     case 12:
     {
         qDebug() << "Message Type: " << msgTypes[12];
-        emit scoreSignal();
+        emit scoreSignal(msgr);
       break;
     }
     case 13: //ping

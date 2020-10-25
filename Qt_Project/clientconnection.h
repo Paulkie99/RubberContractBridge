@@ -55,7 +55,7 @@ signals:
     void moveUpdateSignal();
     void trickEndSignal();
     void playEndSignal();
-    void scoreSignal();
+    void scoreSignal(QJsonObject);
     void disconnectPlayerSignal();
     void connectUnsuccessfulSignal();
 

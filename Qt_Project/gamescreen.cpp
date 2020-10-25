@@ -315,7 +315,7 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
     connect(clientgs, SIGNAL(bidRequestSignal()), this, SLOT(bidRequestSlot()));
     connect(clientgs, SIGNAL(bidUpdateSignal(QJsonObject)), this, SLOT(bidUpdateSlot(QJsonObject)));
-     connect(clientgs, SIGNAL(scoreSignal()), this, SLOT(scoreSlot()));
+     connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
 
     QString mes = clientgs->GenerateMessage("BID_UPDATE");
     // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
@@ -554,12 +554,16 @@ void GameScreen::playEndSlot()
 
 }
 
-void GameScreen::scoreSlot()
+void GameScreen::scoreSlot(QJsonObject scores)
 {
-
+    ScoreBoard scoreBoard(this);
+    // Use modal approach
+    scoreBoard.setModal(true);
+    scoreBoard.exec();
+    scoreBoard.updateScores(scores);
 }
 
 void GameScreen::disconnectPlayerSlot()
 {
-
+ clientgs->clientSocket.close();
 }

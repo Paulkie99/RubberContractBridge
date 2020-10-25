@@ -69,7 +69,7 @@ private slots:
     void moveUpdateSlot();
     void trickEndSlot();
     void playEndSlot();
-    void scoreSlot();
+    void scoreSlot(QJsonObject);
     void disconnectPlayerSlot();
 
 signals:
