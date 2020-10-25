@@ -315,6 +315,7 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
     connect(clientgs, SIGNAL(bidRequestSignal()), this, SLOT(bidRequestSlot()));
     connect(clientgs, SIGNAL(bidUpdateSignal(QJsonObject)), this, SLOT(bidUpdateSlot(QJsonObject)));
+     connect(clientgs, SIGNAL(scoreSignal()), this, SLOT(scoreSlot()));
 
     QString mes = clientgs->GenerateMessage("BID_UPDATE");
     // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
