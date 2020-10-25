@@ -23,3 +23,10 @@ void ScoreBoard::on_ScoreBoard_finished(int result)
 {
     parentWidget()->show();
 }
+
+void ScoreBoard::updateScores(QJsonObject scoresToDisplay)
+{
+ QJsonObject NSscores = scoresToDisplay["NSscores"].toObject();
+ QJsonObject EWscores = scoresToDisplay["EWscores"].toObject();
+ //code to update gui
+}

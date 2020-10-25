@@ -32,6 +32,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Connect the various signals and slots
     connect(&client, &clientconnection::serverFullSignal, this, &MainWindow::serverFullSlot);
     connect(&client, &clientconnection::connectSuccessfullSignal, this, &MainWindow::connectSuccessfulSlot);
+    connect(&client, &clientconnection::lobbyUpdateSignal, this, &MainWindow::lobbyUpdateSlot);
+     connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+     connect(&client, &clientconnection::authUnsuccessfulSignal, this, &MainWindow::authUnsuccessfulSlot);
+     connect(&client, &clientconnection::connectUnsuccessfulSignal, this, &MainWindow::connectUnsuccessfulSlot);
 }
 
 MainWindow::~MainWindow()

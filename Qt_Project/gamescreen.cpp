@@ -931,9 +931,13 @@ void GameScreen::playEndSlot(QJsonObject play)
 
 }
 
-void GameScreen::scoreSlot()
+void GameScreen::scoreSlot(QJsonObject scores)
 {
-
+    ScoreBoard scoreBoard(this);
+    // Use modal approach
+    scoreBoard.setModal(true);
+    scoreBoard.exec();
+    scoreBoard.updateScores(scores);
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
