@@ -17,10 +17,9 @@ GameState::GameState(QObject *parent) : QObject(parent)
     {
         TrickScore[i] = 0;
     }
-    for (int i = 0; i < int(sizeof(CurrentTrick)); i++)
-    {
-        CurrentTrick[i] = NULL;
-    }
+
+    CurrentTrick.clear();
+
     for (int i = 0; i < int(sizeof(GameScore)); i++)
     {
         GameScore[i] = 0;
@@ -32,8 +31,8 @@ GameState::GameState(QObject *parent) : QObject(parent)
             firstDenominationBids[i][j] = -1;
         }
     }
-    PlayerTurn = 0;
-    Declarer = 0;
+    PlayerTurn = -1;
+    Declarer = -1;
     for (int i = 0; i < int(sizeof(IsVulnerable)); i++)
     {
         IsVulnerable[i] = false;
