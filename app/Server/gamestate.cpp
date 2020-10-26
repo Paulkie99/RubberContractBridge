@@ -9,20 +9,23 @@
 //Last update: 02/10/2020 Revision 3
 #include "gamestate.h"
 
-GameState::GameState(QObject *parent) : QObject(parent)
+GameState::GameState()
 {
-    BidStage = true;
-    PassCount = 0;
-    for (int i = 0; i < int(sizeof(TrickScore)); i++)
+    for (int i = 0; i < 2; i++)
     {
         TrickScore[i] = 0;
     }
 
     CurrentTrick.clear();
 
-    for (int i = 0; i < int(sizeof(GameScore)); i++)
+    for (int i = 0; i < 2; i++)
     {
-        GameScore[i] = 0;
+        RubberScore[i] = 0;
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        underTheLine[i] = 0;
     }
     for (int i = 0; i < 5; i++)
     {
@@ -31,9 +34,7 @@ GameState::GameState(QObject *parent) : QObject(parent)
             firstDenominationBids[i][j] = -1;
         }
     }
-    PlayerTurn = -1;
-    Declarer = -1;
-    for (int i = 0; i < int(sizeof(IsVulnerable)); i++)
+    for (int i = 0; i < 2; i++)
     {
         IsVulnerable[i] = false;
     }
@@ -41,33 +42,44 @@ GameState::GameState(QObject *parent) : QObject(parent)
 //    cout << "Hello From GameState!\n\n";
 }
 
-GameState::GameState(const GameState& gs, QObject *parent) : QObject(parent)
+GameState::GameState(const GameState& gs)
 {
     BidStage = gs.BidStage;
+    MoveStage = gs.MoveStage;
     PassCount = gs.PassCount;
-    for (int i = 0; i < int(sizeof(TrickScore)); i++)
+    PlayerTurn = gs.PlayerTurn;
+    Declarer = gs.Declarer;
+    honorsCount = gs.honorsCount;
+    honorsId = gs.honorsId;
+    isGameOver = gs.isGameOver;
+    bidRoundCount = gs.bidRoundCount;
+    CurrentBid = gs.CurrentBid;
+    dealer = gs.dealer;
+    trickCount = gs.trickCount;
+
+    for (int i = 0; i < 2; i++)
     {
         TrickScore[i] = gs.TrickScore[i];
     }
-    for (int i = 0; i < int(sizeof(CurrentTrick)); i++)
-    {
 
-        CurrentTrick[i] = gs.CurrentTrick[i];
-    }
-    for (int i = 0; i < int(sizeof(GameScore)); i++)
+    CurrentTrick = gs.CurrentTrick;
+
+    for (int i = 0; i < 2; i++)
     {
-        GameScore[i] = gs.GameScore[i];
+        RubberScore[i] = gs.RubberScore[i];
     }
-//    for (int i = 0; i < int(sizeof(Teams)); i++)
-//    {
-//        for (int j = 0; j < int(sizeof(Teams[i])); j++)
-//        {
-//            Teams[i][j] = gs.Teams[i][j];
-//        }
-//    }
-    PlayerTurn = gs.PlayerTurn;
-    Declarer = gs.Declarer;
-    for (int i = 0; i < int(sizeof(IsVulnerable)); i++)
+    for (int i = 0; i < 2; i++)
+    {
+        underTheLine[i] = gs.underTheLine[i];
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            firstDenominationBids[i][j] = gs.firstDenominationBids[i][j];
+        }
+    }
+    for (int i = 0; i < 2; i++)
     {
         IsVulnerable[i] = gs.IsVulnerable[i];
     }
@@ -200,12 +212,44 @@ void GameState::setBidRoundCount(int value)
 
 void GameState::Reset(int dealer)
 {
-    SetBidStage(true);
-    setPlayerTurn(dealer);
-    setBidRoundCount(0);
-    setCurrentBid(NULL);
-    setDeclarer(-1);
-    setPassCount(0);
+    BidStage = true;
+    MoveStage = false;
+    PassCount = 0;
+    PlayerTurn = dealer;
+    Declarer = -1;
+    honorsCount = 0;
+    honorsId = -1;
+    isGameOver = false;
+    bidRoundCount = 0;
+    CurrentBid = NULL;
+    trickCount = 0;
+
+    for (int i = 0; i < 2; i++)
+    {
+        TrickScore[i] = 0;
+    }
+
+    CurrentTrick.clear();
+
+    for (int i = 0; i < 2; i++)
+    {
+        RubberScore[i] = 0;
+    }
+    for (int i = 0; i < 2; i++)
+    {
+        underTheLine[i] = 0;
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            firstDenominationBids[i][j] = -1;
+        }
+    }
+    for (int i = 0; i < 2; i++)
+    {
+        IsVulnerable[i] = false;
+    }
 }
 
 int GameState::nextPlayerTurn()
@@ -221,4 +265,14 @@ int GameState::getTrickCount() const
 void GameState::setTrickCount(int value)
 {
     trickCount = value;
+}
+
+bool GameState::getMoveStage() const
+{
+    return MoveStage;
+}
+
+void GameState::setMoveStage(bool value)
+{
+    MoveStage = value;
 };

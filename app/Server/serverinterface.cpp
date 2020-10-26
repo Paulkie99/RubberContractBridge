@@ -14,12 +14,12 @@
 /*
  * Constructor for server interface, a port may be specified, default port is 159. Can also be specified whether the created server should shuffle its deck on creation.
  * */
-ServerInterface::ServerInterface(bool shuffle, QWidget *parent, quint16 port)
+ServerInterface::ServerInterface(QWidget *parent, quint16 port)
     : QDialog(parent)
     , ui(new Ui::Server_Dialog)
 {
     ui->setupUi(this);
-    bridgeServer = new Server("Bridge Server", QWebSocketServer::NonSecureMode, this, shuffle);
+    bridgeServer = new Server("Bridge Server", QWebSocketServer::NonSecureMode, this);
     bridgeServer->listen(QHostAddress::Any, port);
     connect(bridgeServer, SIGNAL(messageReceived(QString)),
             this, SLOT(messageReceived(QString)));

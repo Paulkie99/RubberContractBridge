@@ -28,7 +28,7 @@ class Server : public QWebSocketServer
 {
     Q_OBJECT
 public:
-    explicit Server(const QString &serverName = "Bridge Server", SslMode secureMode = SecureMode, QObject *parent = NULL, bool shuffle=true);
+    explicit Server(const QString &serverName = "Bridge Server", SslMode secureMode = SecureMode, QObject *parent = NULL);
     friend class TestServer;
     friend class ServerInterface;
     friend class InputValidator;
@@ -37,6 +37,8 @@ public:
 
     QJsonArray* Construct_Cards_Message(int player);
     int getTeamy(int otherTeamy);
+
+    void Next_Move();
 
 signals:
     void messageReceived(QString); //signal to the server-interface that a message has been received
@@ -68,6 +70,16 @@ private:
     void BroadcastMessage(QJsonObject);
     void UpdateGameState(int card_val, int card_suit, bool isBid);
     Card* findCardInHand(int player, int val, int suit);
+
+    void findHonors();
+
+    void Score_Deal();
+
+    Card* GetBestCardInTrick();
+
+    void Update_Bid(int id, int value, int suit);
+
+    void Update_Play();
 
 private slots:
     void acceptConnection();

@@ -26,6 +26,7 @@ public:
     bool isAuthenticated = false; // has the connected client been authenticated?
     int id = 100; // client id, used to index Server::ConnectedClients[]
     QString alias = "";
+    bool isReady = false;
 
 signals:
     void socketDisconnect(int);

@@ -35,18 +35,24 @@ private:
         QJsonObject jObject = d.object();
         return jObject;
     }
+    std::vector<clientconnection*> clients;
+    std::vector<QSignalSpy*> spies;
+    void send_bid(QString suit, QString rank, bool out_of_turn = false);
 
 private slots:
     void initTestCase();
     void init();
     void cleanup();
+
     void TestIdealServerSendsAndReceives();
     void TestAuthFailed();
     void TestInputBranch();
     void TestDeal();
-    void TestShuffle();
     void TestConnectLobbyFull();
     void TestDisconnect();
+    void TestReconnect();
+    void TestValidInvalidBid();
+    void TestValidInvalidMove();
 };
 
 TestServer::TestServer()
@@ -68,7 +74,7 @@ void TestServer::initTestCase()
  * */
 void TestServer::init()
 {
-    server = new ServerInterface(false);
+    server = new ServerInterface();
     spyServerReception = new QSignalSpy(server->bridgeServer, SIGNAL(messageReceived(QString)));
     spyServerSend = new QSignalSpy(server->bridgeServer, SIGNAL(messageSent(QString)));
 }
@@ -78,6 +84,8 @@ void TestServer::cleanup()
     delete server;
     delete spyServerReception;
     delete spyServerSend;
+    clients.clear();
+    spies.clear();
 }
 
 /*
@@ -85,21 +93,24 @@ void TestServer::cleanup()
  * */
 void TestServer::TestIdealServerSendsAndReceives()
 {
-    clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), false); //connect the client to server
+    clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "Username"); //connect the client to server
     // wait sufficient amount of time for all messages to be sent/received
     spyServerReception->wait(100);
     spyServerSend->wait(100);
     QList<QVariant> args = spyServerReception->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "Hello There"); // first messsage received should be "Hello There"
+    QCOMPARE(args.at(0).toString(), "Unknown Message Received"); // first messsage received should be "Hello There"
 
     args = spyServerSend->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Id\":0,\"Type\":\"CONNECT_SUCCESSFUL\"}"); // Server should reply saying that connection was successful
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "CONNECT_SUCCESSFUL"); // Server should reply saying that connection was successful
 
     args = spyServerReception->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Alias\":\"Player123\",\"Id\":0,\"Password\":\"password123\",\"Type\":\"CONNECT_REQUEST\"}"); // Server should then receive username and password info
+    QCOMPARE(args.at(0).toString(), "Connect request received"); // Server should then receive username and password info
 
     args = spyServerSend->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Id\":0,\"Type\":\"AUTH_SUCCESSFUL\"}"); // server should reply saying that the user was successfully authenticated
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "AUTH_SUCCESSFUL"); // server should reply saying that the user was successfully authenticated
+
+    args = spyServerSend->takeAt(0);
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "LOBBY_UPDATE"); // server should reply saying that the user was successfully authenticated
 }
 
 /*
@@ -112,13 +123,13 @@ void TestServer::TestAuthFailed()
     spyServerReception->wait(100);
     spyServerSend->wait(100);
     QList<QVariant> args = spyServerReception->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "Hello There"); // first messsage received should be "Hello There"
+    QCOMPARE(args.at(0).toString(), "Unknown Message Received"); // first messsage received should be "Hello There"
 
     args = spyServerSend->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Id\":0,\"Type\":\"CONNECT_SUCCESSFUL\"}"); // Server should reply saying that connection was successful
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "CONNECT_SUCCESSFUL"); // Server should reply saying that connection was successful
 
     args = spyServerReception->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Alias\":\"Player123\",\"Id\":0,\"Password\":\"\",\"Type\":\"CONNECT_REQUEST\"}"); // Server should then receive username and password info (with empty password)
+    QCOMPARE(args.at(0).toString(), "Connect request received"); // Server should then receive username and password info
 
     args = spyServerSend->takeAt(0); // server should reply saying that the user was could not be authenticated
     QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "AUTH_UNSUCCESSFUL");
@@ -130,37 +141,55 @@ void TestServer::TestAuthFailed()
  * */
 void TestServer::TestInputBranch()
 {
-    clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), false); //connect the client to server
+    clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "Username"); //connect the client to server
     // wait sufficient amount of time for all messages to be sent/received
     spyServerReception->wait(100);
     spyServerSend->wait(100);
+
     QList<QVariant> args = spyServerReception->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "Hello There"); // first messsage received should be "Hello There"
+    QCOMPARE(args.at(0).toString(), "Unknown Message Received"); // first messsage received should be "Hello There"
 
     args = spyServerSend->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Id\":0,\"Type\":\"CONNECT_SUCCESSFUL\"}"); // Server should reply saying that connection was successful
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "CONNECT_SUCCESSFUL"); // Server should reply saying that connection was successful
 
     args = spyServerReception->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Alias\":\"Player123\",\"Id\":0,\"Password\":\"password123\",\"Type\":\"CONNECT_REQUEST\"}"); // Server should then receive username and password info
+    QCOMPARE(args.at(0).toString(), "Connect request received"); // Server should then receive username and password info
 
     args = spyServerSend->takeAt(0);
-    QCOMPARE(args.at(0).toString(), "{\"Id\":0,\"Type\":\"AUTH_SUCCESSFUL\"}"); // server should reply saying that the user was successfully authenticated
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "AUTH_SUCCESSFUL"); // server should reply saying that the user was successfully authenticated
+
+    args = spyServerSend->takeAt(0);
+    QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "LOBBY_UPDATE"); // server should reply saying that the user was successfully authenticated
 
     QJsonObject ping = client.CreateJObject(client.GenerateMessage("PING"));
     ping["Id"] = 0;
     client.SendMessageToServer(client.CreateJString(ping)); // PING server
+
+    spyServerReception->wait(50);
     spyServerSend->wait(50);
+
+    args = spyServerReception->takeAt(0);
+    QCOMPARE(args.at(0).toString(), "Ping received"); // server correctly sent pong
+
     args = spyServerSend->takeAt(0);
     QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "PONG"); // server correctly sent pong
 
-    client.SendMessageToServer(client.GenerateMessage("BID_SEND")); // send bid
+    QJsonObject bid_send = client.CreateJObject(client.GenerateMessage("BID_SEND"));
+    bid_send["Id"] = 0;
+    client.SendMessageToServer(client.CreateJString(bid_send)); // send bid
+
     spyServerReception->wait(50);
-    args = spyServerReception->takeAt(2);
+
+    args = spyServerReception->takeAt(0);
     QCOMPARE(args.at(0).toString(), "Bid received"); // server received bid
 
-    client.SendMessageToServer(client.GenerateMessage("MOVE_SEND")); // send move
+    QJsonObject move_send = client.CreateJObject(client.GenerateMessage("MOVE_SEND"));
+    move_send["Id"] = 0;
+    client.SendMessageToServer(client.CreateJString(move_send)); // send move
+
     spyServerReception->wait(50);
-    args = spyServerReception->takeAt(3);
+
+    args = spyServerReception->takeAt(1);
     QCOMPARE(args.at(0).toString(), "Move received"); // server received move
 }
 
@@ -169,104 +198,83 @@ void TestServer::TestInputBranch()
  * */
 void TestServer::TestDeal()
 {
-    clientconnection client1(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy1(&client1, SIGNAL(messageReceived(QString)));
-    spy1.wait(100); // allow sufficient time for the client to connect and send/receive initial messages
 
-    clientconnection client2(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy2(&client2, SIGNAL(messageReceived(QString)));
-    spy2.wait(100);
+    for(int i = 0; i < 4; ++i)
+    {
+        QString username = "User" + QString(i);
 
-    clientconnection client3(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy3(&client3, SIGNAL(messageReceived(QString)));
-    spy3.wait(100);
+        clientconnection* temp = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, username);
 
-    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy4(&client4, SIGNAL(messageReceived(QString)));
-    spy4.wait(100);
+        QSignalSpy* temp_spy = new QSignalSpy(temp, SIGNAL(messageReceived(QString)));
 
-    spy1.wait(100);
-    spy2.wait(100);
-    spy3.wait(100);
+        clients.push_back(temp);
+        spies.push_back(temp_spy);
+        spies[i]->wait(50);
+    }
 
-    QList<QVariant> args = spy1.takeAt(2); // shuffle not enabled, therefore expected that client 1 receives this specific card array
-    QCOMPARE(args.at(0).toString(), "{\"Cards\":[{\"Suit\":0,\"Value\":0},{\"Suit\":0,\"Value\":4},{\"Suit\":0,\"Value\":8},{\"Suit\":0,\"Value\":12},{\"Suit\":1,\"Value\":3},{\"Suit\":1,\"Value\":7},{\"Suit\":1,\"Value\":11},{\"Suit\":2,\"Value\":2},{\"Suit\":2,\"Value\":6},{\"Suit\":2,\"Value\":10},{\"Suit\":3,\"Value\":1},{\"Suit\":3,\"Value\":5},{\"Suit\":3,\"Value\":9}],\"Id\":0,\"Type\":\"HAND_DEALT\"}");
+    QJsonObject clien1_msg = clients[0]->CreateJObject(clients[0]->GenerateMessage("PLAYER_READY"));
+    clients[0]->SendMessageToServer(clients[0]->CreateJString(clien1_msg));
 
-    args = spy2.takeAt(2);
-    QCOMPARE(args.at(0).toString(), "{\"Cards\":[{\"Suit\":0,\"Value\":1},{\"Suit\":0,\"Value\":5},{\"Suit\":0,\"Value\":9},{\"Suit\":1,\"Value\":0},{\"Suit\":1,\"Value\":4},{\"Suit\":1,\"Value\":8},{\"Suit\":1,\"Value\":12},{\"Suit\":2,\"Value\":3},{\"Suit\":2,\"Value\":7},{\"Suit\":2,\"Value\":11},{\"Suit\":3,\"Value\":2},{\"Suit\":3,\"Value\":6},{\"Suit\":3,\"Value\":10}],\"Id\":1,\"Type\":\"HAND_DEALT\"}");
+    QJsonObject clien2_msg = clients[1]->CreateJObject(clients[1]->GenerateMessage("PLAYER_READY"));
+    clients[1]->SendMessageToServer(clients[1]->CreateJString(clien1_msg));
 
-    args = spy3.takeAt(2);
-    QCOMPARE(args.at(0).toString(), "{\"Cards\":[{\"Suit\":0,\"Value\":2},{\"Suit\":0,\"Value\":6},{\"Suit\":0,\"Value\":10},{\"Suit\":1,\"Value\":1},{\"Suit\":1,\"Value\":5},{\"Suit\":1,\"Value\":9},{\"Suit\":2,\"Value\":0},{\"Suit\":2,\"Value\":4},{\"Suit\":2,\"Value\":8},{\"Suit\":2,\"Value\":12},{\"Suit\":3,\"Value\":3},{\"Suit\":3,\"Value\":7},{\"Suit\":3,\"Value\":11}],\"Id\":2,\"Type\":\"HAND_DEALT\"}");
+    QJsonObject clien3_msg = clients[2]->CreateJObject(clients[2]->GenerateMessage("PLAYER_READY"));
+    clients[2]->SendMessageToServer(clients[2]->CreateJString(clien1_msg));
 
-    args = spy4.takeAt(2);
-    QCOMPARE(args.at(0).toString(), "{\"Cards\":[{\"Suit\":0,\"Value\":3},{\"Suit\":0,\"Value\":7},{\"Suit\":0,\"Value\":11},{\"Suit\":1,\"Value\":2},{\"Suit\":1,\"Value\":6},{\"Suit\":1,\"Value\":10},{\"Suit\":2,\"Value\":1},{\"Suit\":2,\"Value\":5},{\"Suit\":2,\"Value\":9},{\"Suit\":3,\"Value\":0},{\"Suit\":3,\"Value\":4},{\"Suit\":3,\"Value\":8},{\"Suit\":3,\"Value\":12}],\"Id\":3,\"Type\":\"HAND_DEALT\"}");
+    QJsonObject clien4_msg = clients[3]->CreateJObject(clients[3]->GenerateMessage("PLAYER_READY"));
+    clients[3]->SendMessageToServer(clients[3]->CreateJString(clien1_msg));
+
+    spies[0]->wait(50);
+    spies[1]->wait(50);
+    spies[2]->wait(50);
+    spies[3]->wait(50);
+
+    for(int i = 0; i < 4; ++i)
+    {
+        if(spies[i]->size() == (8 - i))
+        {
+            QCOMPARE(Convert_Message_To_Json(spies[i]->takeAt((8 - i) - 2).at(0).toString())["Type"], "BID_START");
+            QCOMPARE(Convert_Message_To_Json(spies[i]->takeAt((8 - i) - 2).at(0).toString())["Type"], "BID_REQUEST");
+
+            QJsonObject bid_send = clients[i]->CreateJObject(clients[i]->GenerateMessage("BID_SEND"));
+            QJsonObject bid = {qMakePair(QString("Suit"), QJsonValue("NT")), qMakePair(QString("Rank"), QJsonValue("1"))};
+            bid_send["Bid"] = bid;
+            bid_send["Id"] = clients[i]->id;
+            clients[i]->SendMessageToServer(clients[i]->CreateJString(bid_send));
+        }
+        else if(spies[i]->size() == 7 - i)
+        {
+            QCOMPARE(Convert_Message_To_Json(spies[i]->takeAt(7 - i - 1).at(0).toString())["Type"], "BID_START");
+        }
+    }
 }
 
-/*
- * Function testing the shuffle() function of the server
- * */
-void TestServer::TestShuffle()
-{
-    delete server;
-    server = new ServerInterface(true); //enable shuffle function
-
-    clientconnection client1(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy1(&client1, SIGNAL(messageReceived(QString)));
-    spy1.wait(100);
-
-    clientconnection client2(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy2(&client2, SIGNAL(messageReceived(QString)));
-    spy2.wait(100);
-
-    clientconnection client3(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy3(&client3, SIGNAL(messageReceived(QString)));
-    spy3.wait(100);
-
-    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false);
-    QSignalSpy spy4(&client4, SIGNAL(messageReceived(QString)));
-    spy4.wait(100);
-
-    spy1.wait(100);
-    spy2.wait(100);
-    spy3.wait(100);
-
-    QList<QVariant> args = spy1.takeAt(2); // arrays received should now be random
-    QVERIFY(args.at(0).toString() != "{\"Cards\":[{\"Suit\":0,\"Value\":0},{\"Suit\":0,\"Value\":4},{\"Suit\":0,\"Value\":8},{\"Suit\":0,\"Value\":12},{\"Suit\":1,\"Value\":3},{\"Suit\":1,\"Value\":7},{\"Suit\":1,\"Value\":11},{\"Suit\":2,\"Value\":2},{\"Suit\":2,\"Value\":6},{\"Suit\":2,\"Value\":10},{\"Suit\":3,\"Value\":1},{\"Suit\":3,\"Value\":5},{\"Suit\":3,\"Value\":9}],\"Id\":0,\"Type\":\"HAND_DEALT\"}");
-
-    args = spy2.takeAt(2);
-    QVERIFY(args.at(0).toString() != "{\"Cards\":[{\"Suit\":0,\"Value\":1},{\"Suit\":0,\"Value\":5},{\"Suit\":0,\"Value\":9},{\"Suit\":1,\"Value\":0},{\"Suit\":1,\"Value\":4},{\"Suit\":1,\"Value\":8},{\"Suit\":1,\"Value\":12},{\"Suit\":2,\"Value\":3},{\"Suit\":2,\"Value\":7},{\"Suit\":2,\"Value\":11},{\"Suit\":3,\"Value\":2},{\"Suit\":3,\"Value\":6},{\"Suit\":3,\"Value\":10}],\"Id\":1,\"Type\":\"HAND_DEALT\"}");
-
-    args = spy3.takeAt(2);
-    QVERIFY(args.at(0).toString() != "{\"Cards\":[{\"Suit\":0,\"Value\":2},{\"Suit\":0,\"Value\":6},{\"Suit\":0,\"Value\":10},{\"Suit\":1,\"Value\":1},{\"Suit\":1,\"Value\":5},{\"Suit\":1,\"Value\":9},{\"Suit\":2,\"Value\":0},{\"Suit\":2,\"Value\":4},{\"Suit\":2,\"Value\":8},{\"Suit\":2,\"Value\":12},{\"Suit\":3,\"Value\":3},{\"Suit\":3,\"Value\":7},{\"Suit\":3,\"Value\":11}],\"Id\":2,\"Type\":\"HAND_DEALT\"}");
-
-    args = spy4.takeAt(2);
-    QVERIFY(args.at(0).toString() != "{\"Cards\":[{\"Suit\":0,\"Value\":3},{\"Suit\":0,\"Value\":7},{\"Suit\":0,\"Value\":11},{\"Suit\":1,\"Value\":2},{\"Suit\":1,\"Value\":6},{\"Suit\":1,\"Value\":10},{\"Suit\":2,\"Value\":1},{\"Suit\":2,\"Value\":5},{\"Suit\":2,\"Value\":9},{\"Suit\":3,\"Value\":0},{\"Suit\":3,\"Value\":4},{\"Suit\":3,\"Value\":8},{\"Suit\":3,\"Value\":12}],\"Id\":3,\"Type\":\"HAND_DEALT\"}");
-}
 
 /*
  * Test whether the server allows a fifth connection even though a lobby consists of four
  * */
 void TestServer::TestConnectLobbyFull()
 {
-    clientconnection client1(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client1(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User1");
     QSignalSpy spy1(&client1, SIGNAL(messageReceived(QString)));
-    spy1.wait(100);
+    spy1.wait(50);
 
-    clientconnection client2(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client2(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User2");
     QSignalSpy spy2(&client2, SIGNAL(messageReceived(QString)));
-    spy2.wait(100);
+    spy2.wait(50);
 
-    clientconnection client3(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client3(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User3");
     QSignalSpy spy3(&client3, SIGNAL(messageReceived(QString)));
-    spy3.wait(100);
+    spy3.wait(50);
 
-    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User4");
     QSignalSpy spy4(&client4, SIGNAL(messageReceived(QString)));
-    spy4.wait(100);
+    spy4.wait(50);
 
-    clientconnection client5(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client5(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User5");
     QSignalSpy spy5(&client5, SIGNAL(messageReceived(QString)));
-    spy5.wait(100);
+    spy5.wait(50);
+
 
     QList<QVariant> args = spy5.takeAt(0); // Server should send CONNECT_UNSUCCESSFUL to fifth connecting client
     QCOMPARE(Convert_Message_To_Json(args.at(0).toString())["Type"], "CONNECT_UNSUCCESSFUL");
@@ -279,21 +287,21 @@ void TestServer::TestConnectLobbyFull()
 void TestServer::TestDisconnect()
 {
 
-    clientconnection client1(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client1(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User1");
     QSignalSpy spy1(&client1, SIGNAL(messageReceived(QString)));
-    spy1.wait(100);
+    spy1.wait(50);
 
-    clientconnection client2(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client2(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User2");
     QSignalSpy spy2(&client2, SIGNAL(messageReceived(QString)));
-    spy2.wait(100);
+    spy2.wait(50);
 
-    clientconnection client3(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client3(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User3");
     QSignalSpy spy3(&client3, SIGNAL(messageReceived(QString)));
-    spy3.wait(100);
+    spy3.wait(50);
 
-    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false);
+    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User4");
     QSignalSpy spy4(&client4, SIGNAL(messageReceived(QString)));
-    spy4.wait(100);
+    spy4.wait(50);
 
     client4.clientSocket->close();
 
@@ -301,6 +309,87 @@ void TestServer::TestDisconnect()
 
     QList<QVariant> args = spyServerReception->takeAt(8);
     QVERIFY2(args.at(0).toString() == ("Client 3 disconnected"), args.at(0).toString().toStdString().c_str());
+}
+
+/*
+ * Test whether the server performs the applicable housekeeping when a user disconnects
+ * */
+void TestServer::TestReconnect()
+{
+    TestDisconnect();
+
+    clientconnection client4(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, "User4");
+    QSignalSpy spy4(&client4, SIGNAL(messageReceived(QString)));
+    spy4.wait(50);
+
+    QCOMPARE(Convert_Message_To_Json(spy4.takeAt(0).at(0).toString())["Type"], "CONNECT_SUCCESSFUL");
+}
+
+void TestServer::send_bid(QString suit, QString rank, bool out_of_turn)
+{
+    int from = out_of_turn ? (server->bridgeServer->GS.getPlayerTurn() + 1) % 4 : server->bridgeServer->GS.getPlayerTurn();
+    QJsonObject bid_send = clients[from]->CreateJObject(clients[from]->GenerateMessage("BID_SEND"));
+    QJsonObject bid = {qMakePair(QString("Suit"), QJsonValue(suit)), qMakePair(QString("Rank"), QJsonValue(rank))};
+    bid_send["Bid"] = bid;
+    bid_send["Id"] = clients[from]->id;
+    clients[from]->SendMessageToServer(clients[from]->CreateJString(bid_send));
+}
+
+void TestServer::TestValidInvalidBid()
+{
+    TestDeal();
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(13).at(0).toString(), "Bid Valid");
+
+    send_bid("NT", "2", true);
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(14).at(0).toString(), "Bid Invalid");
+
+    send_bid("NT", "2");
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(15).at(0).toString(), "Bid Valid");
+
+    send_bid("NT", "2");
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(16).at(0).toString(), "Bid Invalid");
+
+    send_bid("NT", "1");
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(17).at(0).toString(), "Bid Invalid");
+
+    send_bid("NT", "3");
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(18).at(0).toString(), "Bid Valid");
+
+    send_bid("C", "4");
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(19).at(0).toString(), "Bid Valid");
+
+    send_bid("NT", "2");
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(20).at(0).toString(), "Bid Valid");
+}
+
+void TestServer::TestValidInvalidMove()
+{
+    TestValidInvalidBid();
+
+    send_bid("PASS", NULL);
+    spyServerReception->wait(50);
+    send_bid("PASS", NULL);
+    spyServerReception->wait(50);
+    send_bid("PASS", NULL);
+    spyServerReception->wait(50);
+
+    QVERIFY(server->bridgeServer->GS.getMoveStage() == true);
 }
 
 QTEST_MAIN(TestServer)

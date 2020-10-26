@@ -15,7 +15,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    ServerInterface window(true, nullptr, 159);
+    ServerInterface window(nullptr, 159);
     window.show();
     return a.exec();
 }

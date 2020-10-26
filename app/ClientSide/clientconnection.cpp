@@ -14,10 +14,11 @@
  the url and connection.
  */
 
-clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent) :
+clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent, QString username) :
     QObject(parent),
     ConnectUrl(url),
-    debugOn(debug)
+    debugOn(debug),
+    username(username)
 {
     if (debugOn)
         qDebug() << "WebSocket server:" << url;
@@ -31,6 +32,7 @@ clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent)
    // clientSocket.ignoreSslErrors(expect);
     clientSocket->open(QUrl(url));
 }
+
 
 /*
 This function is used to handle incomming messages from the server. If a message is received from the server, this function will trigger.
@@ -63,6 +65,7 @@ void clientconnection::onTextMessageReceived(QString message)
         id = msgr["Id"].toInt();
         QJsonObject connect = CreateJObject(GenerateMessage("CONNECT_REQUEST"));
         connect["Id"] = id;
+        connect["Alias"] = username;
         if(debugOn)
         {
             connect["Password"] = "";
@@ -227,6 +230,7 @@ QJsonObject clientconnection::CreateJObject(QString value)
 
 QString clientconnection::CreateJString(QJsonObject &jobj)
 {
+    jobj["Id"] = id;
     QJsonDocument doc(jobj);
     QString Jstring(doc.toJson(QJsonDocument::Compact));
     return(Jstring);

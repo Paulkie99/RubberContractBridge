@@ -25,7 +25,7 @@ class ServerInterface : public QDialog
     Q_OBJECT
 
 public:
-    ServerInterface(bool shuffle=true, QWidget *parent = nullptr, quint16 port = 159);
+    ServerInterface(QWidget *parent = nullptr, quint16 port = 159);
     ~ServerInterface();
     friend class TestServer;
 

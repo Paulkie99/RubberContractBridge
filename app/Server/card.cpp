@@ -112,7 +112,9 @@ QString Card::SuitToString(int suit)
         case Spades:
             return "S";
         break;
-
+        case NT:
+            return "NT";
+        break;
     }
     return "";
 }

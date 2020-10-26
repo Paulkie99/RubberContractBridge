@@ -30,12 +30,11 @@ enum players
     West
 };
 
-class GameState : public QObject
+class GameState
 {
-    Q_OBJECT
 public:
-    explicit GameState(QObject *parent = nullptr);
-    GameState(const GameState& gs, QObject *parent = nullptr);
+    explicit GameState();
+    GameState(const GameState& gs);
 //    ~GameState();
 
     void PrintGS();
@@ -75,17 +74,30 @@ public:
     int getTrickCount() const;
     void setTrickCount(int value);
 
+    int honorsId = -1;
+    int honorsCount = 0;
+
+    int underTheLine[2];
+
+    int RubberScore[2];
+
+    bool IsVulnerable[2];
+
+    bool isGameOver = false;
+
+    bool getMoveStage() const;
+    void setMoveStage(bool value);
+
 private:
-    bool BidStage;
+    bool BidStage = false;
+    bool MoveStage = false;
     int bidRoundCount = 0;
-    int PassCount;
+    int PassCount = 0;
     Card* CurrentBid = NULL;
     ServerClient* dealer = NULL;
-    int GameScore[2];
-    int PlayerTurn;
-    int Declarer;
+    int PlayerTurn = -1;
+    int Declarer = -1;
     int trickCount = 0;
-    bool IsVulnerable[2];
 
 
 signals:

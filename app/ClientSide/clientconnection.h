@@ -25,7 +25,7 @@ class clientconnection : public QObject
 {
      Q_OBJECT
 public:
-    explicit clientconnection(const QUrl &url, bool debug = false, QObject *parent = nullptr);
+    explicit clientconnection(const QUrl &url, bool debug = false, QObject *parent = nullptr, QString username = "");
     friend class TestServer;
 
 private:
@@ -37,6 +37,7 @@ private:
     QString GenerateMessage(QString type);
     QJsonObject CreateJObject(QString value);
     QString CreateJString(QJsonObject &jobj);
+    QString username;
 
 private Q_SLOTS:
     void onConnected();
