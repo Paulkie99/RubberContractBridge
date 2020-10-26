@@ -38,6 +38,7 @@ For example a MOVE REQUEST can be received from the server, the function can cal
  */
 void clientconnection::onTextMessageReceived(QString message)
 {
+    std::cout<<"41........."<<message.toStdString()<<endl;
    // if (debugOn)
     //    qDebug() << "Message received:" << message;
     QJsonObject msgr = CreateJObject(message);
@@ -95,6 +96,7 @@ void clientconnection::onTextMessageReceived(QString message)
     case 6:
     {
         // BID_END
+        std::cout<<"98 emitting bidend"<<endl;
         qDebug() << "Message Type: " << msgTypes[6];
         emit bidEndSignal(CreateJObject(message));
         break;

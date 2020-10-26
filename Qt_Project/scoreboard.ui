@@ -118,7 +118,7 @@
     </font>
    </property>
    <property name="readOnly">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="markdown">
     <string>We

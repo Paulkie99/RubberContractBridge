@@ -164,10 +164,13 @@ void GameScreen::on_pushButton_Score_clicked()
 {
     // Create new instance of scoreBoard, set parent as this
     // (Game Screen dialog)
-    ScoreBoard scoreBoard(this);
-    // Use modal approach
-    scoreBoard.setModal(true);
-    scoreBoard.exec();
+//    ScoreBoard scoreBoard(this);
+//    // Use modal approach
+//    scoreBoard.setModal(true);
+//    scoreBoard.exec();
+//    ScoreBoard *sb = new ScoreBoard(this);
+//    sb->show();
+//    sb->updateScores()
 }
 
 // Once the auction is over, the pushButton_Play will be made visible.
@@ -186,6 +189,9 @@ void GameScreen::on_pushButton_Play_clicked()
     // Simulate the PLAY_START message received from the server
     QString mes = clientgs->GenerateMessage("PLAY_START");
     clientgs->SendMessageToServer(mes);
+    clientgs->onTextMessageReceived(mes);
+
+    mes = clientgs->GenerateMessage("SCORE");
     clientgs->onTextMessageReceived(mes);
 }
 
@@ -413,10 +419,14 @@ void GameScreen::sendMove(QString Suit, QString Rank)
 // and thus most of the signals and slots will be connected from here.
 void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientconnection *client1, QString usern, int ID)
 {
+
     Userid = ID;
     Username = usern;
     ui->lblInfo->setText("IP: " + ip + " Port Number: " + port + " Password: " + pass);
     clientgs = client1;
+
+//    clientconnection *client2 = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), true);
+//    clientgs = client2;
     //connectSlots();
     // Connect all relevant signals and slots
     connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
@@ -433,9 +443,9 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
     connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
     connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
-
+cout<<"422 serverinfoslot"<<endl;
     // Debug code
-    QString mes = clientgs->GenerateMessage("BID_START");
+    QString mes = clientgs->GenerateMessage("BID_END");
     // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
     clientgs->onTextMessageReceived(mes);
 
@@ -675,6 +685,7 @@ void GameScreen::visibleAll(bool vis)
 // BID_END received
 void GameScreen::bidEndSlot(QJsonObject contract)
 {
+    cout<<"685 bidendslot"<<endl;
     QString NDeclarer = "";
     QString SDeclarer = "";
     QString EDeclarer = "";
@@ -700,6 +711,8 @@ void GameScreen::bidEndSlot(QJsonObject contract)
     Trump = contract["Trump"].toString();
     Double = contract["Bid"].toObject()["IsDouble"].toBool();
     Redouble = contract["Bid"].toObject()["IsRedouble"].toBool();
+
+    cout<<"709 Declarer: "<<Declarer.toStdString()<<endl;
 
     ui->lblContract->setVisible(true);
     ui->lblDummy->setVisible(true);
@@ -1034,6 +1047,10 @@ void GameScreen::scoreSlot(QJsonObject scores)
 //    scoreBoard.setModal(true);
 //    scoreBoard.exec();
 //    scoreBoard.updateScores(scores);
+
+    ScoreBoard *sb = new ScoreBoard(this);
+    sb->show();
+    sb->updateScores(scores);
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
