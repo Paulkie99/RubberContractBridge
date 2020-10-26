@@ -38,16 +38,16 @@ private:
     QString CreateJString(QJsonObject &jobj);
 
 signals:
-    void customsignal();
-    void serverFullSignal();
-    void otherSignal();
-    void connectSuccessfullSignal();
+//    void customsignal();
+//    void serverFullSignal();
+//    void otherSignal();
+    void connectSuccessfullSignal(QJsonObject);
     void bidStartSignal(QJsonObject);
     void bidRequestSignal();
     void bidUpdateSignal(QJsonObject);
 
     void lobbyUpdateSignal(QJsonObject);
-    void authUnsuccessfulSignal();
+    void authUnsuccessfulSignal(QJsonObject);
     void authSuccessfulSignal();
     void bidEndSignal(QJsonObject);
     void playStartSignal(QJsonObject);
@@ -57,7 +57,7 @@ signals:
     void playEndSignal(QJsonObject);
     void scoreSignal(QJsonObject);
     void disconnectPlayerSignal(QJsonObject);
-    void connectUnsuccessfulSignal();
+    void connectUnsuccessfulSignal(QJsonObject);
     void gameEndSignal(QJsonObject);
     void pongSignal(QJsonObject);
 

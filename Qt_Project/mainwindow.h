@@ -38,28 +38,17 @@ private slots:
 
     void on_pushButton_CreateConf_clicked();
 
-    // temp, delete with time
-    static void ServerFull();
-
-    void customslot();
-
-    void serverFullSlot();
-
-    void otherSlot();
-
-    void connectSuccessfulSlot();
-
+    void connectSuccessfulSlot(QJsonObject);
     void authSuccessfulSlot();
-
-    void lobbyUpdateSlot();
-    void authUnsuccessfulSlot();
-    void connectUnsuccessfulSlot();
+    void authUnsuccessfulSlot(QJsonObject);
+    void connectUnsuccessfulSlot(QJsonObject);
 
 signals:
     /* clientconnection * is a pointer to the client object created in mainwindow.
        This allows us to have only one client object per session, and thus a new
        object doesn't have to be created for each interface.*/
-    void serverInfoSignal(QString, QString, QString, clientconnection *, QString);
+    void serverInfoSignal(QString, QString, QString, clientconnection *, QString, int);
+    void connectRequestSignal(QJsonObject);
 
 private:
     Ui::MainWindow *ui;

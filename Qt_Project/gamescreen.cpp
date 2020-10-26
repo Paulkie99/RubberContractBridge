@@ -12,12 +12,15 @@ using namespace std;
 /* Declare a pointer clientconnection object that points to the original
    client object established in mainwindow.*/
 clientconnection* clientgs;
+// cards is the user's cards
 QString cards[13];
+// cardsDummy is the dummy's cards
 QString cardsDummy[13];
 QString currentBidSuit;
 QString currentBidRank;
 int counter = 0;
 int row = 0;
+int Userid = 0;
 QString Username;
 QString NorthAlias;
 QString SouthAlias;
@@ -43,6 +46,7 @@ QString opp2Username;
  Once integrated it will receive the actual cards to load from server
  The function receives a push button object and a file path to which the
  push button object icon will be set.*/
+
 void GameScreen::loadCards(QPushButton *pb, QString path)
 {
     QPixmap pm(path);
@@ -86,7 +90,22 @@ GameScreen::GameScreen(QWidget *parent) :
     ui->pb_Move_2->setVisible(false);
     ui->pb_Move_3->setVisible(false);
     ui->pb_Move_4->setVisible(false);
-
+    //clientgs = clienttoets;
+    // Connect all relevant signals and slots
+//    connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(bidRequestSignal()), this, SLOT(bidRequestSlot()));
+//    connect(clientgs, SIGNAL(bidUpdateSignal(QJsonObject)), this, SLOT(bidUpdateSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(bidEndSignal(QJsonObject)), this, SLOT(bidEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(playStartSignal(QJsonObject)), this, SLOT(playStartSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(lobbyUpdateSignal(QJsonObject)), this, SLOT(lobbyUpdateSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(moveRequestSignal(QJsonObject)), this, SLOT(moveRequestSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(moveUpdateSignal(QJsonObject)), this, SLOT(moveUpdateSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(trickEndSignal(QJsonObject)), this, SLOT(trickEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(playEndSignal(QJsonObject)), this, SLOT(playEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(gameEndSignal(QJsonObject)), this, SLOT(gameEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
 
     // Code to grey out a cell (0, 1). Will be used to indicate which bids will
     // be valid and which not with integration.
@@ -103,11 +122,31 @@ GameScreen::GameScreen(QWidget *parent) :
 //    clientgs->SendMessageToServer(mes);
 }
 
+
+
 GameScreen::~GameScreen()
 {
     delete ui;
 }
 
+void GameScreen::connectSlots()
+{
+//    // Connect all relevant signals and slots
+//    connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(bidRequestSignal()), this, SLOT(bidRequestSlot()));
+//    connect(clientgs, SIGNAL(bidUpdateSignal(QJsonObject)), this, SLOT(bidUpdateSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(bidEndSignal(QJsonObject)), this, SLOT(bidEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(playStartSignal(QJsonObject)), this, SLOT(playStartSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(lobbyUpdateSignal(QJsonObject)), this, SLOT(lobbyUpdateSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(moveRequestSignal(QJsonObject)), this, SLOT(moveRequestSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(moveUpdateSignal(QJsonObject)), this, SLOT(moveUpdateSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(trickEndSignal(QJsonObject)), this, SLOT(trickEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(playEndSignal(QJsonObject)), this, SLOT(playEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(gameEndSignal(QJsonObject)), this, SLOT(gameEndSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
+//    connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
+}
 
 // If the game is left, for which ever reason, this slot ensure that
 // the user is taken back to the main screen.
@@ -135,6 +174,7 @@ void GameScreen::on_pushButton_Score_clicked()
 // For testing purposes this button will remain visible.
 void GameScreen::on_pushButton_Play_clicked()
 {
+    //connect(clientgs, SIGNAL(playStartSignal(QJsonObject)), this, SLOT(playStartSlot(QJsonObject)));
     ui->pushButton_BackAuction->setVisible(false);
     ui->pushButton_Abandon->setVisible(true);
     // Increase the index of the stacked widget to the Normal Play
@@ -145,9 +185,10 @@ void GameScreen::on_pushButton_Play_clicked()
 
     // Simulate the PLAY_START message received from the server
     QString mes = clientgs->GenerateMessage("PLAY_START");
+    clientgs->SendMessageToServer(mes);
     clientgs->onTextMessageReceived(mes);
-
 }
+
 
 // Close the Game Screen page.
 // The user will be taken back to the Main Screen.
@@ -165,7 +206,6 @@ void GameScreen::showCards(int i)
 
     if (i == 0)
     { // Load player cards
-        cout<<"185"<<endl;
         for (int k=0;k<13;k++) {
             if (cards[k] != "") {
                 paths[k] = "../Cards/" + cards[k];
@@ -243,7 +283,6 @@ void GameScreen::showCards(int i)
             loadCards(pb, paths[12]);
         }
     }
-
 }
 
 // Helper function that enables/disables the card labels. if i = 0, then the player's cards are
@@ -330,6 +369,7 @@ void GameScreen::sendBid(QString Suit, QString Rank)
         }
 
     bid["Bid"] = bid2;
+    bid["Id"] = Userid;
 
     // Disable GUI elements until another BID_REQUEST is received from server
     ui->tableBids->setEnabled(false);
@@ -346,7 +386,7 @@ void GameScreen::sendBid(QString Suit, QString Rank)
         cout<<QString::number(counter).toStdString()<<endl;
         mes = clientgs->GenerateMessage("BID_REQUEST");
         clientgs->onTextMessageReceived(mes);
-       counter++;
+        counter++;
     }
 
 
@@ -361,7 +401,7 @@ void GameScreen::sendMove(QString Suit, QString Rank)
     move2["Suit"] = Suit;
     move2["Rank"] = Rank;
     move["Bid"] = move2;
-
+    move["Id"] = Userid;
     // Disable card elements
     disableCards(2);
     //Send the updated message to the server
@@ -371,12 +411,13 @@ void GameScreen::sendMove(QString Suit, QString Rank)
 
 // Slot to receive the server info and display in a label. This is the 1st slot to activate in gamescree.cpp,
 // and thus most of the signals and slots will be connected from here.
-void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientconnection *client1, QString usern)
+void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientconnection *client1, QString usern, int ID)
 {
+    Userid = ID;
     Username = usern;
     ui->lblInfo->setText("IP: " + ip + " Port Number: " + port + " Password: " + pass);
     clientgs = client1;
-
+    //connectSlots();
     // Connect all relevant signals and slots
     connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
     connect(clientgs, SIGNAL(bidRequestSignal()), this, SLOT(bidRequestSlot()));
@@ -393,6 +434,7 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
     connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
 
+    // Debug code
     QString mes = clientgs->GenerateMessage("BID_START");
     // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
     clientgs->onTextMessageReceived(mes);
@@ -558,6 +600,7 @@ void GameScreen::bidRequestSlot()
 }
 
 // Slot for updating the bidding table when a player has made a bid
+// BID_UPDATE received
 void GameScreen::bidUpdateSlot(QJsonObject bid)
 {
     QString Suit = bid["Bid"].toObject()["Suit"].toString();
@@ -585,16 +628,9 @@ void GameScreen::bidUpdateSlot(QJsonObject bid)
     }
 }
 
-void GameScreen::toets(int i)
-{
-    QString mes = clientgs->GenerateMessage("BID_UPDATE");
-    // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
-    clientgs->onTextMessageReceived(mes);
-}
 
 void GameScreen::addToTable(QString bid, int col)
 {
-    //cout<<"501"<<endl;
     QTableWidgetItem* selectedItem = new QTableWidgetItem;
     selectedItem->setText(bid);
     selectedItem->setTextAlignment(4);
@@ -636,6 +672,7 @@ void GameScreen::visibleAll(bool vis)
 
 // Slot for when the bidding is over. The contract info, dummy & declarer is extracted
 // from the JSON object received here.
+// BID_END received
 void GameScreen::bidEndSlot(QJsonObject contract)
 {
     QString NDeclarer = "";
@@ -718,9 +755,11 @@ void GameScreen::bidEndSlot(QJsonObject contract)
     // Do the user's info labels first
     ui->lblPlayer->setText(UserPosition);
     ui->lblNamePlayer->setText(Username);
+
     if (Dummy == UserPosition[0]) {
         ui->lblPlayer->setText(UserPosition + " (Dummy)");
 
+        // if player == dummy then make top cards invisible
         // Make the dummy labels invisible
         ui->pb_14->setVisible(false);
         ui->pb_15->setVisible(false);
@@ -736,6 +775,7 @@ void GameScreen::bidEndSlot(QJsonObject contract)
         ui->pb_25->setVisible(false);
         ui->pb_26->setVisible(false);
     }
+
     if (Declarer == UserPosition[0]) {
         ui->lblPlayer->setText(UserPosition + " (Declarer)");
     }
@@ -785,64 +825,121 @@ void GameScreen::bidEndSlot(QJsonObject contract)
     ui->lblOpp1Name->setText(opp1Username);
     ui->lblOpp2->setText(opp2Pos);
     ui->lblOpp2Name->setText(opp2Username);
-
-    // if player == dummy then maak boonste invisible
-
-}
-
-// Slot for when the PLAY_START message is received from the server. The QJsonObject
-// received contains the dummy cards and will populate the dummy buttons.
-void GameScreen::playStartSlot(QJsonObject obj)
-{
-    ui->lblRoundInfo->setVisible(false);
-    QJsonValue value = obj.value("DummyCards");
-    QJsonArray array1 = value.toArray();
-    int count = 0;
-
-    foreach (const QJsonValue & v, array1){
-        for (int k=0;k<v.toObject().value("Rank").toArray().size();k++) {
-            cardsDummy[count] = v.toObject().value("Suit").toString() + v.toObject().value("Rank")[k].toString();
-            count++;
-        }
-    }
-
-    cout<<"Dummy Cards: ";
-    // Temp debug code
-    for (int k=0;k<13;k++) {
-        cout<<cardsDummy[k].toStdString()<<", ";
-    }
-    cout<<endl;
-    // Load the dummy cards into GUI. Set parameter to 1 to indicate it's the dummy cards being loaded
-    showCards(1);
-}
-
-// Slot for when a MOVE_REQUEST signal is received from the server. This slot function will
-// enable/disable the relevent card labels depending on if the player cards should be played,
-// or the dummy cards. Because these components are now enabled and thus clickable, the relevent
-// card played will be sent back to the server from within the component on_clicked slot.
-void GameScreen::moveRequestSlot(QJsonObject request)
-{
-    if (request["MoveDummy"] == false)
-    { // Move must be made from player cards
-        disableCards(0, true);
-    }
-    if (request["MoveDummy"] == true)
-    { // Move must be made from dummy cards
-        if (Dummy != UserPosition[0]) {
-            disableCards(1, true);
-        }
-        else {
-            disableCards(0, true);
-        }
-
-    }
 }
 
 // Slot for MOVE_UPDATE. This slot will update the display showing the card played by a player.
+// MOVE_UPDATE received
 void GameScreen::moveUpdateSlot(QJsonObject move)
 {
     QString Suit = move["Bid"].toObject()["Suit"].toString();
     QString Rank = move["Bid"].toObject()["Rank"].toString();
+    QString cardplayed = Suit + Rank;
+
+    // Check if the card played was from the dummy
+    if (UserPosition[0] != Dummy && UserPosition[0] != Declarer)
+    { // User is not the dummy nor declarer
+        for (int k=0;k<13;k++)
+        {
+            if (cardsDummy[k] == cardplayed)
+            {
+                switch (k) {
+                    case 0:
+                      ui->pb_14->setVisible(false);
+                      break;
+                    case 1:
+                      ui->pb_15->setVisible(false);
+                      break;
+                    case 2:
+                      ui->pb_16->setVisible(false);
+                      break;
+                    case 3:
+                      ui->pb_17->setVisible(false);
+                      break;
+                    case 4:
+                      ui->pb_18->setVisible(false);
+                      break;
+                    case 5:
+                      ui->pb_19->setVisible(false);
+                      break;
+                    case 6:
+                      ui->pb_20->setVisible(false);
+                      break;
+                    case 7:
+                      ui->pb_21->setVisible(false);
+                      break;
+                    case 8:
+                      ui->pb_22->setVisible(false);
+                      break;
+                    case 9:
+                      ui->pb_23->setVisible(false);
+                      break;
+                    case 10:
+                      ui->pb_24->setVisible(false);
+                      break;
+                    case 11:
+                      ui->pb_25->setVisible(false);
+                      break;
+                    case 12:
+                      ui->pb_26->setVisible(false);
+                      break;
+                }
+                break;
+            }
+        }
+    }
+
+    // If the user is the dummy and his teammate played one of his cards
+    if (UserPosition[0] == Dummy)
+    { // User is the dummy and one of his cards has been played by the declarer
+        for (int k=0;k<13;k++)
+        {
+            if (cards[k] == cardplayed)
+            {
+                switch (k) {
+                    case 0:
+                      ui->pb_1->setVisible(false);
+                      break;
+                    case 1:
+                      ui->pb_2->setVisible(false);
+                      break;
+                    case 2:
+                      ui->pb_3->setVisible(false);
+                      break;
+                    case 3:
+                      ui->pb_4->setVisible(false);
+                      break;
+                    case 4:
+                      ui->pb_5->setVisible(false);
+                      break;
+                    case 5:
+                      ui->pb_6->setVisible(false);
+                      break;
+                    case 6:
+                      ui->pb_7->setVisible(false);
+                      break;
+                    case 7:
+                      ui->pb_8->setVisible(false);
+                      break;
+                    case 8:
+                      ui->pb_9->setVisible(false);
+                      break;
+                    case 9:
+                      ui->pb_10->setVisible(false);
+                      break;
+                    case 10:
+                      ui->pb_11->setVisible(false);
+                      break;
+                    case 11:
+                      ui->pb_12->setVisible(false);
+                      break;
+                    case 12:
+                      ui->pb_13->setVisible(false);
+                      break;
+                }
+                break;
+            }
+        }
+    }
 
     if (moveCounter == 0)
     { // Load into 1st move button
@@ -871,12 +968,12 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
 }
 
 // Slot for when TRICK_END is received.
+// TRICK_END received
 void GameScreen::trickEndSlot(QJsonObject trick)
 {
-    // onthou om move counter te reset na 0
     // Reset move counter of current trick
     moveCounter = 0;
-    // onthou om move buttons se icons te reset en weer invisible te maak
+
     // Reset move buttons
     ui->pb_Move_1->setIcon(QIcon());
     ui->pb_Move_1->setVisible(false);
@@ -886,16 +983,16 @@ void GameScreen::trickEndSlot(QJsonObject trick)
     ui->pb_Move_3->setVisible(false);
     ui->pb_Move_4->setIcon(QIcon());
     ui->pb_Move_4->setVisible(false);
-    // onthou om all die buttons weer te disable
+
     // Disable all cards
     disableCards(2);
-
 
     ui->lblRoundInfo->setVisible(true);
     ui->lblRoundInfo->setText(trick["WinningPartnership"].toString() + " won the trick");
 }
 
 // Slot for "PLAY_END". The user will return to the bidding screen and new cards dealt
+// PLAY_END received
 void GameScreen::playEndSlot(QJsonObject play)
 {
     // Make all card buttons visible again
@@ -928,20 +1025,19 @@ void GameScreen::playEndSlot(QJsonObject play)
     QMessageBox over;
     over.information(0,"Round Over",play["WinningPartnership"].toString() + " won the round");
     over.setFixedSize(500,200);
-
-
 }
 
 void GameScreen::scoreSlot(QJsonObject scores)
 {
-    ScoreBoard scoreBoard(this);
-    // Use modal approach
-    scoreBoard.setModal(true);
-    scoreBoard.exec();
-    scoreBoard.updateScores(scores);
+//    ScoreBoard scoreBoard(this);
+//    // Use modal approach
+//    scoreBoard.setModal(true);
+//    scoreBoard.exec();
+//    scoreBoard.updateScores(scores);
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
+// DISCONNECTED_PLAYER received
 void GameScreen::disconnectPlayerSlot(QJsonObject disc)
 {
     QString playerdisc = disc["PlayerPos"].toString();
@@ -952,68 +1048,81 @@ void GameScreen::disconnectPlayerSlot(QJsonObject disc)
     this->close();
 }
 
-
 // Slot activates after successfully connecting to server. The "update" object
 // contains the positions and aliases of all connected players.
+// LOBBY_UPDATE received
 void GameScreen::lobbyUpdateSlot(QJsonObject update)
 {
     QJsonValue value = update.value("Cards");
-        QJsonArray arr = value.toArray();
-        foreach (const QJsonValue & v, arr)
-        {
-            if (v.toObject().value("Position").toString() == "N") {
-                NorthAlias = v.toObject().value("Alias").toString();
-                continue;
-            }
-            if (v.toObject().value("Position").toString() == "S") {
-                SouthAlias = v.toObject().value("Alias").toString();
-                continue;
-            }
-            if (v.toObject().value("Position").toString() == "E") {
-                EastAlias = v.toObject().value("Alias").toString();
-                continue;
-            }
-            if (v.toObject().value("Position").toString() == "W") {
-                WestAlias = v.toObject().value("Alias").toString();
-                continue;
-            }
-        }
+    QJsonArray arr = value.toArray();
 
-        if (NorthAlias == Username) {
-            UserPosition = "North";
-        }
-        if (SouthAlias == Username) {
-            UserPosition = "South";
-        }
-        if (EastAlias == Username) {
-            UserPosition = "East";
-        }
-        if (WestAlias == Username) {
-            UserPosition = "West";
-        }
+    // Extract each position's alias
+    foreach (const QJsonValue & v, arr)
+    {
+    if (v.toObject().value("Position").toString() == "N") {
+        NorthAlias = v.toObject().value("Alias").toString();
+        continue;
+    }
+    if (v.toObject().value("Position").toString() == "S") {
+        SouthAlias = v.toObject().value("Alias").toString();
+        continue;
+    }
+    if (v.toObject().value("Position").toString() == "E") {
+        EastAlias = v.toObject().value("Alias").toString();
+        continue;
+    }
+    if (v.toObject().value("Position").toString() == "W") {
+        WestAlias = v.toObject().value("Alias").toString();
+        continue;
+    }
+    }
 
-        // Update Game Screen GUI elements
-        ui->lblNamePlayer->setText(Username);
-        ui->lblPlayer->setText(UserPosition);
+    // Check which position the user is
+    if (NorthAlias == Username) {
+        UserPosition = "North";
+    }
+    if (SouthAlias == Username) {
+        UserPosition = "South";
+    }
+    if (EastAlias == Username) {
+        UserPosition = "East";
+    }
+    if (WestAlias == Username) {
+        UserPosition = "West";
+    }
 
-        // Set dummy labels to invisible
-        bool visible = false;
-        ui->pb_14->setVisible(visible);
-        ui->pb_15->setVisible(visible);
-        ui->pb_16->setVisible(visible);
-        ui->pb_17->setVisible(visible);
-        ui->pb_18->setVisible(visible);
-        ui->pb_19->setVisible(visible);
-        ui->pb_20->setVisible(visible);
-        ui->pb_21->setVisible(visible);
-        ui->pb_22->setVisible(visible);
-        ui->pb_23->setVisible(visible);
-        ui->pb_24->setVisible(visible);
-        ui->pb_25->setVisible(visible);
-        ui->pb_26->setVisible(visible);
+    // Update Game Screen GUI elements
+    ui->lblNamePlayer->setText(Username);
+    ui->lblPlayer->setText(UserPosition);
+
+    // Set dummy labels to invisible
+    bool visible = false;
+    ui->pb_14->setVisible(visible);
+    ui->pb_15->setVisible(visible);
+    ui->pb_16->setVisible(visible);
+    ui->pb_17->setVisible(visible);
+    ui->pb_18->setVisible(visible);
+    ui->pb_19->setVisible(visible);
+    ui->pb_20->setVisible(visible);
+    ui->pb_21->setVisible(visible);
+    ui->pb_22->setVisible(visible);
+    ui->pb_23->setVisible(visible);
+    ui->pb_24->setVisible(visible);
+    ui->pb_25->setVisible(visible);
+    ui->pb_26->setVisible(visible);
+
+    // Send PLAYER_READY message to server
+    QString mes = clientgs->GenerateMessage("PLAYER_READY");
+    QJsonObject temp = clientgs->CreateJObject(mes);
+    temp["Id"] = Userid;
+    mes = clientgs->CreateJString(temp);
+    clientgs->SendMessageToServer(mes);
+    // Debug code
+    clientgs->onTextMessageReceived(mes);
+
 }
 
-// Slot for GAME_END
+// GAME_END recieved
 void GameScreen::gameEndSlot(QJsonObject end)
 {
     QMessageBox over;
@@ -1023,21 +1132,77 @@ void GameScreen::gameEndSlot(QJsonObject end)
     this->close();
 }
 
+// PING signal emitted
 void GameScreen::ping()
 {
    // Send ping to server
     QString mes = clientgs->GenerateMessage("PING");
     QJsonObject obj = clientgs->CreateJObject(mes);
+    obj["Id"] = Userid;
     clientgs->SendMessageToServer(clientgs->CreateJString(obj));
 
-    // Debug code clientgs->onMessageReceived("PING")
+    // Debug code
+    // clientgs->onMessageReceived("PING")
 }
 
+// PONG received
 void GameScreen::pongSlot(QJsonObject pong)
 {
     QString reply = pong["Type"].toString();
     // Debug code
     // cout<<"Pong received from server"<<endl;
+}
+
+// Slot for when the PLAY_START message is received from the server. The QJsonObject
+// received contains the dummy cards and will populate the dummy buttons.
+// PLAY_START received
+void GameScreen::playStartSlot(QJsonObject ob)
+{
+    cout<<"803"<<endl;
+    ui->lblRoundInfo->setVisible(false);
+    QJsonValue value = ob.value("DummyCards");
+    QJsonArray array1 = value.toArray();
+    int count = 0;
+
+    foreach (const QJsonValue & v, array1){
+        for (int k=0;k<v.toObject().value("Rank").toArray().size();k++) {
+            cardsDummy[count] = v.toObject().value("Suit").toString() + v.toObject().value("Rank")[k].toString();
+            count++;
+        }
+    }
+
+    cout<<"Dummy Cards: ";
+    // Temp debug code
+    for (int k=0;k<13;k++) {
+        cout<<cardsDummy[k].toStdString()<<", ";
+    }
+    cout<<endl;
+    // Load the dummy cards into GUI. Set parameter to 1 to indicate it's the dummy cards being loaded
+    showCards(1);
+}
+
+// Slot for when a MOVE_REQUEST signal is received from the server. This slot function will
+// enable/disable the relevent card labels depending on if the player cards should be played,
+// or the dummy cards. Because these components are now enabled and thus clickable, the relevent
+// card played will be sent back to the server from within the component on_clicked slot.
+// MOVE_REQUEST received
+void GameScreen::moveRequestSlot(QJsonObject request)
+{
+    if (request["MoveDummy"] == false)
+    { // Move must be made from player cards
+        disableCards(0, true);
+    }
+    if (request["MoveDummy"] == true)
+    { // Move must be made from dummy cards
+        if (Dummy != UserPosition[0]) {
+            disableCards(1, true);
+        }
+        else { // If the user is the dummy, and the dummy cards must be played, the user's
+               // team mate must make a move, not the user.
+            disableCards(0, false);
+        }
+
+    }
 }
 
 

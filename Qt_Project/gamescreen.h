@@ -29,6 +29,8 @@ private slots:
 
     void on_pushButton_Play_clicked();
 
+    void connectSlots();
+
     void loadCards(QPushButton *, QString);
 
     void on_pushButton_Abandon_clicked();
@@ -43,7 +45,7 @@ private slots:
 
     void sendMove(QString, QString);
 
-    void serverInfoSlot(QString, QString, QString, clientconnection *, QString);
+    void serverInfoSlot(QString, QString, QString, clientconnection *, QString, int);
 
     void bidStartSlot(QJsonObject);
 
@@ -63,14 +65,12 @@ private slots:
 
     void bidUpdateSlot(QJsonObject bid);
 
-    void toets(int);
-
     void addToTable(QString, int);
 
     void visibleAll(bool vis = true);
 
     void bidEndSlot(QJsonObject);
-    void playStartSlot(QJsonObject);
+
     void moveRequestSlot(QJsonObject);
     void moveUpdateSlot(QJsonObject);
     void trickEndSlot(QJsonObject);
@@ -81,7 +81,7 @@ private slots:
     void gameEndSlot(QJsonObject);
     void ping();
     void pongSlot(QJsonObject);
-
+    void playStartSlot(QJsonObject);
     void on_pb_1_clicked();
 
     void on_pb_2_clicked();

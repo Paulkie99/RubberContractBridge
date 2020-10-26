@@ -51,27 +51,14 @@ void clientconnection::onTextMessageReceived(QString message)
       case 0:
         { // CONNECT_UNSUCCESSFUL
         qDebug() << "Message Type: " << msgTypes[0];
-        //code added here to handle CONNECT_UNSUCCESSFUL
-
-        QString desc = msgr["Description"].toString();
-
-        // If-else for an unsuccessful connection
-        if (desc == "LOBBY_FULL") {
-            //MainWindow::ServerFull();
-            //connect(this, SIGNAL(customsignal()),MainWindow(),SLOT(customsl))
-            emit serverFullSignal();
-        }
-        else
-        {
-            emit otherSignal();
-        }
-
+        emit connectUnsuccessfulSignal(CreateJObject(message));
         break;
         }
       case 1:
     {
+        // CONNECT_SUCCESSFUL
         qDebug() << "Message Type: " << msgTypes[1];
-        emit connectSuccessfullSignal();
+        emit connectSuccessfullSignal(CreateJObject(message));
         break;
     }
       case 2:
@@ -110,14 +97,15 @@ void clientconnection::onTextMessageReceived(QString message)
         // BID_END
         qDebug() << "Message Type: " << msgTypes[6];
         emit bidEndSignal(CreateJObject(message));
-      break;
+        break;
     }
     case 7:
     {
         // PLAY_START
         qDebug() << "Message Type: " << msgTypes[7];
-        emit playStartSignal(CreateJObject(message));
-      break;
+        QJsonObject bids = CreateJObject(message);
+        emit playStartSignal(bids);
+        break;
     }
     case 8:
     {
@@ -175,14 +163,16 @@ void clientconnection::onTextMessageReceived(QString message)
     }
     case 16:
     {
+        // AUTH_SUCCESSFUL
         qDebug() << "Message Type: " << msgTypes[16];
         emit authSuccessfulSignal();
       break;
     }
     case 17:
     {
+        // AUTH_UNSUCCESSFUL
         qDebug() << "Message Type: " << msgTypes[16];
-        emit authUnsuccessfulSignal();
+        emit authUnsuccessfulSignal(CreateJObject(message));
       break;
     }
     case 18:

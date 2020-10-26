@@ -6,9 +6,10 @@
 using namespace std;
 
 // Establish a clientconnection object for communicating over the network
-clientconnection client(QUrl(QStringLiteral("ws://localhost:159")), true);
-
-
+clientconnection *client;
+//clientconnection client(QStringLiteral("ws://localhost:159"), true);
+int id = 0;
+bool connected = false;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -29,13 +30,34 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lblHeading->setFocus();
 
 
+//    connect(&client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+//    connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+//    connect(&client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+//    connect(&client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+//    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+//    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+//    connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+//    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+
+
+    // Temp debug code to test successful connect. Server will send this after constructor of client
+//    QString mes = client.GenerateMessage("CONNECT_SUCCESSFUL");
+//    client.onTextMessageReceived(mes);
+
     // Connect the various signals and slots
-    connect(&client, &clientconnection::serverFullSignal, this, &MainWindow::serverFullSlot);
-    connect(&client, &clientconnection::connectSuccessfullSignal, this, &MainWindow::connectSuccessfulSlot);
-    connect(&client, &clientconnection::lobbyUpdateSignal, this, &MainWindow::lobbyUpdateSlot);
-     connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-     connect(&client, &clientconnection::authUnsuccessfulSignal, this, &MainWindow::authUnsuccessfulSlot);
-     connect(&client, &clientconnection::connectUnsuccessfulSignal, this, &MainWindow::connectUnsuccessfulSlot);
+
+//    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+//    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+//    connect(client, &clientconnection::authUnsuccessfulSignal, this, &MainWindow::authUnsuccessfulSlot);
+//    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+
+//    // Connect the various signals and slots
+//    connect(&client, &clientconnection::serverFullSignal, this, &MainWindow::serverFullSlot);
+//    connect(&client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+//    connect(&client, &clientconnection::lobbyUpdateSignal, this, &MainWindow::lobbyUpdateSlot);
+//     connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+//     connect(&client, &clientconnection::authUnsuccessfulSignal, this, &MainWindow::authUnsuccessfulSlot);
+//     connect(&client, &clientconnection::connectUnsuccessfulSignal, this, &MainWindow::connectUnsuccessfulSlot);
 }
 
 MainWindow::~MainWindow()
@@ -44,62 +66,34 @@ MainWindow::~MainWindow()
 }
 
 
-// Temp debug, delete with time
-void MainWindow::ServerFull()
+// The client is connected to the server and may begin sending messages.
+// CONNECT_SUCCESSFUL received
+void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
 {
-    cout<<"Hello"<<endl;
-    QMessageBox err;
-    err.critical(0,"Error","Server is full");
-    err.setFixedSize(500,200);
-    //ui->leditHostIP->setFocus();
+    connected = true;
 
-}
+    // Send a CONNECT_REQUEST to the server
+    id = connectSuc["Id"].toInt();
 
-void MainWindow::customslot()
-{
-    cout<<"4545"<<endl;
-
-}
-
-void MainWindow::serverFullSlot()
-{
-    QMessageBox err;
-    err.critical(0,"Error","Server is full");
-    err.setFixedSize(500,200);
-    ui->leditHostIP->setFocus();
-}
-
-void MainWindow::otherSlot()
-{
-    QMessageBox err;
-    err.critical(0,"Error","Unable to join server. Check the server credentials");
-    err.setFixedSize(500,200);
-    ui->leditHostIP->setFocus();
-}
-
-void MainWindow::connectSuccessfulSlot()
-{
-    //  CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS TO THE SERVER
-    // Modelless approach
-    // Hide main window
-    hide();
-    // Set stacked widget index to main window for when the user returns
-    ui->stackedWidget->setCurrentIndex(0);
+//    // Get the values from the "Join Game" screen
+    QString IP = ui->leditHostIP->text();
+    QString Port = ui->sbPort->text();
+    QString Password = ui->leditPassword->text();
+    QString Username = ui->leditUsername->text();
 
 
-    // Create a new instance of GameScreen
-    // Set parent of gameScreen as this class (main window)
-    gameScreen = new GameScreen(this);
-    gameScreen->show();
+    QString mes = client->GenerateMessage("CONNECT_REQUEST");
+    QJsonObject request = client->CreateJObject(mes);
+    request["Password"] = Password;
+    request["Alias"] = Username;
+    request["Id"] = id;
 
-    // For some reason the only way to pass information along via signals & slots is to use
-    // the SIGNAL and SLOT method
-    //connect(this, &MainWindow::serverInfoSignal(&QString , QString, QString), &gameScreen, &GameScreen::serverInfoSlot(QString, QString, QString));
-    connect(this, SIGNAL(serverInfoSignal(QString, QString, QString, clientconnection *, QString)), gameScreen, SLOT(serverInfoSlot(QString, QString, QString, clientconnection *, QString)));
-    emit serverInfoSignal(ui->leditHostIP->text(),ui->sbPort->text(),ui->leditPassword->text(), &client, ui->leditUsername->text());
+    //Send the updated message to the server
+    client->SendMessageToServer(client->CreateJString(request));
 
-
-    //emit bid start signal ?
+    // Temp debug code to test successful login
+    mes = client->GenerateMessage("AUTH_SUCCESSFUL");
+    client->onTextMessageReceived(mes);
 }
 
 // If the user wishes to join an existing game, the stacked widget's
@@ -123,27 +117,45 @@ void MainWindow::on_pushButton_Join_clicked()
 // join an existing game.
 void MainWindow::on_pushButton_JoinServer_clicked()
 {
-    // Get the values from the "Join Game" screen
-    QString IP = ui->leditHostIP->text();
-    QString Port = ui->sbPort->text();
-    QString Password = ui->leditPassword->text();
-    QString Username = ui->leditUsername->text();
+    // Establish a clientconnection object for communicating over the network
+    clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), true);
+    client = client1;
 
+    // Connect the various signals and slots
+    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+    connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
 
-    QString mes = client.GenerateMessage("CONNECT_REQUEST");
-    QJsonObject request = client.CreateJObject(mes);
-    request["Password"] = Password;
-    request["Alias"] = Username;
+    // Temp debug code to test successful connect. Server will send this after constructor of client
+    QString mes = client->GenerateMessage("CONNECT_SUCCESSFUL");
+    client->onTextMessageReceived(mes);
 
-    //Send the updated message to the server
-    client.SendMessageToServer(client.CreateJString(request));
+    //********* als hieronder moet saam geuncomment word*********
+//    // Send a CONNECT_REQUEST to the server
 
-    // Temp debug code to test successful login
-    mes = client.GenerateMessage("CONNECT_SUCCESSFUL");
-    client.onTextMessageReceived(mes);
+//    // Get the values from the "Join Game" screen
+//    QString IP = ui->leditHostIP->text();
+//    QString Port = ui->sbPort->text();
+//    QString Password = ui->leditPassword->text();
+//    QString Username = ui->leditUsername->text();
+
+//    QString mes = client->GenerateMessage("CONNECT_REQUEST");
+//    QJsonObject request = client->CreateJObject(mes);
+////    QString mes = client.GenerateMessage("CONNECT_REQUEST");
+////    QJsonObject request = client.CreateJObject(mes);
+//    request["Password"] = Password;
+//    request["Alias"] = Username;
+//    request["Id"] = id;
+
+//    //Send the updated message to the server
+//    //client.SendMessageToServer(client.CreateJString(request));
+//    client->SendMessageToServer(client->CreateJString(request));
+
+//    // Temp debug code to simulate successful login
+////    mes = client.GenerateMessage("AUTH_SUCCESSFUL");
+////    client.onTextMessageReceived(mes);
 }
-
-
 
 // The user opts to create a new server
 void MainWindow::on_pushButton_Create_clicked()
@@ -207,24 +219,44 @@ void MainWindow::on_pushButton_CreateConf_clicked()
     gameScreen->show();
 }
 
-//Function to handle a received lobby update signal
-void MainWindow::lobbyUpdateSlot()
-{
 
+// AUTH_UNSUCCESSFUL received
+void MainWindow::authUnsuccessfulSlot(QJsonObject unsuc)
+{
+    QMessageBox err;
+    err.critical(0,"Could not authorize",unsuc["Description"].toString());
+    err.setFixedSize(500,200);
 }
 
+// CONNECT_REQUEST was approved and access to the server granted.
+// AUTH_SUCCESSFUL received
 void MainWindow::authSuccessfulSlot()
 {
+    // Create the gamescreen object
+    // CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS TO THE SERVER
+    // Modelless approach
+    // Hide main window
+    hide();
+    // Set stacked widget index to main window for when the user returns
+    ui->stackedWidget->setCurrentIndex(0);
 
+
+    // Create a new instance of GameScreen
+    // Set parent of gameScreen as this class (main window)
+    gameScreen = new GameScreen(this);
+    gameScreen->show();
+
+    // For some reason the only way to pass information along via signals & slots is to use
+    // the SIGNAL and SLOT method
+    //connect(this, &MainWindow::serverInfoSignal(QString , QString, QString), &gameScreen, &GameScreen::serverInfoSlot(QString, QString, QString));
+    connect(this, SIGNAL(serverInfoSignal(QString, QString, QString, clientconnection *, QString, int)), gameScreen, SLOT(serverInfoSlot(QString, QString, QString, clientconnection *, QString, int)));
+    emit serverInfoSignal(ui->leditHostIP->text(),ui->sbPort->text(),ui->leditPassword->text(), client, ui->leditUsername->text(), id);
 }
 
-void MainWindow::authUnsuccessfulSlot()
+void MainWindow::connectUnsuccessfulSlot(QJsonObject conunsuc)
 {
-
-}
-
-void MainWindow::connectUnsuccessfulSlot()
-{
-
+    QMessageBox err;
+    err.critical(0,"Could not connect",conunsuc["Description"].toString());
+    err.setFixedSize(500,200);
 }
 
