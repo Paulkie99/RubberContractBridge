@@ -11,7 +11,10 @@
 #include "server.h"
 
 /*
- * Constructor for the server, including server name, sslmode and parent object. Also can be specified whether shuffle should be called on construction, which is useful for testing.
+ * Constructor for the server, including server name, sslmode and parent object.
+ * Signals for connections and disconnections are connected to relevant server slots
+ * Deck is constructed and player_hands are initialised
+ * Message types are stored
  * */
 Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) : QWebSocketServer(serverName, secureMode, parent), validator(this)
 {
@@ -27,7 +30,7 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) :
     qInfo() << "Constructing deck";
     int count = 0;
     for(int suit = Clubs; suit <= Spades; suit++)   // step through the values of the card value and suit enums and add each combination to the deck
-        for(int value = One; value < Ace; value++)
+        for(int value = Two; value <= Ace; value++)
             Deck[count++] = Card(value, suit);
 
     //Initialise Player_Hands entries to NULL
@@ -75,6 +78,10 @@ QString Server::GenerateMessage(QString type)
 
 /*
  * Authenticate username and password of connecting client
+ * A valid username/password is non-empty
+ * A valid username is unique
+ * If authentication is successful, send auth_successful and broadcast lobby_update
+ * else, send auth_unsuccessful and disconnect socket
  * */
 void Server::Authenticate(QString username, QString password, int id)
 {
@@ -147,7 +154,7 @@ void Server::Shuffle(unsigned seed)
 }
 
 /*
- * Deal the deck to connected players, dealer passed is the int index of the client in ConnectedClients[] who should be the dealer
+ * Construct a message as a QJsonArray, which contains the passed player's cards in hand, sorted by suit
  * */
 QJsonArray* Server::Construct_Cards_Message(int player)
 {
@@ -206,11 +213,22 @@ QJsonArray* Server::Construct_Cards_Message(int player)
     return client_cards;
 }
 
+/*
+ * Helper function to get the id of a player's team mate
+ * */
 int Server::getTeamy(int otherTeamy)
 {
     return (otherTeamy + 2) % num_players;
 }
 
+/*
+ * Deal the deck in-order to players, in a clockwise direction.
+ * Shuffle should be called before this function.
+ * A desired dealer may be passed or will otherwise be determined randomly if a current dealer does not exist
+ * If a dealer exists, the dealer becomes the next player
+ * This function also sends bid_start message to each player, which contains the players' hands
+ * Bid_request is sent to the dealer
+ * */
 void Server::Deal(int dealer)
 {
     //first assign cards one at a time to each player
@@ -280,7 +298,10 @@ void Server::PrintHands()
     {
         for(int player = 0; player < num_players; ++player)
         {
-            Player_Hands[card][player]->print(out);
+            if(Player_Hands[card][player])
+                Player_Hands[card][player]->print(out);
+            else
+                out << "                 ";
             out << "\t";
         }
         out << "\n";
@@ -289,6 +310,7 @@ void Server::PrintHands()
 
 /*
  * Perform necessary functions to connect a client to a specified position in the ConnectedClients array, the relevant signals and slots are also connected
+ * CONNECT_SUCCESFUL is sent
  * */
 void Server::ConnectClient(int pos)
 {
@@ -328,6 +350,9 @@ void Server::SendMessage(int id, QJsonObject msg)
     ConnectedClients[id].clientSocket->sendTextMessage(strFromObj);
 }
 
+/*
+ * Helper function to send a message to all connected clients
+ * */
 void Server::BroadcastMessage(QJsonObject msg)
 {
     for (int player = 0; player < num_players; ++player)
@@ -336,22 +361,56 @@ void Server::BroadcastMessage(QJsonObject msg)
     }
 }
 
+/*
+ * Determine whether a card is in a player's hand and return it, else return null
+ * If it is not the player's turn, and they are the declarer, and it is the dummy turn, check the dummy's hand as well
+ * */
 Card *Server::findCardInHand(int player, int val, int suit)
 {
-    for(int card = 0; card < Ace; ++card)
+    if(player == GS.getPlayerTurn())
     {
-        if(Player_Hands[card][player])
-            if(Player_Hands[card][player]->value == val)
-                if(Player_Hands[card][player]->suit == suit)
+        for(int card = 0; card < Ace; ++card)
+        {
+            if(Player_Hands[card][player])
+            {
+                if(Player_Hands[card][player]->value == val)
                 {
-                    Card* to_ret = Player_Hands[card][player];
-                    Player_Hands[card][player] = NULL;
-                    return to_ret;
+                    if(Player_Hands[card][player]->suit == suit)
+                    {
+                        Card* to_ret = Player_Hands[card][player];
+                        Player_Hands[card][player] = NULL;
+                        return to_ret;
+                    }
                 }
+            }
+        }
+    }
+    else if(player == getTeamy(GS.getPlayerTurn()) && player == GS.getDeclarer())
+    {
+        int dummy = getTeamy(player);
+        for(int card = 0; card < Ace; ++card)
+        {
+            if(Player_Hands[card][dummy])
+            {
+                if(Player_Hands[card][dummy]->value == val)
+                {
+                    if(Player_Hands[card][dummy]->suit == suit)
+                    {
+                        Card* to_ret = Player_Hands[card][dummy];
+                        Player_Hands[card][dummy] = NULL;
+                        return to_ret;
+                    }
+                }
+            }
+        }
     }
     return NULL;
 }
 
+/*
+ * Check each player's hand for honors, depending on trump suit.
+ * If a hand contains five honors (or four in case of NT contract), save their Id and number of honors in GS
+ * */
 void Server::findHonors()
 {
     int suit = GS.getCurrentBid()->suit;
@@ -428,7 +487,7 @@ void Server::acceptConnection()
 }
 
 /*
- * This function receives messages from clients and calls the relevant validation function based on the message type
+ * Increment player turn and bidroundcount, send a bid request to the player who's turn it is now
  * */
 void Server::Next_Bid()
 {
@@ -439,6 +498,10 @@ void Server::Next_Bid()
     SendMessage(GS.getPlayerTurn(), bid_req);
 }
 
+/*
+ * Send a move request to the player who's turn it is, if they are the dummy send a message to the declarer with "MoveDummy" true
+ * Unlike Next_Bid, player turn must be incremented outside of this function
+ * */
 void Server::Next_Move()
 {
     QJsonObject move_req = Convert_Message_To_Json(GenerateMessage("MOVE_REQUEST"));\
@@ -454,6 +517,10 @@ void Server::Next_Move()
     }
 }
 
+/*
+ * Score a deal according to bridge scoring rules, determine whether a game has ended and whether a rubber has ended
+ * Send SCORE, and GAME_END depending on whether a rubber has ended
+ * */
 void Server::Score_Deal()
 {
     QJsonObject score = Convert_Message_To_Json(GenerateMessage("SCORE"));
@@ -663,6 +730,9 @@ void Server::Score_Deal()
     }
 }
 
+/*
+ * Find the best card in the current trick based on the bid contract
+ * */
 Card* Server::GetBestCardInTrick()
 {
     int lead_suit = GS.CurrentTrick[0]->suit;
@@ -696,6 +766,11 @@ Card* Server::GetBestCardInTrick()
     return best_card;
 }
 
+/*
+ * Update GS based on a recent bid, if three consecutive passses have occurred send bid_end, play_start and move_request
+ * If the deal is passed out (four passes in first bidding round), shuffle and redeal
+ * Call Next_Bid otherwise
+ * */
 void Server::Update_Bid(int id, int value, int suit)
 {
     Card* bid = new Card(value, suit);
@@ -771,7 +846,8 @@ void Server::Update_Bid(int id, int value, int suit)
         if(GS.getPassCount() == 4) // everyone passed in first round
         {
             // deal passed out
-            Shuffle();
+            if(shuffle)
+                Shuffle();
             Deal();
         }
         else
@@ -781,6 +857,12 @@ void Server::Update_Bid(int id, int value, int suit)
     }
 }
 
+/*
+ * Update GS based on a recent move
+ * If a trick has ended broadcast trick_end
+ * If thirteen tricks have ended broadcast play_end and call Score_Deal
+ * Call Next_Deal otherwise
+ * */
 void Server::Update_Play()
 {
     if(GS.CurrentTrick.size() == num_players) // end trick
@@ -798,6 +880,8 @@ void Server::Update_Play()
         GS.setTrickCount(GS.getTrickCount() + 1);
 
         GS.CurrentTrick.clear();
+
+//        PrintHands();
 
         if(GS.getTrickCount() == hand_size) // end play
         {
@@ -829,7 +913,8 @@ void Server::Update_Play()
             }
             else
             {
-                Shuffle();
+                if(shuffle)
+                    Shuffle();
                 Deal();
             }
         }
@@ -846,6 +931,17 @@ void Server::Update_Play()
     }
 }
 
+/*
+ * This slot receives client text messages and calls the relevant functions based on the received message
+ * In case of connect_request : Authenticate()
+ * Bid_Send : isValidBid() and Update_Bid()
+ * Move_Send : isValidMove() and Update_Play()
+ * Ping : send Pong
+ * Pong : output that pong has been received
+ * Disconnect player: call socketDisconnect
+ * Player_Ready: Ignore if in bidding or play stage, else increment number of ready players if the player is not already ready,
+ * if there is four ready players, Shuffle() and Deal()
+ * */
 void Server::ValidateInput(QString message)
 {
 //     emit messageReceived(message); // add message to ui listwidget
@@ -910,15 +1006,15 @@ void Server::ValidateInput(QString message)
             QJsonObject card = msg["Move"].toObject();
 
             int id = msg["Id"].toInt();
-            int value = card["Rank"].toInt();
-            int suit = card["Suit"].toInt();
+            int value = Card::StringToValue(card["Rank"].toString());
+            int suit = Card::StringToSuit(card["Suit"].toString());
 
             bool valid = validator.isValidMove(id, value, suit);
 
             if(valid)
             {
                 qInfo() << "Move Valid";
-
+                emit messageReceived("Move Valid");
 
                 QJsonObject move_update = Convert_Message_To_Json(GenerateMessage("MOVE_UPDATE"));
                 move_update["Move"] = card;
@@ -928,6 +1024,11 @@ void Server::ValidateInput(QString message)
                 GS.CurrentTrick.push_back(findCardInHand(id, value, suit));
 
                 Update_Play();
+            }
+            else
+            {
+                emit messageReceived("Move Invalid");
+                qInfo() << "Invalid Move";
             }
         }
         break;
@@ -975,7 +1076,8 @@ void Server::ValidateInput(QString message)
 
             if(numReady == num_players) // Four users are connected and authenticated, the game may commence.
             {
-                Shuffle();
+                if(shuffle)
+                   Shuffle();
                 Deal();
             }
             emit messageReceived("Player ready received");
@@ -989,7 +1091,7 @@ void Server::ValidateInput(QString message)
 }
 
 /*
- * Slot triggered when a client disconnects
+ * Slot triggered when a client disconnects, reinitialise serverclient based on id and broadcast DISCONNECT_PLAYER
  * */
 void Server::socketDisconnect(int id)
 {

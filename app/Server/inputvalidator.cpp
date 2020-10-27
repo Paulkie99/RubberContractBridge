@@ -37,7 +37,6 @@ bool InputValidator::isValidBid(int id, int val, int suit)
     if(val > Seven)
         return false;
 
-    //TODO: Add validation logic based on GS (last bid, number of passes, etc)
     if(id != server->GS.getPlayerTurn())
         return false;
 
@@ -66,7 +65,9 @@ bool InputValidator::isValidBid(int id, int val, int suit)
             return false;
         if(currentBid)
         {
-            if(val <= currentBid->value)
+            if(val < currentBid->value)
+                return false;
+            else if(val == currentBid->value)
                 if(suit <= currentBid->suit)
                     return false;
         }
@@ -85,11 +86,12 @@ bool InputValidator::isValidMove(int id, int val, int suit)
         return false;
 
     if(server->GS.getPlayerTurn() != id)
-        return false;
+        if(server->GS.getDeclarer() != id || server->GS.getPlayerTurn() != server->getTeamy(server->GS.getDeclarer()))
+            return false;
 
     if(!isValidCardInHand(id, val, suit))
     {
-        if(server->GS.getDeclarer() == id)
+        if(server->GS.getDeclarer() == id && server->GS.getPlayerTurn() == server->getTeamy(id))
         {
             if(!isValidCardInHand(server->getTeamy(id), val, suit))
                 return false;
@@ -102,8 +104,6 @@ bool InputValidator::isValidMove(int id, int val, int suit)
 
     if(!isValidFollowSuit(id, suit))
         return false;
-
-    //TODO: Add validation logic based on GS (trump card, lead suit, etc)
 
     //else
     return true;

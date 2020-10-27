@@ -51,6 +51,8 @@ private:
     GameState  GS;
     InputValidator validator;
 
+    bool shuffle = true;
+
     std::array<Card, deck_size> Deck;
     int numConnectedClients = 0;
     int numAuthenticatedUsers = 0;
