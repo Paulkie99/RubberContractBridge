@@ -2,7 +2,7 @@
 //Author: Jacques Human 18223916
 //Last update: 05/10/2020
 #include "clientconnection.h"
-#include <QtCore/QDebug>
+//#include <QtCore/QDebug>
 #include <QList>
 #include <QSslError>
 #include <iostream>
@@ -17,8 +17,8 @@
 clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent) :
     QObject(parent), ConnectUrl(url), debugOn(debug)
 {
-    if (debugOn)
-        qDebug() << "WebSocket server:" << url;
+//    if (debugOn)
+//        qDebug() << "WebSocket server:" << url;
     connect(&clientSocket, &QWebSocket::connected, this, &clientconnection::onConnected);
     connect(&clientSocket, &QWebSocket::disconnected, this, &clientconnection::closed);
    // QList<QSslCertificate> cert = QSslCertificate::fromPath(QLatin1String("C:/Users/User/localhost.cert"));
@@ -50,28 +50,28 @@ void clientconnection::onTextMessageReceived(QString message)
     {
       case 0:
         { // CONNECT_UNSUCCESSFUL
-        qDebug() << "Message Type: " << msgTypes[0];
+       // qDebug() << "Message Type: " << msgTypes[0];
         emit connectUnsuccessfulSignal(CreateJObject(message));
         break;
         }
       case 1:
     {
         // CONNECT_SUCCESSFUL
-        qDebug() << "Message Type: " << msgTypes[1];
+     //   qDebug() << "Message Type: " << msgTypes[1];
         emit connectSuccessfullSignal(CreateJObject(message));
         break;
     }
       case 2:
     {
         // LOBBY_UPDATE
-        qDebug() << "Message Type: " << msgTypes[2];
+      //  qDebug() << "Message Type: " << msgTypes[2];
         emit lobbyUpdateSignal(CreateJObject(message));
         break;
     }
     case 3:
         {
             // BID_START
-            qDebug() << "Message Type: " << msgTypes[3];
+       //     qDebug() << "Message Type: " << msgTypes[3];
 
            // QString mes = GenerateMessage("BID_START");
             QJsonObject bids = CreateJObject(message);
@@ -81,28 +81,28 @@ void clientconnection::onTextMessageReceived(QString message)
     case 4:
     {
         // BID_REQUEST
-        qDebug() << "Message Type: " << msgTypes[4];
+      //  qDebug() << "Message Type: " << msgTypes[4];
         emit bidRequestSignal();
         break;
     }
     case 5:
     {
         // BID_UPDATE
-        qDebug() << "Message Type: " << msgTypes[5];
+     //   qDebug() << "Message Type: " << msgTypes[5];
         emit bidUpdateSignal(CreateJObject(message));
         break;
     }
     case 6:
     {
         // BID_END
-        qDebug() << "Message Type: " << msgTypes[6];
+     //   qDebug() << "Message Type: " << msgTypes[6];
         emit bidEndSignal(CreateJObject(message));
         break;
     }
     case 7:
     {
         // PLAY_START
-        qDebug() << "Message Type: " << msgTypes[7];
+     //   qDebug() << "Message Type: " << msgTypes[7];
         QJsonObject bids = CreateJObject(message);
         emit playStartSignal(bids);
         break;
@@ -110,75 +110,75 @@ void clientconnection::onTextMessageReceived(QString message)
     case 8:
     {
         // MOVE_REQUEST
-        qDebug() << "Message Type: " << msgTypes[8];
+     //   qDebug() << "Message Type: " << msgTypes[8];
         emit moveRequestSignal(CreateJObject(message));
       break;
     }
     case 9:
     {
         // MOVE_UPDATE
-        qDebug() << "Message Type: " << msgTypes[9];
+    //    qDebug() << "Message Type: " << msgTypes[9];
         emit moveUpdateSignal(CreateJObject(message));
       break;
     }
     case 10:
     {
         // TRICK_END
-        qDebug() << "Message Type: " << msgTypes[10];
+    //    qDebug() << "Message Type: " << msgTypes[10];
         emit trickEndSignal(CreateJObject(message));
       break;
     }
     case 11:
     {
         // PLAY_END
-        qDebug() << "Message Type: " << msgTypes[11];
+    //    qDebug() << "Message Type: " << msgTypes[11];
         emit playEndSignal(CreateJObject(message));
       break;
     }
     case 12:
     {
-        qDebug() << "Message Type: " << msgTypes[12];
+     //   qDebug() << "Message Type: " << msgTypes[12];
         emit scoreSignal(msgr);
       break;
     }
     case 13:
     {
         // PING
-        qDebug() << "Message Type: " << msgTypes[13];
+    //    qDebug() << "Message Type: " << msgTypes[13];
         break;
     }
     case 14:
     {
         // PONG
-        qDebug() << "Message Type: " << msgTypes[14];
+    //    qDebug() << "Message Type: " << msgTypes[14];
         emit pongSignal(CreateJObject(message));
         break;
     }
     case 15:
     {
         // DISCONNECT_PLAYER
-        qDebug() << "Message Type: " << msgTypes[15];
+    //    qDebug() << "Message Type: " << msgTypes[15];
         emit disconnectPlayerSignal(CreateJObject(message));
       break;
     }
     case 16:
     {
         // AUTH_SUCCESSFUL
-        qDebug() << "Message Type: " << msgTypes[16];
+    //    qDebug() << "Message Type: " << msgTypes[16];
         emit authSuccessfulSignal();
       break;
     }
     case 17:
     {
         // AUTH_UNSUCCESSFUL
-        qDebug() << "Message Type: " << msgTypes[16];
+    //    qDebug() << "Message Type: " << msgTypes[16];
         emit authUnsuccessfulSignal(CreateJObject(message));
       break;
     }
     case 18:
     {
         //GAME_END
-        qDebug() << "Message Type: " << msgTypes[17];
+    //    qDebug() << "Message Type: " << msgTypes[17];
         emit gameEndSignal(CreateJObject(message));
         break;
     }
@@ -194,8 +194,8 @@ as a test of functionality.
 
 void clientconnection::onConnected()
 {
-    if (debugOn)
-        qDebug() << "WebSocket connected";
+//    if (debugOn)
+//        qDebug() << "WebSocket connected";
     connect(&clientSocket, &QWebSocket::textMessageReceived,
             this, &clientconnection::onTextMessageReceived);
     SendMessageToServer("Hello There");
@@ -210,7 +210,7 @@ void clientconnection::onConnected()
  */
 void clientconnection::SendMessageToServer(QString msg)
 {
-    qDebug() <<"Sending message" <<msg;
+   // qDebug() <<"Sending message" <<msg;
     clientSocket.sendTextMessage(msg);
 }
 
@@ -229,13 +229,13 @@ QString clientconnection::GenerateMessage(QString type)
 
     /* Note (Ivan Cuyler): The JFILES folder needs to be in the direct parent directory of
        the project. For some reason it won't work if it is in the same folder.*/
-    QString path = "../JFILES/";
+    QString path = "C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/JFILES/";
     path = path + type + ".json";
     file.setFileName(path);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     val = file.readAll();
     file.close();
-    qInfo() << "Generating message: " << val;
+   // qInfo() << "Generating message: " << val;
     return val;
 //    QJsonDocument d = QJsonDocument::fromJson(val.toUtf8());
 //    QJsonObject jObject = d.object();
@@ -250,6 +250,7 @@ QString clientconnection::GenerateMessage(QString type)
 
 QJsonObject clientconnection::CreateJObject(QString value)
 {
+  //  std::cout<<"Creating JObject "<<value.toStdString()<<endl;
   QJsonDocument doc = QJsonDocument::fromJson(value.toUtf8());
   QJsonObject jObject = doc.object();
   return(jObject);

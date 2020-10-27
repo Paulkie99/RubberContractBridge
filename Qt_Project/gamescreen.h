@@ -17,12 +17,21 @@ class GameScreen : public QDialog
 {
     Q_OBJECT
     friend class MainWindow;
-
+    friend class TestGameScreen;
 public:
     explicit GameScreen(QWidget *parent = nullptr);
     ~GameScreen();
 
 private slots:
+
+    QJsonObject returnJson(QString);
+    void setUsername(QString);
+    QString getUserPosition();
+    QString getTeamPosition();
+    QString getOpp1Position();
+    QString getOpp2Position();
+    QString getBid();
+
     void on_GameScreen_finished(int result);
 
     void on_pushButton_Score_clicked();
@@ -47,8 +56,6 @@ private slots:
 
     void serverInfoSlot(QString, QString, QString, clientconnection *, QString, int);
 
-    void bidStartSlot(QJsonObject);
-
     void on_pushButton_ViewCards_clicked();
 
     void on_pushButton_BackAuction_clicked();
@@ -61,16 +68,12 @@ private slots:
 
     void on_pushButton_Redouble_clicked();
 
-    void bidRequestSlot();
-
-    void bidUpdateSlot(QJsonObject bid);
-
     void addToTable(QString, int);
-
     void visibleAll(bool vis = true);
-
+    void bidRequestSlot();
+    void bidUpdateSlot(QJsonObject bid);
     void bidEndSlot(QJsonObject);
-
+    void bidStartSlot(QJsonObject);
     void moveRequestSlot(QJsonObject);
     void moveUpdateSlot(QJsonObject);
     void trickEndSlot(QJsonObject);
@@ -82,6 +85,7 @@ private slots:
     void ping();
     void pongSlot(QJsonObject);
     void playStartSlot(QJsonObject);
+
     void on_pb_1_clicked();
 
     void on_pb_2_clicked();

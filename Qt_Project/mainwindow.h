@@ -15,14 +15,20 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-//    friend class clientconnection;
     friend class GameScreen;
+    friend class TestMainWindow;
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
 
+    QString sendHello();
+
+    QString getPassword();
+
+    QJsonObject returnJson(QString);
 
     void on_pushButton_Join_clicked();
 
@@ -38,7 +44,7 @@ private slots:
 
     void on_pushButton_CreateConf_clicked();
 
-    void connectSuccessfulSlot(QJsonObject);
+    QJsonObject connectSuccessfulSlot(QJsonObject);
     void authSuccessfulSlot();
     void authUnsuccessfulSlot(QJsonObject);
     void connectUnsuccessfulSlot(QJsonObject);
@@ -52,7 +58,6 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-
     // Create instance of GameScreen
     GameScreen *gameScreen;
 };

@@ -10,6 +10,7 @@ clientconnection *client;
 //clientconnection client(QStringLiteral("ws://localhost:159"), true);
 int id = 0;
 bool connected = false;
+QString testpassword = "";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -28,36 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->leditPassword->setEchoMode(QLineEdit::Password);
     // Set the focus to the heading
     ui->lblHeading->setFocus();
-
-
-//    connect(&client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
-//    connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-//    connect(&client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
-//    connect(&client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
-//    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
-//    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-//    connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
-//    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
-
-
-    // Temp debug code to test successful connect. Server will send this after constructor of client
-//    QString mes = client.GenerateMessage("CONNECT_SUCCESSFUL");
-//    client.onTextMessageReceived(mes);
-
-    // Connect the various signals and slots
-
-//    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
-//    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-//    connect(client, &clientconnection::authUnsuccessfulSignal, this, &MainWindow::authUnsuccessfulSlot);
-//    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
-
-//    // Connect the various signals and slots
-//    connect(&client, &clientconnection::serverFullSignal, this, &MainWindow::serverFullSlot);
-//    connect(&client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
-//    connect(&client, &clientconnection::lobbyUpdateSignal, this, &MainWindow::lobbyUpdateSlot);
-//     connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-//     connect(&client, &clientconnection::authUnsuccessfulSignal, this, &MainWindow::authUnsuccessfulSlot);
-//     connect(&client, &clientconnection::connectUnsuccessfulSignal, this, &MainWindow::connectUnsuccessfulSlot);
 }
 
 MainWindow::~MainWindow()
@@ -65,10 +36,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QString MainWindow::sendHello()
+{
+    cout<<"ello"<<endl;
+    return "hello";
+}
+
+QString MainWindow::getPassword()
+{
+    return testpassword;
+}
+
+// Unit Test Function
+QJsonObject MainWindow::returnJson(QString type)
+{
+    // Establish a clientconnection object for communicating over the network
+    clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), false);
+
+    QString mes = client1->GenerateMessage(type);
+    return client1->CreateJObject(mes);
+}
+
 
 // The client is connected to the server and may begin sending messages.
 // CONNECT_SUCCESSFUL received
-void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
+QJsonObject MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
 {
     connected = true;
 
@@ -88,12 +80,13 @@ void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
     request["Alias"] = Username;
     request["Id"] = id;
 
-    //Send the updated message to the server
-    client->SendMessageToServer(client->CreateJString(request));
+    return request;
+//    //Send the updated message to the server
+//    client->SendMessageToServer(client->CreateJString(request));
 
-    // Temp debug code to test successful login
-    mes = client->GenerateMessage("AUTH_SUCCESSFUL");
-    client->onTextMessageReceived(mes);
+//    // Temp debug code to test successful login
+//    mes = client->GenerateMessage("AUTH_SUCCESSFUL");
+//    client->onTextMessageReceived(mes);
 }
 
 // If the user wishes to join an existing game, the stacked widget's
@@ -107,7 +100,6 @@ void MainWindow::on_pushButton_Join_clicked()
     ui->menuBridge->setTitle("Join Game");
     // Set the focus to leditHostIP
     ui->leditHostIP->setFocus();
-
 }
 
 // Preliminary client-side logic to receive input from the user.
@@ -122,10 +114,10 @@ void MainWindow::on_pushButton_JoinServer_clicked()
     client = client1;
 
     // Connect the various signals and slots
-    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
-    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-    connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
-    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+//    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+//    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+//    connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+//    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
 
     // Temp debug code to test successful connect. Server will send this after constructor of client
     QString mes = client->GenerateMessage("CONNECT_SUCCESSFUL");

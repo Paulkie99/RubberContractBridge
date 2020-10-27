@@ -1,5 +1,6 @@
 QT       += core gui
 QT += core websockets
+QT += testlib
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -12,9 +13,10 @@ CONFIG -= app_bundle
 SOURCES += \
     clientconnection.cpp \
     gamescreen.cpp \
-    main.cpp \
     mainwindow.cpp \
-    scoreboard.cpp
+    scoreboard.cpp \
+    testgamescreen.cpp \
+    testmainwindow.cpp
 
 HEADERS += \
     clientconnection.h \
@@ -26,7 +28,7 @@ FORMS += \
     gamescreen.ui \
     mainwindow.ui \
     scoreboard.ui
-
+#QMAKE_POST_LINK += ./${TARGET}
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
