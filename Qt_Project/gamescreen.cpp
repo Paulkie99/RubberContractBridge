@@ -498,10 +498,14 @@ void GameScreen::sendMove(QString Suit, QString Rank)
 // and thus most of the signals and slots will be connected from here.
 void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientconnection *client1, QString usern, int ID)
 {
+
     Userid = ID;
     Username = usern;
     ui->lblInfo->setText("IP: " + ip + " Port Number: " + port + " Password: " + pass);
     clientgs = client1;
+
+//    clientconnection *client2 = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), true);
+//    clientgs = client2;
     //connectSlots();
     // Connect all relevant signals and slots
     connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
@@ -518,9 +522,9 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
     connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
     connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
-
+cout<<"422 serverinfoslot"<<endl;
     // Debug code
-    QString mes = clientgs->GenerateMessage("BID_START");
+    QString mes = clientgs->GenerateMessage("BID_END");
     // Temp debug code. NEE VERKEERD, HAAL NET UIT SODRA KLAAR --> In reality this must be clientgs->sendToServer(
     clientgs->onTextMessageReceived(mes);
 
