@@ -6,7 +6,7 @@
 
 /* Code used to implement tests for the server
  * Author: Paul Claasen 18006885
- * Last update: 06/10/2020 Revision 1*/
+ * Last update: 27/10/2020 Revision 10*/
 
 #include <inputvalidator.h>
 #include <serverinterface.h>
@@ -23,6 +23,9 @@ class TestServer : public QObject
 public:
     TestServer();
     ~TestServer();
+
+    void PassAndPlay();
+    void PassAndPlay2();
 
 private:
     ServerInterface* server;
@@ -49,6 +52,7 @@ private slots:
     void TestAuthFailed();
     void TestInputBranch();
     void TestDeal();
+    void TestShuffle();
     void TestConnectLobbyFull();
     void TestDisconnect();
     void TestReconnect();
@@ -80,6 +84,7 @@ void TestServer::init()
     server->bridgeServer->shuffle = false;
     spyServerReception = new QSignalSpy(server->bridgeServer, SIGNAL(messageReceived(QString)));
     spyServerSend = new QSignalSpy(server->bridgeServer, SIGNAL(messageSent(QString)));
+    server->bridgeServer->GS.setDealer(&server->bridgeServer->ConnectedClients[1]);
 }
 
 /*
@@ -259,6 +264,59 @@ void TestServer::TestDeal()
     }
 }
 
+/*
+ * Function testing the shuffle() function of the server
+ * */
+void TestServer::TestShuffle()
+{
+    delete server;
+    server = new ServerInterface();
+    server->bridgeServer->shuffle = true;
+
+    server->bridgeServer->GS.setDealer(&server->bridgeServer->ConnectedClients[0]);
+
+    for(int i = 0; i < 4; ++i)
+    {
+        QString username = "User" + QString(i);
+
+        clientconnection* temp = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), false, nullptr, username);
+
+        QSignalSpy* temp_spy = new QSignalSpy(temp, SIGNAL(messageReceived(QString)));
+
+        clients.push_back(temp);
+        spies.push_back(temp_spy);
+        spies[i]->wait(50);
+    }
+
+    QJsonObject clien1_msg = clients[0]->CreateJObject(clients[0]->GenerateMessage("PLAYER_READY"));
+    clients[0]->SendMessageToServer(clients[0]->CreateJString(clien1_msg));
+
+    QJsonObject clien2_msg = clients[1]->CreateJObject(clients[1]->GenerateMessage("PLAYER_READY"));
+    clients[1]->SendMessageToServer(clients[1]->CreateJString(clien1_msg));
+
+    QJsonObject clien3_msg = clients[2]->CreateJObject(clients[2]->GenerateMessage("PLAYER_READY"));
+    clients[2]->SendMessageToServer(clients[2]->CreateJString(clien1_msg));
+
+    QJsonObject clien4_msg = clients[3]->CreateJObject(clients[3]->GenerateMessage("PLAYER_READY"));
+    clients[3]->SendMessageToServer(clients[3]->CreateJString(clien1_msg));
+
+    spies[0]->wait(50);
+    spies[1]->wait(50);
+    spies[2]->wait(50);
+    spies[3]->wait(50);
+
+    for(int i = 0; i < 4; ++i)
+    {
+        if(spies[i]->size() == (8 - i))
+        {
+            QJsonObject bid_start = Convert_Message_To_Json(spies[i]->takeAt((8 - i) - 2).at(0).toString());
+            QCOMPARE(bid_start["Type"], "BID_START");
+            QVERIFY(bid_start["Cards"].toArray().at(0).toObject()["Rank"].toArray().at(0).toString() != "K" && bid_start["Cards"].toArray().at(0).toObject()["Rank"].toArray().at(1).toString() != "9" && bid_start["Cards"].toArray().at(0).toObject()["Rank"].toArray().at(2).toString() != "5");
+            QCOMPARE(Convert_Message_To_Json(spies[i]->takeAt((8 - i) - 2).at(0).toString())["Type"], "BID_REQUEST");
+        }
+    }
+}
+
 
 /*
  * Test whether the server allows a fifth connection even though a lobby consists of four, four clients are connected
@@ -385,40 +443,40 @@ void TestServer::TestValidInvalidBid()
     spyServerReception->wait(50);
     QCOMPARE(spyServerReception->takeAt(14).at(0).toString(), "Bid Invalid");
 
-    send_bid("NT", "2"); // north bid
+    send_bid("C", "2"); // north bid
 
     spyServerReception->wait(50);
     QCOMPARE(spyServerReception->takeAt(15).at(0).toString(), "Bid Valid");
 
-    send_bid("NT", "2"); // east bid, rank invalid
+    send_bid("NT", "1"); // east bid, rank invalid
 
     spyServerReception->wait(50);
     QCOMPARE(spyServerReception->takeAt(16).at(0).toString(), "Bid Invalid");
 
-    send_bid("NT", "1"); // east bid, rank invalid
+    send_bid("D", "2"); // east bid
 
     spyServerReception->wait(50);
-    QCOMPARE(spyServerReception->takeAt(17).at(0).toString(), "Bid Invalid");
+    QCOMPARE(spyServerReception->takeAt(17).at(0).toString(), "Bid Valid");
 
-    send_bid("S", "3"); // east bid
-
-    spyServerReception->wait(50);
-    QCOMPARE(spyServerReception->takeAt(18).at(0).toString(), "Bid Valid");
-
-    send_bid("H", "3"); // south bid, suit invalid
+    send_bid("C", "2"); // south bid, suit invalid
 
     spyServerReception->wait(50);
-    QCOMPARE(spyServerReception->takeAt(19).at(0).toString(), "Bid Invalid");
+    QCOMPARE(spyServerReception->takeAt(18).at(0).toString(), "Bid Invalid");
 
-    send_bid("NT", "3"); // south bid
+    send_bid("S", "2"); // south bid
+
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(19).at(0).toString(), "Bid Valid");
+
+    send_bid("C", "3"); // west bid
 
     spyServerReception->wait(50);
     QCOMPARE(spyServerReception->takeAt(20).at(0).toString(), "Bid Valid");
 
-    send_bid("C", "4"); // west bid
+    send_bid("C", "3"); // north bid invalid
 
     spyServerReception->wait(50);
-    QCOMPARE(spyServerReception->takeAt(21).at(0).toString(), "Bid Valid");
+    QCOMPARE(spyServerReception->takeAt(21).at(0).toString(), "Bid Invalid");
 
 }
 
@@ -426,10 +484,8 @@ void TestServer::TestValidInvalidBid()
  * Tests a variety of moves and checks whether they correctly return valid or invalid, also plays an entire deal
  * with the end result being that NS wins 9 tricks, with a contract of 4 Clubs.
  * */
-void TestServer::TestValidInvalidMove()
+void TestServer::PassAndPlay()
 {
-    TestValidInvalidBid(); // last bid is 4C by South, who is declarer
-
     send_bid("PASS", NULL); // west pass
     spyServerReception->wait(50);
     send_bid("PASS", NULL); // north pass
@@ -682,16 +738,329 @@ void TestServer::TestValidInvalidMove()
     send_move("C", "K"); // west
     spyServerReception->wait(50);
     QCOMPARE(spyServerReception->takeAt(88).at(0).toString(), "Move Valid");
-
-    // North won
 }
 
-/*
- * Repeat the previous bidding and deal, and verify whether the correct scores and winners are determined.
- * */
+void TestServer::PassAndPlay2()
+{
+    send_bid("PASS", NULL); // west pass
+    spyServerReception->wait(50);
+    send_bid("PASS", NULL); // north pass
+    spyServerReception->wait(50);
+    send_bid("PASS", NULL); // east pass
+    spyServerReception->wait(50);
+
+    QVERIFY(server->bridgeServer->GS.getMoveStage() == true); // verify that we are in play stage after three passes
+
+    send_move("C", "2", true); // out of turn
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(28).at(0).toString(), "Move Invalid");
+
+    send_move("C", "2"); // west, not in hand
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(29).at(0).toString(), "Move Invalid");
+
+    send_move("NT", "2"); //NT not valid card
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(30).at(0).toString(), "Move Invalid");
+
+    send_move("Pass", "2"); // pass invalid
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(31).at(0).toString(), "Move Invalid");
+
+    send_move("Double", "2"); // double invalid
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(32).at(0).toString(), "Move Invalid");
+
+    send_move("Redouble", "2"); // redouble invalid
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(33).at(0).toString(), "Move Invalid");
+
+    send_move("C", "1"); // No "1" card
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(34).at(0).toString(), "Move Invalid");
+
+    send_move("C", "11"); // No "11" card
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(35).at(0).toString(), "Move Invalid");
+
+    send_move("S", "A"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(36).at(0).toString(), "Move Valid");
+
+    send_move("S", "3", false, 2); // north dummy hand
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(37).at(0).toString(), "Move Valid");
+
+    send_move("S", "4"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(38).at(0).toString(), "Move Valid");
+
+    send_move("C", "8"); // south invalid, can follow suit but doesn't
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(39).at(0).toString(), "Move Invalid");
+
+    send_move("S", "5"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(40).at(0).toString(), "Move Valid");
+
+    send_move("C", "K"); // west won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(41).at(0).toString(), "Move Valid");
+
+    send_move("C", "A", false, 2); // north
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(42).at(0).toString(), "Move Valid");
+
+    send_move("C", "J"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(43).at(0).toString(), "Move Valid");
+
+    send_move("C", "4"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(44).at(0).toString(), "Move Valid");
+
+    send_move("H", "4", false, 2); // north won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(45).at(0).toString(), "Move Valid");
+
+    send_move("H", "K"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(46).at(0).toString(), "Move Valid");
+
+    send_move("H", "A"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(47).at(0).toString(), "Move Valid");
+
+    send_move("H", "J"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(48).at(0).toString(), "Move Valid");
+
+    send_move("H", "6"); // south won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(49).at(0).toString(), "Move Valid");
+
+    send_move("H", "7"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(50).at(0).toString(), "Move Valid");
+
+    send_move("H", "8", false, 2); // north
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(51).at(0).toString(), "Move Valid");
+
+    send_move("H", "5"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(52).at(0).toString(), "Move Valid");
+
+    send_move("H", "Q"); // north won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(53).at(0).toString(), "Move Valid");
+
+    send_move("H", "9"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(54).at(0).toString(), "Move Valid");
+
+    send_move("H", "2"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(55).at(0).toString(), "Move Valid");
+
+    send_move("H", "3"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(56).at(0).toString(), "Move Valid");
+
+    send_move("D", "5", false, 2); // north won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(57).at(0).toString(), "Move Valid");
+
+    send_move("D", "10"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(58).at(0).toString(), "Move Valid");
+
+    send_move("D", "J"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(59).at(0).toString(), "Move Valid");
+
+    send_move("D", "4"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(60).at(0).toString(), "Move Valid");
+
+    send_move("D", "3"); // south won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(61).at(0).toString(), "Move Valid");
+
+    send_move("D", "8"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(62).at(0).toString(), "Move Valid");
+
+    send_move("D", "9", false, 2); // north
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(63).at(0).toString(), "Move Valid");
+
+    send_move("D", "A"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(64).at(0).toString(), "Move Valid");
+
+    send_move("S", "Q"); // east won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(65).at(0).toString(), "Move Valid");
+
+    send_move("S", "9"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(66).at(0).toString(), "Move Valid");
+
+    send_move("S", "10"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(67).at(0).toString(), "Move Valid");
+
+    send_move("S", "7", false, 2); // north
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(68).at(0).toString(), "Move Valid");
+
+    send_move("S", "8"); // east won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(69).at(0).toString(), "Move Valid");
+
+    send_move("S", "K"); // south dummy
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(70).at(0).toString(), "Move Valid");
+
+    send_move("S", "6"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(71).at(0).toString(), "Move Valid");
+
+    send_move("S", "J", false, 2); // north dum
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(72).at(0).toString(), "Move Valid");
+
+    send_move("C", "8"); // south won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(73).at(0).toString(), "Move Valid");
+
+    send_move("C", "5"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(74).at(0).toString(), "Move Valid");
+
+    send_move("C", "2", false, 2); // north
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(75).at(0).toString(), "Move Valid");
+
+    send_move("C", "3"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(76).at(0).toString(), "Move Valid");
+
+    send_move("C", "Q"); // south won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(77).at(0).toString(), "Move Valid");
+
+    send_move("C", "9"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(78).at(0).toString(), "Move Valid");
+
+    send_move("C", "6", false, 2); // north
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(79).at(0).toString(), "Move Valid");
+
+    send_move("C", "7"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(80).at(0).toString(), "Move Valid");
+
+    send_move("D", "7"); // south won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(81).at(0).toString(), "Move Valid");
+
+    send_move("D", "Q"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(82).at(0).toString(), "Move Valid");
+
+    send_move("D", "K", false, 2); // north dummy
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(83).at(0).toString(), "Move Valid");
+
+    send_move("D", "6"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(84).at(0).toString(), "Move Valid");
+
+    send_move("C", "10", false, 2); // north won
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(85).at(0).toString(), "Move Valid");
+
+    send_move("D", "2"); // east
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(86).at(0).toString(), "Move Valid");
+
+    send_move("H", "10"); // south
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(87).at(0).toString(), "Move Valid");
+
+    send_move("S", "2"); // west
+    spyServerReception->wait(50);
+    QCOMPARE(spyServerReception->takeAt(88).at(0).toString(), "Move Valid");
+}
+
+void TestServer::TestValidInvalidMove()
+{
+    TestValidInvalidBid(); // last bid is 4C by South, who is declarer
+
+    PassAndPlay();
+
+    // North won
+    QCOMPARE(server->bridgeServer->GS.underTheLine[0], 60);
+    QCOMPARE(server->bridgeServer->GS.RubberScore[0], 60);
+}
+
 void TestServer::TestScoring()
 {
     TestValidInvalidMove();
+
+    server->bridgeServer->GS.setPlayerTurn(2);
+    send_bid("C", "4");
+    spyServerReception->wait(50); // south bid
+
+    while(spyServerReception->size() > 21){spyServerReception->removeLast();}
+    PassAndPlay();
+    spyServerReception->wait(50);
+
+    QCOMPARE(server->bridgeServer->GS.underTheLine[NS], 60);
+    QCOMPARE(server->bridgeServer->GS.RubberScore[NS], 60);
+    QCOMPARE(server->bridgeServer->GS.underTheLine[EW], 0);
+    QCOMPARE(server->bridgeServer->GS.RubberScore[EW], 50);
+
+    server->bridgeServer->GS.setPlayerTurn(2);
+    send_bid("C", "2");
+    spyServerReception->wait(50); // south bid
+
+    while(spyServerReception->size() > 21){spyServerReception->removeLast();}
+    PassAndPlay();
+    spyServerReception->wait(50);
+
+    QVERIFY(server->bridgeServer->GS.IsVulnerable[NS]);
+    QCOMPARE(server->bridgeServer->GS.underTheLine[NS], 0);
+    QCOMPARE(server->bridgeServer->GS.RubberScore[NS], 120);
+    QCOMPARE(server->bridgeServer->GS.underTheLine[EW], 0);
+    QCOMPARE(server->bridgeServer->GS.RubberScore[EW], 50);
+
+    server->bridgeServer->GS.setPlayerTurn(2);
+    send_bid("NT", "3");
+    spyServerReception->wait(50); // south bid
+
+    while(spyServerReception->size() > 21){spyServerReception->removeLast();}
+    PassAndPlay2();
+    spyServerReception->wait(50);
+    spies[0]->wait(50);
+
+    QVERIFY(!server->bridgeServer->GS.IsVulnerable[NS]);
+
+    QJsonObject game_end = Convert_Message_To_Json(spies[0]->takeLast().at(0).toString());
+    QCOMPARE(game_end["Type"], "GAME_END");
+    QCOMPARE(game_end["WinningPartnership"], "NS");
+    QCOMPARE(game_end["NSscore"], 950);
+    QCOMPARE(game_end["EWscore"], 50);
+
+    QJsonObject score = Convert_Message_To_Json(spies[0]->takeLast().at(0).toString());
+    QJsonObject nsscore = score["NSscores"].toObject();
+    QCOMPARE(score["Type"], "SCORE");
+    QCOMPARE(nsscore["trickScore"], 100);
+    QCOMPARE(nsscore["rubberbonus"], 700);
+    QCOMPARE(nsscore["overtricks"], 30);
 }
 
 QTEST_MAIN(TestServer)

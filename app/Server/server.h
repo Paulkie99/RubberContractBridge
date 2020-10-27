@@ -6,7 +6,7 @@
 
 /* Code used to implement the server for the bridge game of EPE321
  * Author: Paul Claasen 18006885
- * Last update: 06/10/2020 Revision 3*/
+ * Last update: 27/10/2020 Revision 7*/
 
 #ifndef SERVER_H
 #define SERVER_H
@@ -70,7 +70,6 @@ private:
     void ConnectClient(int pos);
     void SendMessage(int id, QJsonObject);
     void BroadcastMessage(QJsonObject);
-    void UpdateGameState(int card_val, int card_suit, bool isBid);
     Card* findCardInHand(int player, int val, int suit);
 
     void findHonors();

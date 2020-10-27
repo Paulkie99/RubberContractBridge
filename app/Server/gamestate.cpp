@@ -6,7 +6,7 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 02/10/2020 Revision 3
+//Last update: 27/10/2020 Revision 7
 #include "gamestate.h"
 
 GameState::GameState()
@@ -230,25 +230,12 @@ void GameState::Reset(int dealer)
     }
 
     CurrentTrick.clear();
-
-    for (int i = 0; i < 2; i++)
-    {
-        RubberScore[i] = 0;
-    }
-    for (int i = 0; i < 2; i++)
-    {
-        underTheLine[i] = 0;
-    }
     for (int i = 0; i < 5; i++)
     {
         for (int j = 0; j < 2; j++)
         {
             firstDenominationBids[i][j] = -1;
         }
-    }
-    for (int i = 0; i < 2; i++)
-    {
-        IsVulnerable[i] = false;
     }
 }
 

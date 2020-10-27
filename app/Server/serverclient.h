@@ -6,7 +6,7 @@
 
 /* Code used to implement the serverclient, which is the server's representation of a client.
  * Author: Paul Claasen 18006885
- * Last update: 06/10/2020 Revision 3
+ * Last update: 26/10/2020 Revision 4
  **/
 
 #ifndef SERVERCLIENT_H

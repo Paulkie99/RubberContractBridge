@@ -6,7 +6,7 @@
 
 /* Code used to implement the server for the bridge game of EPE321
  * Author: Paul Claasen 18006885
- * Last update: 06/10/2020 Revision 3*/
+ * Last update: 27/10/2020 Revision 20*/
 
 #include "server.h"
 
@@ -556,6 +556,8 @@ void Server::Score_Deal()
     int contract = contract_card.value + 1;
     int declarerTeam = GS.getDeclarer() % 2;
     int made = GS.TrickScore[declarerTeam] - 6;
+    qInfo() << "Contract: " << contract;
+    qInfo() << "Made: " << made;
     if(made > contract) // overtrick(s) and contract points
     {
         int num_over = made - contract;
@@ -591,7 +593,9 @@ void Server::Score_Deal()
         trickScore *= (contract_card.isRedoubled ? 2 : 1);
 
         scores[declarerTeam]["trickScore"] = trickScore;
+        qInfo() << "NSscore under" << GS.underTheLine[0];
         GS.underTheLine[declarerTeam] += trickScore;
+        qInfo() << "NSscore under" << GS.underTheLine[0];
 
         int insult = 1;
         insult *= (contract_card.isDoubled ? 50 : 0);
@@ -639,6 +643,7 @@ void Server::Score_Deal()
     }
     else // equal
     { // just contract points
+        qInfo() << "NSscore under" << GS.underTheLine[0];
         int trickScore = 0;
         if(contract_card.suit == NT)
         {
@@ -655,6 +660,7 @@ void Server::Score_Deal()
 
         scores[declarerTeam]["trickScore"] = trickScore;
         GS.underTheLine[declarerTeam] += trickScore;
+        qInfo() << "NSscore under" << GS.underTheLine[0];
 
         int insult = 1;
         insult *= (contract_card.isDoubled ? 50 : 0);
@@ -676,6 +682,7 @@ void Server::Score_Deal()
     }
 
 
+    qInfo() << "NSscore Rubber" << GS.RubberScore[0];
     GS.RubberScore[NS] += scores[NS]["overtricks"].toInt() +
                           scores[NS]["undertricks"].toInt() +
                           scores[NS]["honors"].toInt() +
@@ -683,6 +690,7 @@ void Server::Score_Deal()
                           scores[NS]["unfinished"].toInt() +
                           scores[NS]["trickScore"].toInt() +
                           scores[NS]["insult"].toInt();
+    qInfo() << "NSscore Rubber" << GS.RubberScore[0];
 
     GS.RubberScore[EW] += scores[EW]["overtricks"].toInt() +
                           scores[EW]["undertricks"].toInt() +
@@ -803,9 +811,12 @@ void Server::Update_Bid(int id, int value, int suit)
     else if(GS.getBidRoundCount() > 0) // passed, but not first round
     {
         GS.IncreasePassCount();
+        qInfo() << "PASS DETECTED" << GS.getPassCount();
         if(GS.getPassCount() == 3) // three consecutive passses, play should commence
         {// start play stage
+            qInfo() << "Play starting";
             GS.SetBidStage(false);
+            GS.setMoveStage(true);
             GS.setDeclarer(GS.firstDenominationBids[GS.getCurrentBid()->suit][GS.getCurrentBid()->owner % 2]);
             GS.setPlayerTurn((GS.getDeclarer() + 1) % num_players);
 
@@ -824,8 +835,6 @@ void Server::Update_Bid(int id, int value, int suit)
 
             bid_end["Contract"] = contract;
             BroadcastMessage(bid_end);
-
-            GS.setMoveStage(true);
 
             QJsonObject play_start = Convert_Message_To_Json(GenerateMessage("PLAY_START"));
             QJsonArray dummy_cards = *Construct_Cards_Message((GS.getDeclarer() + 2) % num_players);

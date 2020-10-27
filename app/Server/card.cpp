@@ -6,7 +6,7 @@
 
 /* Code used to implement the card class
  * Author: Paul Claasen 18006885
- * Last update: 05/10/2020 Revision 1*/
+ * Last update: 25/10/2020 Revision 3*/
 
 #include "card.h"
 

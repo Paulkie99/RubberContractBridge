@@ -6,7 +6,7 @@
 
 /* This class represents a card object and includes convenient print functions.
  * Author: Paul Claasen 18006885
- * Last update: 05/10/2020 Revision 1*/
+ * Last update: 25/10/2020 Revision 3*/
 
 #ifndef CARD_H
 #define CARD_H
