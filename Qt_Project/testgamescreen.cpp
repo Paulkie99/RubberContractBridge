@@ -1,7 +1,17 @@
+/* Declaration
+ * 1. I understand what plagiarism is and am aware of the University’s policy in this regard.
+ * 2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
+ * printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
+ * departmental requirements.*/
+
+/* Author: Ivan Cuyler
+ * Last update: 2020/10/27 */
+
 #include <QtTest/QtTest>
 #include <QCoreApplication>
 #include "gamescreen.h"
 #include "ui_gamescreen.h"
+#include <iostream>
 
 class TestGameScreen: public QObject
 {
@@ -13,19 +23,14 @@ private:
     GameScreen *gs = new GameScreen;
 
 private slots:
-    void toUpper();
     void testPlayerCardsLoading();
     void testDummyCardsLoading();
     void testPositionDisplay();
-    void bidButtons();
-    void bidCellClicked();
+    void testbidButtons();
+    void testbidCellClicked();
+    void testCardPlayed();
 };
 
-void TestGameScreen::toUpper()
-{
-    QString str = "Hello";
-    QVERIFY(str.toUpper() == "HELLO");
-}
 
 // Test the extraction, saving and loading of the player's card upon BID_START received
 void TestGameScreen::testPlayerCardsLoading()
@@ -67,11 +72,15 @@ void TestGameScreen::testDummyCardsLoading()
     QVERIFY(gs->ui->pb_13->icon().isNull() == false);
 }
 
+// Test that the position labels are correctly updated
 void TestGameScreen::testPositionDisplay()
 {
+    // Set the user's username
     gs->setUsername("P4");
+    // Generate JSON objects
     QJsonObject bidend = gs->returnJson("BID_END");
     QJsonObject lobby = gs->returnJson("LOBBY_UPDATE");
+    // Simulate the label update functions
     gs->lobbyUpdateSlot(lobby);
     gs->bidEndSlot(bidend);
 
@@ -107,22 +116,10 @@ void TestGameScreen::testPositionDisplay()
     QCOMPARE(gs->getOpp2Position(), "South (Dummy)");
 }
 
-void TestGameScreen::bidButtons()
+// Test the correct functionality of the bidding buttons on the Auction screen
+void TestGameScreen::testbidButtons()
 {
-
-//    int xPos = gs->ui->tableBids->columnViewportPosition( 2 ) + 5;
-//    int yPos = gs->ui->tableBids->rowViewportPosition( 3 ) + 10;
-
-//    QRect rect = gs->ui->tableBids->visualItemRect(gs->ui->tableBids->item(2,2));
-//    QTest::mouseClick(gs->ui->tableBids->viewport(), Qt::LeftButton, 0, rect.center());
-//    QTest::qWait( 1000 );
-//    QTest::mouseDClick(gs->ui->tableBids->viewport(), Qt::LeftButton, 0, rect.center());
-////    QTest::mouseDClick(gs->ui->tableBids->viewport(), Qt::LeftButton, NULL, QPoint(xPos, yPos));
-//    QTest::qWait( 1000 );
-//    QTest::keyClick( gs->ui->tableBids, Qt::Key_End );
-   // QVERIFY(gs->ui->tableBids->selectedItems().isEmpty() == false);
-
-
+    // Simulate a mouse click on the Pass bidding option
     QTest::mouseClick(gs->ui->pushButton_Pass, Qt::LeftButton);
     QVERIFY(gs->ui->tableBids->selectedItems().isEmpty() == true);
     QVERIFY(gs->ui->tableBids->isEnabled() == false);
@@ -131,6 +128,7 @@ void TestGameScreen::bidButtons()
     QVERIFY(gs->ui->pushButton_Pass->isEnabled() == false);
     QVERIFY(gs->ui->pushButton_Redouble->isEnabled() == false);
 
+    // Simulate a mouse click on the Double bidding option
     QTest::mouseClick(gs->ui->pushButton_Double, Qt::LeftButton);
     QVERIFY(gs->ui->tableBids->selectedItems().isEmpty() == true);
     QVERIFY(gs->ui->tableBids->isEnabled() == false);
@@ -139,6 +137,7 @@ void TestGameScreen::bidButtons()
     QVERIFY(gs->ui->pushButton_Pass->isEnabled() == false);
     QVERIFY(gs->ui->pushButton_Redouble->isEnabled() == false);
 
+    // Simulate a mouse click on the Redouble bidding option
     QTest::mouseClick(gs->ui->pushButton_Redouble, Qt::LeftButton);
     QVERIFY(gs->ui->tableBids->selectedItems().isEmpty() == true);
     QVERIFY(gs->ui->tableBids->isEnabled() == false);
@@ -147,6 +146,7 @@ void TestGameScreen::bidButtons()
     QVERIFY(gs->ui->pushButton_Pass->isEnabled() == false);
     QVERIFY(gs->ui->pushButton_Redouble->isEnabled() == false);
 
+    // Simulate a mouse click on the normal Bid option
     QTest::mouseClick(gs->ui->pushButton_Bid, Qt::LeftButton);
     QVERIFY(gs->ui->tableBids->selectedItems().isEmpty() == true);
     QVERIFY(gs->ui->tableBids->isEnabled() == false);
@@ -164,8 +164,10 @@ void TestGameScreen::bidButtons()
     QVERIFY(gs->ui->pushButton_Redouble->isEnabled() == true);
 }
 
-void TestGameScreen::bidCellClicked()
+// Test the correct extraction of a bid made by the user from the bidding table
+void TestGameScreen::testbidCellClicked()
 {
+    // Simulate a click on the cell (2, 0)
     gs->on_tableBids_cellClicked(2, 0);
     QCOMPARE(gs->getBid(), "C3");
 
@@ -184,5 +186,81 @@ void TestGameScreen::bidCellClicked()
     QCOMPARE(gs->getBid(), "C1");
 }
 
-QTEST_MAIN(TestGameScreen)
+// Test the correct GUI updating of the user clicking on a card to play it
+void TestGameScreen::testCardPlayed()
+{
+    // Load user cards
+    gs->bidStartSlot(gs->returnJson("BID_START"));
+
+    // Generate a MOVE_UPDATE JSON
+    QJsonObject move = gs->returnJson("MOVE_UPDATE");
+
+    // Simulate a card being clicked and selected to play
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_1, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"H2");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_2, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"H7");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_3, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"S5");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_4, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"SA");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_5, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"S6");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_6, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"C6");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_7, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"CJ");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_8, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"CQ");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_9, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"CK");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_10, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"D2");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_11, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"D9");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_12, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"D10");
+
+    gs->visibleAll(true);
+    gs->disableCards(0, true);
+    QTest::mouseClick(gs->ui->pb_13, Qt::LeftButton);
+    QCOMPARE(gs->getMove(),"DK");
+}
+
+//QTEST_MAIN(TestGameScreen)
 #include "testgamescreen.moc"

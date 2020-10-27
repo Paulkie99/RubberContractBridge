@@ -1,3 +1,12 @@
+/* Declaration
+ * 1. I understand what plagiarism is and am aware of the University’s policy in this regard.
+ * 2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
+ * printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
+ * departmental requirements.*/
+
+/* Author: Ivan Cuyler
+ * Last update: 2020/10/27 */
+
 #include <QtTest/QtTest>
 #include <QCoreApplication>
 #include "mainwindow.h"
@@ -12,7 +21,6 @@ public:
 private:
     MainWindow *mw = new MainWindow;
 private slots:
-    void toUpper();
     void allObjectsPresent();
     void Buttons();
     void testAlias();
@@ -20,13 +28,6 @@ private slots:
     void testPassword();
 };
 
-
-
-void TestMainWindow::toUpper()
-{
-    QString str = "Hello";
-    QVERIFY(str.toUpper() == "HELLO");
-}
 
 // Verify that all objects have been created
 void TestMainWindow::allObjectsPresent()
@@ -78,11 +79,10 @@ void TestMainWindow::Buttons()
 void TestMainWindow::testAlias()
 {
     QJsonObject test = mw->returnJson("CONNECT_REQUEST");
-    //QCOMPARE(mw->sendHello(), "helo");
-    mw->ui->leditUsername->setText("QT Testing Username");
+    QTest::keyClicks(mw->ui->leditUsername, "QT Testing Username");
     test["Alias"] = "QT Testing Username";
-    // mw->returnJson("CONNECT_REQUEST")
-    QVERIFY(test["Alias"] == mw->connectSuccessfulSlot(test)["Alias"]);
+
+    QCOMPARE(test["Alias"], mw->connectSuccessfulSlot(test)["Alias"]);
 }
 
 void TestMainWindow::testID()
@@ -94,10 +94,11 @@ void TestMainWindow::testID()
 void TestMainWindow::testPassword()
 {
     QJsonObject test = mw->returnJson("CONNECT_REQUEST");
-    mw->ui->leditPassword->setText("QT Testing Password");
+    QTest::keyClicks(mw->ui->leditPassword, "QT Testing Password");
     test["Password"] = "QT Testing Password";
+
     QCOMPARE(test["Password"], mw->connectSuccessfulSlot(test)["Password"]);
 }
 
-//QTEST_MAIN(TestMainWindow)
+QTEST_MAIN(TestMainWindow)
 #include "testmainwindow.moc"

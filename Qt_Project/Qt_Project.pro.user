@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.13.1, 2020-10-27T00:22:31. -->
+<!-- Written by QtCreator 4.13.1, 2020-10-27T19:36:47. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -66,10 +66,18 @@
    </valuemap>
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
     <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:TestGameScreen">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:testCardPlayed">Checked</value>
     <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:testDummyCardsLoading">Checked</value>
     <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:testPlayerCardsLoading">Checked</value>
     <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:testPositionDisplay">Checked</value>
-    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:toUpper">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:testbidButtons">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testgamescreen.cpp:testbidCellClicked">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testmainwindow.cpp:Buttons">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testmainwindow.cpp:TestMainWindow">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testmainwindow.cpp:allObjectsPresent">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testmainwindow.cpp:testAlias">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testmainwindow.cpp:testID">Checked</value>
+    <value type="Qt::CheckState" key="C:/Users/ivanc/Documents/Ivan se werk/2020/EPE 321/Project/test/Qt_Project/testmainwindow.cpp:testPassword">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
