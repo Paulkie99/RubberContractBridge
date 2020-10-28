@@ -6,12 +6,12 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 02/10/2020 Revision 3
+//Last update: 02/10/2020 Revision 5
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-#include <QObject>
 #include "card.h"
+#include <vector>
 
 using namespace std;
 
@@ -21,12 +21,20 @@ enum Teams
     EW
 };
 
-class GameState : public QObject
+// Note that player with id 0 == North, 1 == East, etc.
+enum players
 {
-    Q_OBJECT
+    North,
+    East,
+    South,
+    West
+};
+
+class GameState
+{
 public:
-    explicit GameState(QObject *parent = nullptr);
-    GameState(const GameState& gs, QObject *parent = nullptr);
+    explicit GameState();
+    GameState(const GameState& gs);
 //    ~GameState();
 
     void PrintGS();
@@ -34,21 +42,68 @@ public:
     bool GetBidStage();
     void IncreasePassCount();
     void ClearPassCount();
+    QString getPlayerFromId(int id);
+    QString getTeamFromId(int id);
 
+//    ServerClient *getDealer() const;
+//    void setDealer(ServerClient *value);
+
+    int getDeclarer() const;
+    void setDeclarer(int value);
+
+    int getPlayerTurn() const;
+    void setPlayerTurn(int value);
+
+    Card *getCurrentBid() const;
+    void setCurrentBid(Card *value);
+
+    int getPassCount() const;
+    void setPassCount(int value);
+
+    int getBidRoundCount() const;
+    void setBidRoundCount(int value);
+
+    int firstDenominationBids[5][2];
+    std::vector<Card*> CurrentTrick;
+    int TrickScore[2];
+
+    void Reset(int dealer);
+
+    int nextPlayerTurn();
+
+    int getTrickCount() const;
+    void setTrickCount(int value);
+
+    int honorsId = -1;
+    int honorsCount = 0;
+
+    int underTheLine[2];
+
+    int RubberScore[2];
+
+    bool IsVulnerable[2];
+
+    bool isGameOver = false;
+
+    int trumpSuit = -1;
+
+    bool getMoveStage() const;
+    void setMoveStage(bool value);
+
+    int getDummyPlayer() const;
+    void setDummyPlayer(int id);
 
 private:
-    bool BidStage;
-    int PassCount;
-    int TrickScore[2];
-    Card* CurrentTrick[4];
-    int Contract;
-    int Trump;
-    int GameScore[2];
-    int Teams[2][2];
-    int PlayerTurn;
-    int Declarer;
-    bool Double;
-    bool IsVulnerable[2];
+    bool BidStage = false;
+    bool MoveStage = false;
+    int bidRoundCount = 0;
+    int PassCount = 0;
+    Card* CurrentBid = NULL;
+//    ServerClient* dealer = NULL;
+    int PlayerTurn = -1;
+    int Declarer = -1;
+    int trickCount = 0;
+    int dummyPlayer = -1;
 
 
 signals:

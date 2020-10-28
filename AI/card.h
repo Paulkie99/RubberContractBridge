@@ -14,6 +14,9 @@
 #include <QObject>
 #include <QTextStream> // printing to stdout
 #include <iostream>
+#include <vector>
+
+using namespace std;
 
 enum Card_Vals
 {
@@ -50,6 +53,7 @@ public:
     int suit;
 
     void print(QTextStream& out);
+    void print();
     QString ValToString(int val);
     QString SuitToString(int suit);
 };

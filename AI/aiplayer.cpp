@@ -6,7 +6,7 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 07/10/2020 Revision 4
+//Last update: 07/10/2020 Revision 8
 #include "aiplayer.h"
 
 AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
@@ -34,7 +34,7 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
     cards[0][1] = 2; // suit
 
     cards[1][0] = 9; // value
-    cards[1][1] = 3; // suit
+    cards[1][1] = 0; // suit
 
     cards[2][0] = 11; // value
     cards[2][1] = 2; // suit
@@ -83,20 +83,20 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
      * This will be replaced by the hand received from the server when the
      * class is integrated with the server class.
     */
-    //Initialise deck - Adapted from PJ Clausen's Server class for functionallity purposes
-    cout << "Constructing deck\n";
-    // step through the values of the card value and suit enums and add each combination to the deck
-    int count = 0;
-    for(int suit = Clubs; suit <= Spades; suit++)
-        for(int value = Two; value <= Ace; value++)
-            Deck[count++] = Card(value, suit);
+//    //Initialise deck - Adapted from PJ Clausen's Server class for functionallity purposes
+//    cout << "Constructing deck\n";
+//    // step through the values of the card value and suit enums and add each combination to the deck
+//    int count = 0;
+//    for(int suit = Clubs; suit <= Spades; suit++)
+//        for(int value = Two; value <= Ace; value++)
+//            Deck[count++] = Card(value, suit);
 
 //    PrintDeck();
 //    cout << endl;
-    Shuffle(19);
+//    Shuffle(19);
 //    cout << endl;
 //    PrintDeck();
-    Deal();
+//    Deal();
 //    cout << endl;
 //    PrintHand();
 }
@@ -115,12 +115,23 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
 /*
  * A function to set the hand of the AI from the Server directly.
 */
-void AIPlayer::SetHand(Card* PH)
+void AIPlayer::SetHand(Card* PH[13])
 {
     for(int card = 0; card < hand_size; ++card)
     {
-        Player_Hand[card] = &PH[card];
+        Player_Hand[card] = PH[card];
     }
+    for (int i = 0; i < hand_size; i++) {
+        CardsInHand.push_back(Player_Hand[i]);
+    }
+};
+
+/*
+ *Remove the card at the given index
+*/
+void AIPlayer::RemoveCard(int index)
+{
+    CardsInHand.erase(CardsInHand.begin()+index);
 };
 
 void AIPlayer::SetStatus(bool vul)
@@ -128,11 +139,12 @@ void AIPlayer::SetStatus(bool vul)
     Vulnerable = vul;
 };
 
+
 /*
  * Shuffle the deck
  * Adapted from PJ Clausen's Server Class
  * */
-void AIPlayer::Shuffle(unsigned seed)
+/*void AIPlayer::Shuffle(unsigned seed)
 {
     // use 11 as seed for a relatively good hand for no trump
     // use 50 as seed for all four queens and a king
@@ -141,12 +153,12 @@ void AIPlayer::Shuffle(unsigned seed)
 
     cout << "Shuffling deck...\n";
     std::shuffle(Deck.begin(), Deck.end(), std::default_random_engine(seed));
-}
+}*/
 
 /*
  * Adapted from PJ Clausen's Server Class
  * */
-void AIPlayer::Deal()
+/*void AIPlayer::Deal()
 {
     cout << "Dealing...\n";
 //    int count = 0; //keep track of card in deck
@@ -154,13 +166,13 @@ void AIPlayer::Deal()
     {
         Player_Hand[card] = &Deck[card];
     }
-}
+}*/
 
 /*
  * Print every card in the deck
  * Adapted from PJ Clausen's Server Class
  * */
-void AIPlayer::PrintDeck()
+/*void AIPlayer::PrintDeck()
 {
     for(int card = 0; card < deck_size; card++)
     {
@@ -168,7 +180,8 @@ void AIPlayer::PrintDeck()
         Deck[card].print(out);
         out << "\n";
     }
-}
+}*/
+
 
 /*
  * Print current player hands
@@ -178,9 +191,10 @@ void AIPlayer::PrintHand()
 {
     QTextStream out(stdout);
     out << "Player Hand: \n";
-    for(int card = 0; card < hand_size; ++card)
+    for(int card = 0; card < int(CardsInHand.size()); ++card)
     {
-        Player_Hand[card]->print(out);
+//        Player_Hand[card]->print(out);
+        CardsInHand[card]->print(out);
         out << "\n";
     }
 }
@@ -196,9 +210,9 @@ int AIPlayer::GetPID()
  * the AI player will begin play when it is indicated that it needs to
  * make a move by the server.
  */
-QString AIPlayer::Play(int trk[][2])
+/*QString AIPlayer::Play(int trk[][2])
 {
-/*
+
     for (int i = 0; i < hand_size; i++)
     {
         cout << "Index: " << i;
@@ -213,13 +227,12 @@ QString AIPlayer::Play(int trk[][2])
         cout << trk[i][1];
         cout << endl;
     }
-*/
+
 
     int SelectedCard[2];
 
-    /*
-     * If the AI is starting the trick, play the highest value card.
-    */
+
+    // If the AI is starting the trick, play the highest value card.
     if (trk[0][0] == -1){
         int MaxIndex = 0;
         for (int i = 0; i < NumInHand; i++)
@@ -238,11 +251,9 @@ QString AIPlayer::Play(int trk[][2])
 //        }
 
     } else {
-        /*
-         * If it is not the first to go, it should follow the lead suit, unless it can't,
-         * then it will go for the trump suit and if it does not have that, it will go for
-         * the lowest value card.
-        */
+        // If it is not the first to go, it should follow the lead suit, unless it can't,
+        // then it will go for the trump suit and if it does not have that, it will go for
+        // the lowest value card.
         int LeadSuit = trk[0][1];
         // indexes of cards that are the same as the lead suit
         int LeadIndexes[NumInHand];
@@ -263,13 +274,6 @@ QString AIPlayer::Play(int trk[][2])
 
         int MaxIndex = -1;
 
-//        for (int i = 0; i < count; i++)
-//        {
-//            cout << "Bleh: " << cards[LeadIndexes[i]][0]<<endl;
-//        }
-
-//        cout << "Bleh 2.0: " << cards[LeadIndexes[MaxIndex]][0]<<endl;
-
         int count2 = 0;
         for (int i = 0; i < count; i++)
         {
@@ -280,20 +284,25 @@ QString AIPlayer::Play(int trk[][2])
             }
         }
 
+
+        // Show the cards in hand if there are cards of the lead suit in the hand
+//        for (int i = 0; i < count; i++)
+//        {
+//            cout << "Cards of Lead Suit in hand: " << cards[LeadIndexes[i]][0]<<endl;
+//        }
+
+//        cout << "Highest Card of lead suit: " << cards[LeadIndexes[MaxIndex]][0]<<endl;
+
 //        cout << "MaxIndex: " << MaxIndex << endl;
 
-        /*
-         * If there are cards from the lead suit, play the highest card
-        */
+        //If there are cards from the lead suit, play the highest card
         if (MaxIndex != -1) {
             SelectedCard[0] = cards[MaxIndex][0];
             SelectedCard[1] = cards[MaxIndex][1];
         } else
         {
-            /*
-             * If there are no suit of the lead suit in hand, check if there is a trump card
-             * and play the smallest trump card
-            */
+            // If there are no suit of the lead suit in hand, check if there is a trump card
+            // and play the smallest trump card
             int TrumpIndexes[NumInHand];
             for (int i = 0; i < NumInHand; i++)
             {
@@ -318,16 +327,13 @@ QString AIPlayer::Play(int trk[][2])
 //                    cout << "Min: " << MinIndex << endl;
                 }
             }
-            /*
-             * If a trump card is found:
-            */
+
+            //If a trump card is found:
             if (MinIndex != -1) {
                 SelectedCard[0] = cards[MinIndex][0];
                 SelectedCard[1] = cards[MinIndex][1];
             } else {
-                /*
-                 * If no trump card is found, play the smallest card in the hand
-                */
+                // If no trump card is found, play the smallest card in the hand
                 MinIndex = 0;
                 for (int i = 1; i < NumInHand; i++)
                 {
@@ -347,6 +353,190 @@ QString AIPlayer::Play(int trk[][2])
     str.append(QString::number(SelectedCard[0]));
     str.append(", Suit = ");
     str.append(QString::number(SelectedCard[1]));
+
+
+    return str;
+};
+*/
+
+
+/*
+ * When the GameState indicates that the bid phase is over,
+ * the AI player will begin play when it is indicated that it needs to
+ * make a move by the server.
+ * Using the dynamic CardsInHand vector.
+ */
+QString AIPlayer::Play(int trk[][2])
+{
+
+    for (int i = 0; i < int(CardsInHand.size()); i++)
+    {
+        cout << "Index: " << i;
+        cout << "\tCard Value: " << CardsInHand[i]->value;
+        cout << "\tCard Suit: " << CardsInHand[i]->suit << endl;
+    }
+    cout << "\nTrump Suit " << TrumpSuit << endl;
+    cout << "\nTrick Array:\n";
+    for (int i = 0; i < 4; i++)
+    {
+        cout << trk[i][0];
+        cout << trk[i][1];
+        cout << endl << endl;
+    }
+
+
+//    int SelectedCard[2];
+    Card* SelectedCard;
+
+    /*
+     * If the AI is starting the trick, play the highest value card.
+    */
+    if (trk[0][0] == -1){
+        int MaxIndex = 0;
+        for (int i = 0; i < int(CardsInHand.size()); i++)
+        {
+            if (CardsInHand[MaxIndex]->value <= CardsInHand[i]->value){
+                MaxIndex = i;
+            }
+        }
+        SelectedCard = CardsInHand[MaxIndex];
+        RemoveCard(MaxIndex);
+    } else {
+        /*
+         * If it is not the first to go, it should follow the lead suit, unless it can't,
+         * then it will go for the trump suit and if it does not have that, it will go for
+         * the lowest value card.
+        */
+        int LeadSuit = trk[0][1];
+        // indexes of cards that are the same as the lead suit
+        int LeadIndexes[int(CardsInHand.size())];
+        for (int i = 0; i < int(CardsInHand.size()); i++)
+        {
+            LeadIndexes[i] = -1;
+        }
+
+        int count = 0; // number of indexes
+        for (int i = 0; i < int(CardsInHand.size()); i++)
+        {
+            if (CardsInHand[i]->suit == LeadSuit) {
+                LeadIndexes[count] = i;
+                count++;
+//                cout << "index: " << i << endl;
+            }
+        }
+
+        int MaxIndex = -1;
+        int MinIndex = -1;
+
+        int count2 = 0;
+        int countMinLead = 0;
+        for (int i = 0; i < count; i++)
+        {
+            if (CardsInHand[LeadIndexes[count2]]->value <= CardsInHand[LeadIndexes[i]]->value) {
+                MaxIndex = LeadIndexes[i];
+                count2 = i;
+//                cout << "Max: " << MaxIndex << endl;
+            }
+            if (CardsInHand[LeadIndexes[countMinLead]]->value >= CardsInHand[LeadIndexes[i]]->value) {
+                MinIndex = LeadIndexes[i];
+                countMinLead = i;
+            }
+        }
+
+
+        /*
+         * Show the cards in hand if there are cards of the lead suit in the hand
+        */
+//        for (int i = 0; i < count; i++)
+//        {
+//            cout << "Cards of Lead Suit in hand: " << cards[LeadIndexes[i]][0]<<endl;
+//        }
+
+//        cout << "Highest Card of lead suit: " << cards[LeadIndexes[MaxIndex]][0]<<endl;
+
+//        cout << "MaxIndex: " << MaxIndex << endl;
+
+        /*
+         * If there are cards from the lead suit, play the highest card if it is higher than the
+         * previously played cards, otherwise play the lowest card of the lead suit.
+        */
+        if (MaxIndex != -1) {
+
+//            cout << "Min in Has Lead: " << MinIndex << endl;
+//            cout << "Max in Has Lead: " << MaxIndex << endl;
+
+            for (int i = 0; i < 4; i++){
+                if (trk[i][1] == CardsInHand[MaxIndex]->suit){
+                    if (trk[i][0] >= CardsInHand[MaxIndex]->value){
+                        SelectedCard = CardsInHand[MinIndex];
+                        RemoveCard(MinIndex);
+                    } else {
+                        SelectedCard = CardsInHand[MaxIndex];
+                        RemoveCard(MaxIndex);
+                    }
+                }
+            }
+//            SelectedCard = CardsInHand[MaxIndex];
+//            RemoveCard(MaxIndex);
+        } else
+        {
+            /*
+             * If there are no suit of the lead suit in hand, check if there is a trump card
+             * and play the smallest trump card
+            */
+            int TrumpIndexes[int(CardsInHand.size())];
+            for (int i = 0; i < int(CardsInHand.size()); i++)
+            {
+                TrumpIndexes[i] = -1;
+            }
+            int count3 = 0; // number of indexes
+            for (int i = 0; i < int(CardsInHand.size()); i++)
+            {
+                if (CardsInHand[i]->suit == TrumpSuit) {
+                    TrumpIndexes[count3] = i;
+                    count3++;
+//                    cout << "index: " << i << endl;
+                }
+            }
+            int MinIndex = -1;
+            int count4 = 0;
+            for (int i = 0; i < count3; i++)
+            {
+                if (CardsInHand[TrumpIndexes[count4]]->value >= CardsInHand[TrumpIndexes[i]]->value) {
+                    MinIndex = TrumpIndexes[i];
+                    count4 = i;
+//                    cout << "Min: " << MinIndex << endl;
+                }
+            }
+            /*
+             * If a trump card is found:
+            */
+            if (MinIndex != -1) {
+                SelectedCard = CardsInHand[MinIndex];
+                RemoveCard(MinIndex);
+            } else {
+                /*
+                 * If no trump card is found, play the smallest card in the hand
+                */
+                MinIndex = 0;
+                for (int i = 1; i < int(CardsInHand.size()); i++)
+                {
+                    if (CardsInHand[MinIndex]->value >= CardsInHand[i]->value) {
+                        MinIndex = i;
+                    }
+                }
+                SelectedCard = CardsInHand[MinIndex];
+                RemoveCard(MinIndex);
+            }
+        }
+
+    }
+
+    // Return the QString object
+    QString str = "Play; Selected Card: Value = ";
+    str.append(QString::number(SelectedCard->value));
+    str.append(", Suit = ");
+    str.append(QString::number(SelectedCard->suit));
 
 
     return str;
@@ -382,7 +572,7 @@ QString AIPlayer::Bid()
     /*
      * This is the same as the loop below, except it uses the random Card objects array.
     */
-/*    for (int i = 0; i < hand_size; i++)
+    for (int i = 0; i < hand_size; i++)
     {
 //        cout << "Card Value: " << Player_Hand[i]->value << endl;
 //        HandValues += Player_Hand[i]->value;
@@ -394,7 +584,7 @@ QString AIPlayer::Bid()
         if (Player_Hand[i]->value == 11)
         {
             HandValues += 3;
-            HighSuits[Player_Hand[i]->suit]]++;
+            HighSuits[Player_Hand[i]->suit]++;
         }else
         if (Player_Hand[i]->value == 10)
         {
@@ -425,12 +615,12 @@ QString AIPlayer::Bid()
         }
 //        cout << "Batman\n";
     }
-*/
+
 
     /*
      * Go through each card and count the values and how much high cards there are of each suit.
      */
-    for (int i = 0; i < hand_size; i++)
+/*    for (int i = 0; i < hand_size; i++)
     {
 //        cout << "Card Value: " << cards[i][0];
 //        cout << "\tCard Suit: " << cards[i][1] << endl;
@@ -472,6 +662,7 @@ QString AIPlayer::Bid()
             SuitNums[3] += 1;
         }
     }
+    */
 
 //    cout << "\n";
 //    cout << "HandValues: " << HandValues << endl;
@@ -531,17 +722,23 @@ QString AIPlayer::Bid()
 //    cout << "BidValue: " << BidValue << endl;
 //    cout << "ChosenSuit: " << ChosenSuit << endl;
 
-    QString str = "Bid; ";
-    str.append("Tricks: ");
-    str.append(QString::number(BidValue));
-    str.append(", Trump: ");
-    str.append(QString::number(ChosenSuit));
+    QString str;
+    if (BidValue > 0) {
+        str = "Bid; ";
+        str.append("Tricks: ");
+        str.append(QString::number(BidValue));
+        str.append("; Trump: ");
+        str.append(QString::number(ChosenSuit));
+        str.append(";");
+    } else {
+        str = "Bid; Pass; Pass;";
+    }
 
     return str;
 };
 
 
-QString AIPlayer::DetermineMove(bool bid, int trk[][2])
+/*QString AIPlayer::DetermineMove(bool bid, int trk[][2])
 {
     if (bid)
     {
@@ -550,9 +747,32 @@ QString AIPlayer::DetermineMove(bool bid, int trk[][2])
     {
         return Play(trk);
     }
+};*/
+
+
+QString AIPlayer::DetermineMove(GameState& gs)
+{
+    if (gs.GetBidStage())
+    {
+        if (gs.getBidRoundCount() < 1){
+            return Bid();
+        } else {
+            QString str = "Bid; Pass; Pass;";
+            return str;
+        }
+
+    }else
+    {
+        int trk[4][2] = {{12,2},{-1,-1},{-1,-1},{-1,-1}};
+//        for (int i = 0; i < int(gs.CurrentTrick.size()); i++){
+//            trk[i][0] = gs.CurrentTrick[i]->value;
+//            trk[i][1] = gs.CurrentTrick[i]->suit;
+//        }
+        TrumpSuit = gs.trumpSuit;
+        return Play(trk);
+    }
+    return NULL;
 };
-
-
 
 
 

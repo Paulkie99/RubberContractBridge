@@ -6,7 +6,7 @@
 
 //Code used to implement the AI for the bridge game of EPE321
 //Author: Conrad Vos 04564210
-//Last update: 07/10/2020 Revision 4
+//Last update: 07/10/2020 Revision 6
 #ifndef AIPLAYER_H
 #define AIPLAYER_H
 
@@ -15,6 +15,7 @@
 #include <QTextStream>
 #include <random>
 #include <string>
+#include <vector>
 #include "card.h"
 #include "gamestate.h"
 //#include "testcustom.h"
@@ -33,10 +34,10 @@ public:
     explicit AIPlayer(int ID,QObject *parent = nullptr);
 //    ~AIPlayer();
 //    string DetermineMove(GameState gs);
-//    QString DetermineMove(GameState *gs);
-    QString DetermineMove(bool bid, int trk[][2]);
+    QString DetermineMove(GameState& gs);
+//    QString DetermineMove(bool bid, int trk[][2]);
 
-    void SetHand(Card* PH);
+    void SetHand(Card* PH[13]);
     void SetStatus(bool vul);
     void PrintHand();
     void Shuffle(unsigned seed = 1);
@@ -44,6 +45,10 @@ public:
     void PrintDeck();
     int GetPID();
     Card* Player_Hand[hand_size];
+    vector<Card*> CardsInHand;
+
+    void RemoveCard(int index);
+
 
     // array to simulate cards in hand
     int cards[hand_size][2];

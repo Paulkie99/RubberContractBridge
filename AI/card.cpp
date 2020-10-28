@@ -33,6 +33,10 @@ void Card::print(QTextStream& out)
 {
     out << "Value: " << ValToString(value) << ", Suit: " << SuitToString(suit);
 }
+void Card::print()
+{
+    cout << "Value: " << ValToString(value).toStdString() << ", Suit: " << SuitToString(suit).toStdString() << endl;
+}
 
 /*
  * Return the String representing the value of a card
