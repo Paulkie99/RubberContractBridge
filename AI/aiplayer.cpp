@@ -730,19 +730,3 @@ QString AIPlayer::DetermineMove(GameState& gs)
     }
     return NULL;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
