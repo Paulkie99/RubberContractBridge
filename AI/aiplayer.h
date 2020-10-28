@@ -39,9 +39,6 @@ public:
     void SetHand(Card* PH[13]);
     void SetStatus(bool vul);
     void PrintHand();
-    void Shuffle(unsigned seed = 1);
-    void Deal();
-    void PrintDeck();
     int GetPID();
     int getHandValues();
 
