@@ -39,7 +39,7 @@ GameState::GameState()
         IsVulnerable[i] = false;
     }
 
-//    cout << "Hello From GameState!\n\n";
+    qInfo() << "Created GameState";
 }
 
 GameState::GameState(const GameState& gs)

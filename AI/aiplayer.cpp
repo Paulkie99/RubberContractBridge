@@ -15,12 +15,13 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
     Vulnerable = false;
     NumInHand = 13;
     TrumpSuit = -1;
+    HandValues = 0;
 //    for(int card = 0; card < hand_size; ++card)
 //    {
 //        Player_Hand[card] = nullptr;
 //    }
 
-    cout << "Creating AIPlayer " << PID << endl;
+    qInfo() << "Creating AIPlayer " << PID;
 
 //    for (int i = 0; i < NumInHand; i++)
 //    {
@@ -69,7 +70,7 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
     cards[12][0] = 11; // value
     cards[12][1] = 3; // suit
 
-    cout << "After cards init\n";
+//    qInfo() << "After cards init";
 
     for (int i = 0; i < 4; i++)
     {
@@ -101,22 +102,13 @@ AIPlayer::AIPlayer(int ID, QObject *parent) : QObject(parent)
 //    PrintHand();
 }
 
-// Destructor to delete the dynamic pointer array
-//AIPlayer::~AIPlayer()
-//{
-//    cout << "Hello From Destructor!\n";
-//    for (int i = 0; i < NumInHand; i++)
-//    {
-//        delete []cards[i];
-//    }
-//    delete []cards;
-//};
 
 /*
  * A function to set the hand of the AI from the Server directly.
 */
 void AIPlayer::SetHand(Card* PH[13])
 {
+    CardsInHand.clear();
     for(int card = 0; card < hand_size; ++card)
     {
         Player_Hand[card] = PH[card];
@@ -124,6 +116,7 @@ void AIPlayer::SetHand(Card* PH[13])
     for (int i = 0; i < hand_size; i++) {
         CardsInHand.push_back(Player_Hand[i]);
     }
+    qInfo() << "CardsInHand set";
 };
 
 /*
@@ -138,49 +131,6 @@ void AIPlayer::SetStatus(bool vul)
 {
     Vulnerable = vul;
 };
-
-
-/*
- * Shuffle the deck
- * Adapted from PJ Clausen's Server Class
- * */
-/*void AIPlayer::Shuffle(unsigned seed)
-{
-    // use 11 as seed for a relatively good hand for no trump
-    // use 50 as seed for all four queens and a king
-    if(seed == 1) //seed not given (or just a really lame one)
-        seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-    cout << "Shuffling deck...\n";
-    std::shuffle(Deck.begin(), Deck.end(), std::default_random_engine(seed));
-}*/
-
-/*
- * Adapted from PJ Clausen's Server Class
- * */
-/*void AIPlayer::Deal()
-{
-    cout << "Dealing...\n";
-//    int count = 0; //keep track of card in deck
-    for(int card = 0; card < hand_size; ++card)
-    {
-        Player_Hand[card] = &Deck[card];
-    }
-}*/
-
-/*
- * Print every card in the deck
- * Adapted from PJ Clausen's Server Class
- * */
-/*void AIPlayer::PrintDeck()
-{
-    for(int card = 0; card < deck_size; card++)
-    {
-        QTextStream out(stdout);
-        Deck[card].print(out);
-        out << "\n";
-    }
-}*/
 
 
 /*
@@ -208,7 +158,7 @@ int AIPlayer::GetPID()
 /*
  * When the GameState indicates that the bid phase is over,
  * the AI player will begin play when it is indicated that it needs to
- * make a move by the server.
+ * make a move by the server. Using the static array
  */
 /*QString AIPlayer::Play(int trk[][2])
 {
@@ -368,8 +318,10 @@ int AIPlayer::GetPID()
  */
 QString AIPlayer::Play(int trk[][2])
 {
-
-    for (int i = 0; i < int(CardsInHand.size()); i++)
+    /*
+     * Print out the hand used for play.
+    */
+    /*for (int i = 0; i < int(CardsInHand.size()); i++)
     {
         cout << "Index: " << i;
         cout << "\tCard Value: " << CardsInHand[i]->value;
@@ -382,10 +334,8 @@ QString AIPlayer::Play(int trk[][2])
         cout << trk[i][0];
         cout << trk[i][1];
         cout << endl << endl;
-    }
+    }*/
 
-
-//    int SelectedCard[2];
     Card* SelectedCard;
 
     /*
@@ -555,7 +505,7 @@ QString AIPlayer::Bid()
 {
     // The total value of the current hand
     // Ace = 4, King = 3, Queen = 2, Jack = 1, remaining = 0
-    int HandValues = 0;
+    HandValues = 0;
     int SuitNums[4] = {0, 0, 0, 0};
 
     // HighSuits indicate how much high cards there are for a specific suit
@@ -731,12 +681,17 @@ QString AIPlayer::Bid()
         str.append(QString::number(ChosenSuit));
         str.append(";");
     } else {
-        str = "Bid; Pass; Pass;";
+        str = "Bid; Pass;";
     }
 
     return str;
 };
 
+
+int AIPlayer::getHandValues()
+{
+    return HandValues;
+};
 
 /*QString AIPlayer::DetermineMove(bool bid, int trk[][2])
 {
@@ -749,7 +704,9 @@ QString AIPlayer::Bid()
     }
 };*/
 
-
+/*
+ * Determine whether to play or bid
+*/
 QString AIPlayer::DetermineMove(GameState& gs)
 {
     if (gs.GetBidStage())
@@ -761,13 +718,13 @@ QString AIPlayer::DetermineMove(GameState& gs)
             return str;
         }
 
-    }else
+    }else if (gs.getMoveStage())
     {
-        int trk[4][2] = {{12,2},{-1,-1},{-1,-1},{-1,-1}};
-//        for (int i = 0; i < int(gs.CurrentTrick.size()); i++){
-//            trk[i][0] = gs.CurrentTrick[i]->value;
-//            trk[i][1] = gs.CurrentTrick[i]->suit;
-//        }
+        int trk[4][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+        for (int i = 0; i < int(gs.CurrentTrick.size()); i++){
+            trk[i][0] = gs.CurrentTrick[i]->value;
+            trk[i][1] = gs.CurrentTrick[i]->suit;
+        }
         TrumpSuit = gs.trumpSuit;
         return Play(trk);
     }

@@ -15,6 +15,7 @@
 #include <QTextStream> // printing to stdout
 #include <iostream>
 #include <vector>
+#include <QDebug>
 
 using namespace std;
 

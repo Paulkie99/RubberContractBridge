@@ -12,6 +12,7 @@
 
 #include "card.h"
 #include <vector>
+#include <QDebug>
 
 using namespace std;
 
