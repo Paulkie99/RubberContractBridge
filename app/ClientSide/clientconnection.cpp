@@ -181,6 +181,7 @@ void clientconnection::SendMessageToServer(QString msg)
 void clientconnection::closed()
 {
     QJsonObject disc = CreateJObject(GenerateMessage("DISCONNECT_PLAYER"));
+    clientSocket->close();
     disc["Id"] = id;
     SendMessageToServer(CreateJString(disc));
 }

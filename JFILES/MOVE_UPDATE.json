@@ -1,0 +1,6 @@
+{
+	"Type": "MOVE_UPDATE",
+	"Id": 43,
+	"Move": {"Suit" : "C", "Rank" : "6" },
+	"Player": "N"
+}

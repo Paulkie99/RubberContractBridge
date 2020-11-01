@@ -1,0 +1,56 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>Cards/C2.jpg</file>
+    <file>Cards/C3.jpg</file>
+    <file>Cards/C4.jpg</file>
+    <file>Cards/C5.jpg</file>
+    <file>Cards/C6.jpg</file>
+    <file>Cards/C7.jpg</file>
+    <file>Cards/C8.jpg</file>
+    <file>Cards/C9.jpg</file>
+    <file>Cards/C10.jpg</file>
+    <file>Cards/CA.jpg</file>
+    <file>Cards/CJ.jpg</file>
+    <file>Cards/CK.jpg</file>
+    <file>Cards/CQ.jpg</file>
+    <file>Cards/D2.jpg</file>
+    <file>Cards/D3.jpg</file>
+    <file>Cards/D4.jpg</file>
+    <file>Cards/D5.jpg</file>
+    <file>Cards/D6.jpg</file>
+    <file>Cards/D7.jpg</file>
+    <file>Cards/D8.jpg</file>
+    <file>Cards/D9.jpg</file>
+    <file>Cards/D10.jpg</file>
+    <file>Cards/DJ.jpg</file>
+    <file>Cards/DQ.jpg</file>
+    <file>Cards/DK.jpg</file>
+    <file>Cards/H2.jpg</file>
+    <file>Cards/H3.jpg</file>
+    <file>Cards/H4.jpg</file>
+    <file>Cards/H5.jpg</file>
+    <file>Cards/H6.jpg</file>
+    <file>Cards/H7.jpg</file>
+    <file>Cards/H8.jpg</file>
+    <file>Cards/H9.jpg</file>
+    <file>Cards/H10.jpg</file>
+    <file>Cards/HJ.jpg</file>
+    <file>Cards/HQ.jpg</file>
+    <file>Cards/HK.jpg</file>
+    <file>Cards/DA.jpg</file>
+    <file>Cards/HA.jpg</file>
+    <file>Cards/S2.jpg</file>
+    <file>Cards/S3.jpg</file>
+    <file>Cards/S4.jpg</file>
+    <file>Cards/S5.jpg</file>
+    <file>Cards/S6.jpg</file>
+    <file>Cards/S7.jpg</file>
+    <file>Cards/S8.jpg</file>
+    <file>Cards/S9.jpg</file>
+    <file>Cards/S10.jpg</file>
+    <file>Cards/SA.jpg</file>
+    <file>Cards/SJ.jpg</file>
+    <file>Cards/SQ.jpg</file>
+    <file>Cards/SK.jpg</file>
+</qresource>
+</RCC>

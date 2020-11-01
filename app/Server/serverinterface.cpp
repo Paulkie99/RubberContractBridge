@@ -25,6 +25,7 @@ ServerInterface::ServerInterface(QWidget *parent, quint16 port)
             this, SLOT(messageReceived(QString)));
     connect(bridgeServer, SIGNAL(messageSent(QString)),
             this, SLOT(messageSent(QString)));
+    Info("Server listening on port: " + QString(port));
 }
 
 /*
@@ -46,4 +47,9 @@ void ServerInterface::messageReceived(const QString &message)
 void ServerInterface::messageSent(const QString &message)
 {
     ui->listWidget->addItem("Message sent: " + message); // add an item to the list widget so that the message may be displayed
+}
+
+void ServerInterface::Info(const QString &message)
+{
+    ui->listWidget->addItem("Info: " + message); // add an item to the list widget so that the message may be displayed
 }

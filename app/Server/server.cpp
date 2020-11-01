@@ -961,7 +961,7 @@ void Server::ValidateInput(QString message)
      qInfo() << "Validating message: " << type;
 
      if(!validator.isValidSocketId(msg["Id"].toInt()))
-         return;
+        return;
 
      switch(msgTypes.indexOf(type))
      {
@@ -1069,13 +1069,16 @@ void Server::ValidateInput(QString message)
 
         case 6: // PLAYER_READY
         {
-            if(GS.GetBidStage() || GS.getMoveStage()) // game in progress
+            if(GS.GetBidStage() || GS.getMoveStage() || !validator.isValidSocketId(msg["Id"].toInt())) // game in progress
                 break;
 
             if(ConnectedClients[msg["Id"].toInt()].isAuthenticated)
             {
                 if(!ConnectedClients[msg["Id"].toInt()].isReady)
+                {
                     ++numReady;
+                    ConnectedClients[msg["Id"].toInt()].isReady = true;
+                }
             }
             else
             {

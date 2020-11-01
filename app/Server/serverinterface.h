@@ -28,10 +28,11 @@ public:
     ServerInterface(QWidget *parent = nullptr, quint16 port = 159);
     ~ServerInterface();
     friend class TestServer;
+    void Info(const QString& message);
 
 private slots:
-    void messageReceived(const QString &message);
     void messageSent(const QString& message);
+    void messageReceived(const QString &message);
 
 private:
     Ui::Server_Dialog *ui;

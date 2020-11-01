@@ -1,32 +1,19 @@
 
-build-Qt_Project-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
+
 
 *.stash
 
 *.o
 
-build-Server-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/debug/
-
-build-Server-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
 
 *.user
 
-build-Client-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
 
 Client/
 
-build-ClientSide-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/debug/
-
-build-ClientSide-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
-
-app/build-ServerTest-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/debug/
-
-app/build-ServerTest-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
-
-build-Client-Server-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/ClientSide/debug/
 
 *.Debug
 
 *.Release
 
-build-Client-Server-Desktop_Qt_5_15_1_MinGW_64_bit-Debug/
+
