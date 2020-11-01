@@ -148,7 +148,7 @@
       <cursorShape>ArrowCursor</cursorShape>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="Auction">
       <widget class="QLabel" name="lblInfo">
@@ -1238,7 +1238,7 @@
       <widget class="QLabel" name="lblOpp1">
        <property name="geometry">
         <rect>
-         <x>980</x>
+         <x>960</x>
          <y>400</y>
          <width>231</width>
          <height>211</height>

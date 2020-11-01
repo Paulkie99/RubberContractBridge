@@ -15,14 +15,12 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-//    friend class clientconnection;
     friend class GameScreen;
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
-
 
     void on_pushButton_Join_clicked();
 
@@ -48,11 +46,9 @@ signals:
        This allows us to have only one client object per session, and thus a new
        object doesn't have to be created for each interface.*/
     void serverInfoSignal(QString, QString, QString, clientconnection *, QString, int);
-    void connectRequestSignal(QJsonObject);
 
 private:
     Ui::MainWindow *ui;
-
     // Create instance of GameScreen
     GameScreen *gameScreen;
 };
