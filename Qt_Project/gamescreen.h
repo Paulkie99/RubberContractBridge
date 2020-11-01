@@ -1,3 +1,12 @@
+/* Declaration
+ * 1. I understand what plagiarism is and am aware of the University’s policy in this regard.
+ * 2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
+ * printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
+ * departmental requirements.*/
+
+/* Author: Ivan Cuyler
+ * Last update: 2020/10/27 */
+
 #ifndef GAMESCREEN_H
 #define GAMESCREEN_H
 
@@ -45,10 +54,6 @@ private slots:
 
     void sendMove(QString, QString);
 
-    void serverInfoSlot(QString, QString, QString, clientconnection *, QString, int);
-
-    void bidStartSlot(QJsonObject);
-
     void on_pushButton_ViewCards_clicked();
 
     void on_pushButton_BackAuction_clicked();
@@ -61,27 +66,29 @@ private slots:
 
     void on_pushButton_Redouble_clicked();
 
-    void bidRequestSlot();
-
-    void bidUpdateSlot(QJsonObject bid);
-
     void addToTable(QString, int);
 
     void visibleAll(bool vis = true);
 
+    void serverInfoSlot(QString, QString, QString, clientconnection *, QString, int);
+    void lobbyUpdateSlot(QJsonObject);
+    void bidStartSlot(QJsonObject);
+    void bidRequestSlot();
+    void bidUpdateSlot(QJsonObject bid);
     void bidEndSlot(QJsonObject);
-
+    void playStartSlot(QJsonObject);
     void moveRequestSlot(QJsonObject);
     void moveUpdateSlot(QJsonObject);
     void trickEndSlot(QJsonObject);
     void playEndSlot(QJsonObject);
     void scoreSlot(QJsonObject);
     void disconnectPlayerSlot(QJsonObject);
-    void lobbyUpdateSlot(QJsonObject);
     void gameEndSlot(QJsonObject);
+
     void ping();
     void pongSlot(QJsonObject);
-    void playStartSlot(QJsonObject);
+
+
     void on_pb_1_clicked();
 
     void on_pb_2_clicked();

@@ -1,3 +1,12 @@
+/* Declaration
+ * 1. I understand what plagiarism is and am aware of the University’s policy in this regard.
+ * 2. I declare that this assignment is my own original work. Where other people’s work has been used (either from a
+ * printed source, Internet or any other source), this has been properly acknowledged and referenced in accordance with
+ * departmental requirements.*/
+
+/* Author: Ivan Cuyler
+ * Last update: 2020/10/27 */
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -71,17 +80,16 @@ MainWindow::~MainWindow()
 void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
 {
     connected = true;
-
-    // Send a CONNECT_REQUEST to the server
     id = connectSuc["Id"].toInt();
 
-//    // Get the values from the "Join Game" screen
+    // Get the GUI values from the "Join Game" screen
     QString IP = ui->leditHostIP->text();
     QString Port = ui->sbPort->text();
     QString Password = ui->leditPassword->text();
     QString Username = ui->leditUsername->text();
 
 
+    // Generate, construct and return the JSON with the updated GUI values
     QString mes = client->GenerateMessage("CONNECT_REQUEST");
     QJsonObject request = client->CreateJObject(mes);
     request["Password"] = Password;
@@ -96,11 +104,13 @@ void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
     client->onTextMessageReceived(mes);
 }
 
-// If the user wishes to join an existing game, the stacked widget's
-// index will be updated to allow the user to enter the server
-// credentials.
+/* If the user wishes to join an existing game, the stacked widget's
+ index will be updated to allow the user to enter the server credentials. */
 void MainWindow::on_pushButton_Join_clicked()
 {
+    // DEBUG code. Set the user's username to "P4"
+    ui->leditUsername->setText("P4");
+
     // Go to Join game page
     ui->stackedWidget->setCurrentIndex(1);
     // Update the title of the window
@@ -110,11 +120,10 @@ void MainWindow::on_pushButton_Join_clicked()
 
 }
 
-// Preliminary client-side logic to receive input from the user.
-// Once integration starts, these values will be communicated to
-// the game server and appropriate steps followed from there.
-// The pushButton_JoinServer is used when the user elects to
-// join an existing game.
+/* Preliminary client-side logic to receive input from the user.
+ Once integration starts, these values will be communicated to the game server
+ and appropriate steps followed from there. The pushButton_JoinServer is used
+ when the user elects to join an existing game. */
 void MainWindow::on_pushButton_JoinServer_clicked()
 {
     // Establish a clientconnection object for communicating over the network
@@ -130,31 +139,6 @@ void MainWindow::on_pushButton_JoinServer_clicked()
     // Temp debug code to test successful connect. Server will send this after constructor of client
     QString mes = client->GenerateMessage("CONNECT_SUCCESSFUL");
     client->onTextMessageReceived(mes);
-
-    //********* als hieronder moet saam geuncomment word*********
-//    // Send a CONNECT_REQUEST to the server
-
-//    // Get the values from the "Join Game" screen
-//    QString IP = ui->leditHostIP->text();
-//    QString Port = ui->sbPort->text();
-//    QString Password = ui->leditPassword->text();
-//    QString Username = ui->leditUsername->text();
-
-//    QString mes = client->GenerateMessage("CONNECT_REQUEST");
-//    QJsonObject request = client->CreateJObject(mes);
-////    QString mes = client.GenerateMessage("CONNECT_REQUEST");
-////    QJsonObject request = client.CreateJObject(mes);
-//    request["Password"] = Password;
-//    request["Alias"] = Username;
-//    request["Id"] = id;
-
-//    //Send the updated message to the server
-//    //client.SendMessageToServer(client.CreateJString(request));
-//    client->SendMessageToServer(client->CreateJString(request));
-
-//    // Temp debug code to simulate successful login
-////    mes = client.GenerateMessage("AUTH_SUCCESSFUL");
-////    client.onTextMessageReceived(mes);
 }
 
 // The user opts to create a new server
@@ -196,10 +180,8 @@ void MainWindow::on_pushButton_BackConf_clicked()
     ui->lblHeading->setFocus();
 }
 
-// Similar to on_pushButton_JoinServer_clicked, the user opts to
-// create a new server. No client-to-server communication needs to
-// take place because the client is also the host server.
-// The Game Server will be initialised from here.
+/* Similar to on_pushButton_JoinServer_clicked, the user opts to create a new server.
+   The Game Server will be initialised from here once integration starts. */
 void MainWindow::on_pushButton_CreateConf_clicked()
 {
     // Intermediate client-side logic to create the server
@@ -233,7 +215,6 @@ void MainWindow::authUnsuccessfulSlot(QJsonObject unsuc)
 void MainWindow::authSuccessfulSlot()
 {
     // Create the gamescreen object
-    // CLIENT-SIDE LOGIC APPROVES SERVER CREDENTIALS & ALLOWS ACCESS TO THE SERVER
     // Modelless approach
     // Hide main window
     hide();
@@ -246,9 +227,6 @@ void MainWindow::authSuccessfulSlot()
     gameScreen = new GameScreen(this);
     gameScreen->show();
 
-    // For some reason the only way to pass information along via signals & slots is to use
-    // the SIGNAL and SLOT method
-    //connect(this, &MainWindow::serverInfoSignal(QString , QString, QString), &gameScreen, &GameScreen::serverInfoSlot(QString, QString, QString));
     connect(this, SIGNAL(serverInfoSignal(QString, QString, QString, clientconnection *, QString, int)), gameScreen, SLOT(serverInfoSlot(QString, QString, QString, clientconnection *, QString, int)));
     emit serverInfoSignal(ui->leditHostIP->text(),ui->sbPort->text(),ui->leditPassword->text(), client, ui->leditUsername->text(), id);
 }

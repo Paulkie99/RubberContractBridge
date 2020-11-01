@@ -1,8 +1,8 @@
 {
 	"Type": "BID_END",
 	"Id": 31,
-	"Contract": {"Suit" : "H", "Rank" : "3", "IsDouble" : True, "IsRedouble" : False },
+	"Contract": {"Suit" : "H", "Rank" : "3", "IsDouble" : true, "IsRedouble" : false },
 	"Trump": "H",
-	"Declarer": "N",
-	"Dummy": "S"
+	"Declarer": "E",
+	"Dummy": "W"
 }
