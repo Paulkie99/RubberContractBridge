@@ -1038,6 +1038,7 @@ void Server::ValidateInput(QString message)
             {
                 emit messageReceived("Move Invalid");
                 qInfo() << "Invalid Move";
+                Next_Move();
             }
         }
         break;
@@ -1124,4 +1125,10 @@ void Server::socketDisconnect(int id)
     disconnect_player["Type"] = "DISCONNECT_PLAYER";
     disconnect_player["PlayerPos"] = GS.getPlayerFromId(id);
     BroadcastMessage(disconnect_player);
+
+    if(numConnectedClients == 0)
+    {
+        GameState newGs;
+        GS = newGs;
+    }
 }

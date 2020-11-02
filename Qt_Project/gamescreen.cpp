@@ -208,7 +208,7 @@ void GameScreen::showCards(int i)
     { // Load player cards
         for (int k=0;k<13;k++) {
             if (cards[k] != "") {
-                paths[k] = ":/Cards/" + cards[k] + ".jpg";
+                paths[k] = ":/Cards/" + cards[k];
             }
 
          }
@@ -251,7 +251,7 @@ void GameScreen::showCards(int i)
         {
             for (int k=0;k<13;k++) {
                 if (cardsDummy[k] != "") {
-                    paths[k] = "../Cards/" + cardsDummy[k];
+                    paths[k] = ":/Cards/" + cardsDummy[k];
                 }
              }
 
@@ -351,40 +351,6 @@ void GameScreen::disableCards(int i, bool en = false)
         ui->pb_25->setEnabled(false);
         ui->pb_26->setEnabled(false);
     }
-
-    // Even though the buttons are disabled, they shouldn't be grayed out (poor visibility)
-    // Set the style sheet to transparent if the buttons are to be disabled
-    QString transparent = "";
-    if (en == false)
-    {
-       transparent = "background-color: rgb(0, 0, 1)";
-    }
-    ui->pb_1->setStyleSheet(transparent);
-    ui->pb_2->setStyleSheet(transparent);
-    ui->pb_3->setStyleSheet(transparent);
-    ui->pb_4->setStyleSheet(transparent);
-    ui->pb_5->setStyleSheet(transparent);
-    ui->pb_6->setStyleSheet(transparent);
-    ui->pb_7->setStyleSheet(transparent);
-    ui->pb_8->setStyleSheet(transparent);
-    ui->pb_9->setStyleSheet(transparent);
-    ui->pb_10->setStyleSheet(transparent);
-    ui->pb_11->setStyleSheet(transparent);
-    ui->pb_12->setStyleSheet(transparent);
-    ui->pb_13->setStyleSheet(transparent);
-    ui->pb_14->setStyleSheet(transparent);
-    ui->pb_15->setStyleSheet(transparent);
-    ui->pb_16->setStyleSheet(transparent);
-    ui->pb_17->setStyleSheet(transparent);
-    ui->pb_18->setStyleSheet(transparent);
-    ui->pb_19->setStyleSheet(transparent);
-    ui->pb_20->setStyleSheet(transparent);
-    ui->pb_21->setStyleSheet(transparent);
-    ui->pb_22->setStyleSheet(transparent);
-    ui->pb_23->setStyleSheet(transparent);
-    ui->pb_24->setStyleSheet(transparent);
-    ui->pb_25->setStyleSheet(transparent);
-    ui->pb_26->setStyleSheet(transparent);
 }
 
 
@@ -408,11 +374,11 @@ void GameScreen::sendBid(QString Suit, QString Rank)
     bid["Id"] = Userid;
 
     // Disable GUI elements until another BID_REQUEST is received from server
-    ui->tableBids->setEnabled(false);
-    ui->pushButton_Bid->setEnabled(false);
-    ui->pushButton_Double->setEnabled(false);
-    ui->pushButton_Pass->setEnabled(false);
-    ui->pushButton_Redouble->setEnabled(false);
+//    ui->tableBids->setEnabled(false);
+//    ui->pushButton_Bid->setEnabled(false);
+//    ui->pushButton_Double->setEnabled(false);
+//    ui->pushButton_Pass->setEnabled(false);
+//    ui->pushButton_Redouble->setEnabled(false);
 
     // Send the updated message to the server. BID_SEND
     clientgs->SendMessageToServer(clientgs->CreateJString(bid));
@@ -711,6 +677,13 @@ void GameScreen::bidRequestSlot()
 // BID_UPDATE received
 void GameScreen::bidUpdateSlot(QJsonObject bid)
 {
+    // Disable GUI elements until another BID_REQUEST is received from server
+    ui->tableBids->setEnabled(false);
+    ui->pushButton_Bid->setEnabled(false);
+    ui->pushButton_Double->setEnabled(false);
+    ui->pushButton_Pass->setEnabled(false);
+    ui->pushButton_Redouble->setEnabled(false);
+
     QString Suit = bid["Bid"].toObject()["Suit"].toString();
     QString Rank = bid["Bid"].toObject()["Rank"].toString();
 
@@ -989,8 +962,8 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
     QString cardplayed = Suit + Rank;
 
     // Check if the card played was from the dummy on the opposition team
-    if (UserPosition[0] != Dummy[0] && UserPosition[0] != Declarer[0])
-    { // User is not the dummy nor declarer
+  //  if (UserPosition[0] != Dummy[0] && UserPosition[0] != Declarer[0])
+  //  { // User is not the dummy nor declarer
         for (int k=0;k<13;k++)
         {
             // If a card was played from the dummy's hand, the appropriate button should be made invisible
@@ -1040,11 +1013,11 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
                 break;
             }
         }
-    }
+  //  }
 
     // If the user is the dummy and his teammate played one of his cards
-    if (UserPosition[0] == Dummy[0])
-    { // User is the dummy and one of his cards has been played by the declarer
+  //  if (UserPosition[0] == Dummy[0])
+ //   { // User is the dummy and one of his cards has been played by the declarer
         for (int k=0;k<13;k++)
         {
             // The appropriate user card played by the declarer (user's teammate) must be made invisible
@@ -1094,7 +1067,7 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
                 break;
             }
         }
-    }
+  //  }
 
     /* If statements to display which ever card was played on the board. The moveCounter counter determines
      which display button to load next in the correct order. Once it reaches 3, it is reset to 0 (in trickEndSlot)
@@ -1103,28 +1076,28 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
     { // Load into 1st move button
         ui->pb_Move_1->setEnabled(true);
         ui->pb_Move_1->setVisible(true);
-        loadCards(ui->pb_Move_1, "../Cards/" + Suit +Rank);
+        loadCards(ui->pb_Move_1, ":/Cards/" + Suit +Rank);
         moveCounter = moveCounter + 1;
     }
     else if (moveCounter == 1)
     { // Load into 2nd move button
         ui->pb_Move_2->setEnabled(true);
         ui->pb_Move_2->setVisible(true);
-        loadCards(ui->pb_Move_2, "../Cards/" + Suit + Rank);
+        loadCards(ui->pb_Move_2, ":/Cards/" + Suit + Rank);
         moveCounter++;
     }
     else if (moveCounter == 2)
     { // Load into 3rd move button
         ui->pb_Move_3->setEnabled(true);
         ui->pb_Move_3->setVisible(true);
-        loadCards(ui->pb_Move_3, "../Cards/" + Suit + Rank);
+        loadCards(ui->pb_Move_3, ":/Cards/" + Suit + Rank);
         moveCounter++;
     }
     else if (moveCounter == 3)
     { // Load into 4th move button
         ui->pb_Move_4->setEnabled(true);
         ui->pb_Move_4->setVisible(true);
-        loadCards(ui->pb_Move_4, "../Cards/" + Suit + Rank);
+        loadCards(ui->pb_Move_4, ":/Cards/" + Suit + Rank);
         moveCounter++;
     }
 
@@ -1241,7 +1214,8 @@ void GameScreen::disconnectPlayerSlot(QJsonObject disc)
     over.critical(0,"Player Disconnect",playerdisc + " was disconnected. Leaving the game.");
     over.setFixedSize(500,200);
 
-    this->close();
+
+    this->finished(0);
 }
 
 // Slot activates after successfully connecting to server. The "update" object
@@ -1457,157 +1431,157 @@ void GameScreen::moveRequestSlot(QJsonObject request)
 void GameScreen::on_pb_1_clicked()
 {
     sendMove(cards[0].at(0), cards[0].at(1));
-    ui->pb_1->setVisible(false);
+   // ui->pb_1->setVisible(false);
 }
 
 void GameScreen::on_pb_2_clicked()
 {
     sendMove(cards[1].at(0), cards[1].at(1));
-    ui->pb_2->setVisible(false);
+  //  ui->pb_2->setVisible(false);
 }
 
 void GameScreen::on_pb_3_clicked()
 {
     sendMove(cards[2].at(0), cards[2].at(1));
-    ui->pb_3->setVisible(false);
+   // ui->pb_3->setVisible(false);
 }
 
 void GameScreen::on_pb_4_clicked()
 {
     sendMove(cards[3].at(0), cards[3].at(1));
-    ui->pb_4->setVisible(false);
+  //  ui->pb_4->setVisible(false);
 }
 
 void GameScreen::on_pb_5_clicked()
 {
     sendMove(cards[4].at(0), cards[4].at(1));
-    ui->pb_5->setVisible(false);
+  //  ui->pb_5->setVisible(false);
 }
 
 void GameScreen::on_pb_6_clicked()
 {
     sendMove(cards[5].at(0), cards[5].at(1));
-    ui->pb_6->setVisible(false);
+  //  ui->pb_6->setVisible(false);
 }
 
 void GameScreen::on_pb_7_clicked()
 {
     sendMove(cards[6].at(0), cards[6].at(1));
-    ui->pb_7->setVisible(false);
+  //  ui->pb_7->setVisible(false);
 }
 
 void GameScreen::on_pb_8_clicked()
 {
     sendMove(cards[7].at(0), cards[7].at(1));
-    ui->pb_8->setVisible(false);
+ //   ui->pb_8->setVisible(false);
 }
 
 void GameScreen::on_pb_9_clicked()
 {
     sendMove(cards[8].at(0), cards[8].at(1));
-    ui->pb_9->setVisible(false);
+  //  ui->pb_9->setVisible(false);
 }
 
 void GameScreen::on_pb_10_clicked()
 {
     sendMove(cards[9].at(0), cards[9].at(1));
-    ui->pb_10->setVisible(false);
+  //  ui->pb_10->setVisible(false);
 }
 
 void GameScreen::on_pb_11_clicked()
 {
     sendMove(cards[10].at(0), cards[10].at(1));
-    ui->pb_11->setVisible(false);
+ //   ui->pb_11->setVisible(false);
 }
 
 void GameScreen::on_pb_12_clicked()
 {
     sendMove(cards[11].at(0), cards[11].at(1));
-    ui->pb_12->setVisible(false);
+  //  ui->pb_12->setVisible(false);
 }
 
 void GameScreen::on_pb_13_clicked()
 {
     sendMove(cards[12].at(0), cards[12].at(1));
-    ui->pb_13->setVisible(false);
+  //  ui->pb_13->setVisible(false);
 }
 
 void GameScreen::on_pb_14_clicked()
 {
     sendMove(cardsDummy[0].at(0), cardsDummy[0].at(1));
-    ui->pb_14->setVisible(false);
+  //  ui->pb_14->setVisible(false);
 }
 
 void GameScreen::on_pb_15_clicked()
 {
     sendMove(cardsDummy[1].at(0), cardsDummy[1].at(1));
-    ui->pb_15->setVisible(false);
+  //  ui->pb_15->setVisible(false);
 }
 
 void GameScreen::on_pb_16_clicked()
 {
     sendMove(cardsDummy[2].at(0), cardsDummy[2].at(1));
-    ui->pb_16->setVisible(false);
+  //  ui->pb_16->setVisible(false);
 }
 
 void GameScreen::on_pb_17_clicked()
 {
     sendMove(cardsDummy[3].at(0), cardsDummy[3].at(1));
-    ui->pb_17->setVisible(false);
+  //  ui->pb_17->setVisible(false);
 }
 
 void GameScreen::on_pb_18_clicked()
 {
     sendMove(cardsDummy[4].at(0), cardsDummy[4].at(1));
-    ui->pb_18->setVisible(false);
+  //  ui->pb_18->setVisible(false);
 }
 
 void GameScreen::on_pb_19_clicked()
 {
     sendMove(cardsDummy[5].at(0), cardsDummy[5].at(1));
-    ui->pb_19->setVisible(false);
+  //  ui->pb_19->setVisible(false);
 }
 
 void GameScreen::on_pb_20_clicked()
 {
     sendMove(cardsDummy[6].at(0), cardsDummy[6].at(1));
-    ui->pb_20->setVisible(false);
+ //   ui->pb_20->setVisible(false);
 }
 
 void GameScreen::on_pb_21_clicked()
 {
     sendMove(cardsDummy[7].at(0), cardsDummy[7].at(1));
-    ui->pb_21->setVisible(false);
+  //  ui->pb_21->setVisible(false);
 }
 
 void GameScreen::on_pb_22_clicked()
 {
     sendMove(cardsDummy[8].at(0), cardsDummy[8].at(1));
-    ui->pb_22->setVisible(false);
+ //   ui->pb_22->setVisible(false);
 }
 
 void GameScreen::on_pb_23_clicked()
 {
     sendMove(cardsDummy[9].at(0), cardsDummy[9].at(1));
-    ui->pb_23->setVisible(false);
+  //  ui->pb_23->setVisible(false);
 }
 
 void GameScreen::on_pb_24_clicked()
 {
     sendMove(cardsDummy[10].at(0), cardsDummy[10].at(1));
-    ui->pb_24->setVisible(false);
+ //   ui->pb_24->setVisible(false);
 }
 
 void GameScreen::on_pb_25_clicked()
 {
     sendMove(cardsDummy[11].at(0), cardsDummy[11].at(1));
-    ui->pb_25->setVisible(false);
+  //  ui->pb_25->setVisible(false);
 }
 
 void GameScreen::on_pb_26_clicked()
 {
     sendMove(cardsDummy[12].at(0), cardsDummy[12].at(1));
-    ui->pb_26->setVisible(false);
+  //  ui->pb_26->setVisible(false);
 }
 
 void GameScreen::on_GameScreen_destroyed()
