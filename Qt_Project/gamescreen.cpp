@@ -49,6 +49,9 @@ QString opp1Username;
 QString opp2Pos;
 QString opp2Username;
 QString movemade = "";
+QJsonObject NSarray [50];
+QJsonObject EWarray [50] ;
+int ArrCount = 0;
 
 /* Helper function to load the player cards as well as the dummy's cards
  Once integrated it will receive the actual cards to load from server
@@ -170,6 +173,12 @@ void GameScreen::on_pushButton_Score_clicked()
     ScoreBoard *sb = new ScoreBoard(this);
     sb->show();
     sb->updateScores() */
+    ScoreBoard scoreBoard(this);
+
+    scoreBoard.updateScores(NSarray,EWarray,ArrCount);
+    scoreBoard.setModal(true);
+
+    scoreBoard.exec();
 }
 
 // Once the auction is over, the pushButton_Play will be made visible.
@@ -187,6 +196,8 @@ void GameScreen::on_pushButton_Play_clicked()
     // DEBUG code. Simulate the BID_END message received from the server
     QString mes = clientgs->GenerateMessage("BID_END");
     clientgs->onTextMessageReceived(mes);
+    QString testval = clientgs->GenerateMessage("SCORE");
+
 }
 
 // Close the Game Screen page. The user will be taken back to the Main Screen.
@@ -1217,18 +1228,28 @@ void GameScreen::playEndSlot(QJsonObject play)
     clientgs->onTextMessageReceived(mes);
 }
 
-// Implemented by Jacques
+// Implemented by Jacques. This function is called when a SCORE update is received from the server. It extracts the NS EW scores and
+//appends them to arrays. The arrays are then passed to the updateScores function of the scoreboard. The scoreboard is then created
+//and displayed to the user to indicate the scores
 void GameScreen::scoreSlot(QJsonObject scores)
 {
-//    ScoreBoard scoreBoard(this);
-//    // Use modal approach
-//    scoreBoard.setModal(true);
-//    scoreBoard.exec();
-//    scoreBoard.updateScores(scores);
 
-    ScoreBoard *sb = new ScoreBoard(this);
-    sb->show();
-    sb->updateScores(scores);
+    QJsonObject NS = scores["NSscores"].toObject();
+         QJsonObject EW = scores["EWscores"].toObject();
+
+         NSarray[ArrCount] = NS;
+         EWarray[ArrCount] = EW;
+         ArrCount++;
+         //qDebug()<<NSarray[0]["overtricks"];
+         // qDebug()<<scores["Type"].toString();
+          ScoreBoard scoreBoard(this);
+
+          scoreBoard.updateScores(NSarray,EWarray,ArrCount);
+          scoreBoard.setModal(true);
+
+          scoreBoard.exec();
+
+
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
