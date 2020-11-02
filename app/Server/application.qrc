@@ -1,0 +1,29 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>JFILES/AUTH_SUCCESSFUL.json</file>
+    <file>JFILES/AUTH_UNSUCCESSFUL.json</file>
+    <file>JFILES/BID_END.json</file>
+    <file>JFILES/BID_REQUEST.json</file>
+    <file>JFILES/BID_SEND.json</file>
+    <file>JFILES/BID_START.json</file>
+    <file>JFILES/BID_UPDATE.json</file>
+    <file>JFILES/CONNECT_REQUEST.json</file>
+    <file>JFILES/CONNECT_SUCCESSFUL.json</file>
+    <file>JFILES/CONNECT_UNSUCCESSFUL.json</file>
+    <file>JFILES/DISCONNECT_PLAYER.json</file>
+    <file>JFILES/GAME_END.json</file>
+    <file>JFILES/HAND_DEALT.json</file>
+    <file>JFILES/LOBBY_UPDATE.json</file>
+    <file>JFILES/MOVE_REQUEST.json</file>
+    <file>JFILES/MOVE_SEND.json</file>
+    <file>JFILES/MOVE_UPDATE.json</file>
+    <file>JFILES/NOT_READY.json</file>
+    <file>JFILES/PING.json</file>
+    <file>JFILES/PLAY_END.json</file>
+    <file>JFILES/PLAY_START.json</file>
+    <file>JFILES/PLAYER_READY.json</file>
+    <file>JFILES/PONG.json</file>
+    <file>JFILES/SCORE.json</file>
+    <file>JFILES/TRICK_END.json</file>
+</qresource>
+</RCC>

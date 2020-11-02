@@ -58,7 +58,7 @@ private:
     int numAuthenticatedUsers = 0;
     int numReady = 0;
     QStringList msgTypes;
-    const QString JPath = "C:/Users/pj/Documents/Y3S2/EPE321/Project/group_e/app/JFILES/"; //path for Json temlpate files
+    const QString JPath = ":/JFILES/"; //path for Json temlpate files
 
     QString GenerateMessage(QString);
     QJsonObject Convert_Message_To_Json(QString);
