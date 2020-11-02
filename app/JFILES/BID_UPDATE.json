@@ -1,6 +1,0 @@
-{
-	"Type": "BID_UPDATE",
-	"Id": 29,
-	"Bid": {"Suit" : "H", "Rank" : "5" },
-	"Player": "N"
-}

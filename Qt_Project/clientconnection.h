@@ -42,7 +42,6 @@ private Q_SLOTS:
     void onConnected();
     void onTextMessageReceived(QString message);
     void closed(int id);
-    void socketClose();
 
 signals:
 //    void customsignal();
@@ -67,6 +66,7 @@ signals:
     void connectUnsuccessfulSignal(QJsonObject);
     void gameEndSignal(QJsonObject);
     void pongSignal(QJsonObject);
+    void pingSignal(QJsonObject);
 
 
 };

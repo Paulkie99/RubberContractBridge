@@ -18,37 +18,40 @@ using namespace std;
 
 /* Declare a pointer clientconnection object that points to the original
    client object established in mainwindow.*/
-clientconnection* clientgs;
+clientconnection* clientgs = NULL;
 // cards is the user's cards
 QString cards[13];
 // cardsDummy is the dummy's cards
 QString cardsDummy[13];
-QString currentBidSuit;
-QString currentBidRank;
+QString currentBidSuit = "";
+QString currentBidRank = "";
 int counter = 0;
 int row = 0;
 int Userid = 0;
-QString Username;
-QString NorthAlias;
-QString SouthAlias;
-QString WestAlias;
-QString EastAlias;
-QString UserPosition;
-QString Declarer;
+QString Username = "";
+QString NorthAlias = "";
+QString SouthAlias = "";
+QString WestAlias = "";
+QString EastAlias = "";
+QString UserPosition = "";
+QString Declarer = "";
 QString Dummy = "not set";
-QString Trump;
+QString Trump = "";
 bool Double = false;
 bool Redouble = false;
-QString Contract;
+QString Contract = "";
 // moveCounter holds how many cards have been played in the current round
 int moveCounter = 0;
-QString teamPos;
-QString teamUsername;
-QString opp1Pos;
-QString opp1Username;
-QString opp2Pos;
-QString opp2Username;
+QString teamPos = "";
+QString teamUsername = "";
+QString opp1Pos = "";
+QString opp1Username = "";
+QString opp2Pos = "";
+QString opp2Username = "";
 QString movemade = "";
+QJsonObject NSarray [50];
+QJsonObject EWarray [50] ;
+int ArrCount = 0;
 
 /* Helper function to load the player cards as well as the dummy's cards
  Once integrated it will receive the actual cards to load from server
@@ -77,6 +80,7 @@ GameScreen::GameScreen(QWidget *parent) :
     ui->tableBids->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableBids->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableSequence->horizontalHeader()->setVisible(true);
+    ui->tableSequence->clear();
     // Set the title of the window
     QWidget::setWindowTitle("Auction");
     // Ensure that the correct interface is displayed when joining a game
@@ -89,37 +93,19 @@ GameScreen::GameScreen(QWidget *parent) :
     ui->lblDouble->setVisible(false);
     ui->lblContractPlay->setVisible(false);
 
-    /* The pushButton_Play will only be visible once the auction is over,
-     however for testing purposes it should remain visible as it will
-     allow access to the Normal Play screen. */
-    //ui->pushButton_Play->setVisible(false);
+    // Disable GUI elements until a BID_REQUEST is received from server
+    ui->tableBids->setEnabled(false);
+    ui->pushButton_Bid->setEnabled(false);
+    ui->pushButton_Double->setEnabled(false);
+    ui->pushButton_Pass->setEnabled(false);
+    ui->pushButton_Redouble->setEnabled(false);
+    ui->pushButton_Play->setVisible(false);
 
     // Make the moves played push buttons invisible
     ui->pb_Move_1->setVisible(false);
     ui->pb_Move_2->setVisible(false);
     ui->pb_Move_3->setVisible(false);
     ui->pb_Move_4->setVisible(false);
-    //clientgs = clienttoets;
-    // Connect all relevant signals and slots
-//    connect(clientgs, SIGNAL(bidStartSignal(QJsonObject)),this, SLOT(bidStartSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(bidRequestSignal()), this, SLOT(bidRequestSlot()));
-//    connect(clientgs, SIGNAL(bidUpdateSignal(QJsonObject)), this, SLOT(bidUpdateSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(bidEndSignal(QJsonObject)), this, SLOT(bidEndSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(playStartSignal(QJsonObject)), this, SLOT(playStartSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(lobbyUpdateSignal(QJsonObject)), this, SLOT(lobbyUpdateSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(moveRequestSignal(QJsonObject)), this, SLOT(moveRequestSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(moveUpdateSignal(QJsonObject)), this, SLOT(moveUpdateSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(trickEndSignal(QJsonObject)), this, SLOT(trickEndSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(playEndSignal(QJsonObject)), this, SLOT(playEndSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(gameEndSignal(QJsonObject)), this, SLOT(gameEndSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
-//    connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
-
-
-//    QString mes = clientgs->GenerateMessage("BID_START");
-//    //QJsonObject bids = client.CreateJObject(mes);
-//    clientgs->SendMessageToServer(mes);
 }
 
 // Desctructor
@@ -164,21 +150,19 @@ void GameScreen::on_GameScreen_finished(int result)
 // Implemented by Jacques
 void GameScreen::on_pushButton_Score_clicked()
 {
-    /* // Create new instance of scoreBoard, set parent as this (Game Screen dialog)
     ScoreBoard scoreBoard(this);
-    // Use modal approach
-    scoreBoard.setModal(true);
-    scoreBoard.exec();
-    ScoreBoard *sb = new ScoreBoard(this);
-    sb->show();
-    sb->updateScores() */
+
+        scoreBoard.updateScores(NSarray,EWarray,ArrCount);
+        scoreBoard.setModal(true);
+
+        scoreBoard.exec();
 }
 
 // Once the auction is over, the pushButton_Play will be made visible.
 // For testing purposes this button will remain visible.
 void GameScreen::on_pushButton_Play_clicked()
 {
-    //connect(clientgs, SIGNAL(playStartSignal(QJsonObject)), this, SLOT(playStartSlot(QJsonObject)));
+    ui->pushButton_Play->setVisible(false);
     ui->pushButton_BackAuction->setVisible(false);
     ui->pushButton_Abandon->setVisible(true);
     // Increase the index of the stacked widget to the Normal Play page.
@@ -194,7 +178,7 @@ void GameScreen::on_pushButton_Play_clicked()
 // Close the Game Screen page. The user will be taken back to the Main Screen.
 void GameScreen::on_pushButton_Abandon_clicked()
 {
-    this->close();
+    on_GameScreen_finished(0);
 }
 
 /* Helper function to load and display cards received from the server. Variable i is used
@@ -365,7 +349,7 @@ void GameScreen::sendBid(QString Suit, QString Rank)
     QJsonObject bid2 = bid["Bid"].toObject();
     bid2["Suit"] = Suit;
     if (Rank == "") {
-        bid2["Rank"] = NULL;
+        bid2["Rank"] = QJsonValue::Null;
     } else {
            bid2["Rank"] = Rank;
         }
@@ -429,20 +413,20 @@ void GameScreen::sendMove(QString Suit, QString Rank)
     move["Id"] = Userid;
 
     // DEBUG movemade = ...? Extract the move made from the QJsonObject
-    movemade = move["Move"].toObject().value("Suit").toString() + move["Move"].toObject().value("Rank").toString();
+//    movemade = move["Move"].toObject().value("Suit").toString() + move["Move"].toObject().value("Rank").toString();
     // Disable card elements
     disableCards(2);
     //Send the updated message to the server
     clientgs->SendMessageToServer(clientgs->CreateJString(move));
 
     // DEBUG code. A move was made, and server receeives MOVE_SEND. Server sends MOVE_UPDATE
-    mes = clientgs->GenerateMessage("MOVE_UPDATE");
-    QJsonObject moveupdate = clientgs->CreateJObject(mes);
-    QJsonObject moveupdate2 = moveupdate["Move"].toObject();
-    moveupdate2["Suit"] = Suit;
-    moveupdate2["Rank"] = Rank;
-    moveupdate["Move"] = moveupdate2;
-    moveupdate["Player"] = UserPosition;
+//    mes = clientgs->GenerateMessage("MOVE_UPDATE");
+//    QJsonObject moveupdate = clientgs->CreateJObject(mes);
+//    QJsonObject moveupdate2 = moveupdate["Move"].toObject();
+//    moveupdate2["Suit"] = Suit;
+//    moveupdate2["Rank"] = Rank;
+//    moveupdate["Move"] = moveupdate2;
+//    moveupdate["Player"] = UserPosition;
 //    clientgs->onTextMessageReceived(clientgs->CreateJString(moveupdate));
 }
 
@@ -472,6 +456,7 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     connect(clientgs, SIGNAL(gameEndSignal(QJsonObject)), this, SLOT(gameEndSlot(QJsonObject)));
     connect(clientgs, SIGNAL(disconnectPlayerSignal(QJsonObject)), this, SLOT(disconnectPlayerSlot(QJsonObject)));
     connect(clientgs, SIGNAL(pongSignal(QJsonObject)), this, SLOT(pongSlot(QJsonObject)));
+    connect(clientgs, SIGNAL(pingSignal(QJsonObject)), this, SLOT(ping(QJsonObject)));
     connect(clientgs, SIGNAL(scoreSignal(QJsonObject)), this, SLOT(scoreSlot(QJsonObject)));
 
 
@@ -565,18 +550,6 @@ void GameScreen::bidStartSlot(QJsonObject cardsdealt)
     ui->pushButton_Pass->setEnabled(false);
     ui->pushButton_Redouble->setEnabled(false);
     ui->pushButton_ViewCards->setEnabled(true);
-
-    // Temp debug code to allow a bid to be made by the player
-    ui->tableBids->setEnabled(true);
-    ui->pushButton_Bid->setEnabled(true);
-
-    /* In die normale flow of events sal die server na bg 'n BID_REQUEST stuur, maar omdat
-       die server nou nie hier is nie word dit gesimulate in die sendBid function bo.
-       Dis meer realisties om dit daar te doen want anders is daar net 1 request wat gestuur word
-       en dis dit - nou kan ons klomp stuur. */
-    // Temp debug code to test BID_REQUEST with bidRequestSignal/Slot
-//    QString mes = clientgs->GenerateMessage("BID_REQUEST");
-//    clientgs->onTextMessageReceived(mes);
 }
 
 void GameScreen::on_pushButton_ViewCards_clicked()
@@ -1181,7 +1154,7 @@ void GameScreen::playEndSlot(QJsonObject play)
     ui->lblDouble->setVisible(false);
     ui->lblContractPlay->setVisible(false);
     // Uncomment pb_Play->setVisible(false) for final implementation
-    // ui->pushButton_Play->setVisible(false);
+     ui->pushButton_Play->setVisible(false);
 
     QMessageBox over;
     over.information(0,"Round Over",play["WinningPartnership"].toString() + " won the round");
@@ -1195,15 +1168,21 @@ void GameScreen::playEndSlot(QJsonObject play)
 // Implemented by Jacques
 void GameScreen::scoreSlot(QJsonObject scores)
 {
-//    ScoreBoard scoreBoard(this);
-//    // Use modal approach
-//    scoreBoard.setModal(true);
-//    scoreBoard.exec();
-//    scoreBoard.updateScores(scores);
+    QJsonObject NS = scores["NSscores"].toObject();
+             QJsonObject EW = scores["EWscores"].toObject();
 
-    ScoreBoard *sb = new ScoreBoard(this);
-    sb->show();
-    sb->updateScores(scores);
+             NSarray[ArrCount] = NS;
+             EWarray[ArrCount] = EW;
+             ArrCount++;
+             //qDebug()<<NSarray[0]["overtricks"];
+             // qDebug()<<scores["Type"].toString();
+              ScoreBoard scoreBoard(this);
+
+              scoreBoard.updateScores(NSarray,EWarray,ArrCount);
+              scoreBoard.setModal(true);
+
+              scoreBoard.exec();
+
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
@@ -1215,8 +1194,16 @@ void GameScreen::disconnectPlayerSlot(QJsonObject disc)
     over.critical(0,"Player Disconnect",playerdisc + " was disconnected. Leaving the game.");
     over.setFixedSize(500,200);
 
-
-    this->finished(0);
+    UserPosition = "";
+    Username = "";
+    ui->tableSequence->clear();
+    ui->lblTeam->setText("");
+    ui->lblNameTeam->setText("");
+    ui->lblOpp1->setText("");
+    ui->lblOpp1Name->setText("");
+    ui->lblOpp2->setText("");
+    ui->lblOpp2Name->setText("");
+    on_GameScreen_finished(1);
 }
 
 // Slot activates after successfully connecting to server. The "update" object
@@ -1339,7 +1326,7 @@ void GameScreen::gameEndSlot(QJsonObject end)
 void GameScreen::ping()
 {
    // Send ping to server
-    QString mes = clientgs->GenerateMessage("PING");
+    QString mes = clientgs->GenerateMessage("PONG");
     QJsonObject obj = clientgs->CreateJObject(mes);
     obj["Id"] = Userid;
     clientgs->SendMessageToServer(clientgs->CreateJString(obj));
@@ -1587,4 +1574,5 @@ void GameScreen::on_pb_26_clicked()
 
 void GameScreen::on_GameScreen_destroyed()
 {
+    on_GameScreen_finished(0);
 }

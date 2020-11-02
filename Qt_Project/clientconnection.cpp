@@ -21,7 +21,6 @@ clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent)
         qDebug() << "WebSocket server:" << url;
     connect(&clientSocket, &QWebSocket::connected, this, &clientconnection::onConnected);
 //    connect(&clientSocket, &QWebSocket::disconnected, this, &clientconnection::closed);
-    connect(&clientSocket, &QWebSocket::aboutToClose, this, &clientconnection::socketClose);
    // QList<QSslCertificate> cert = QSslCertificate::fromPath(QLatin1String("C:/Users/User/localhost.cert"));
     //QSslError certerror(QSslError::SelfSignedCertificate, cert.at(0));
     //QList<QSslError> expect;
@@ -146,6 +145,7 @@ void clientconnection::onTextMessageReceived(QString message)
     {
         // PING
         qDebug() << "Message Type: " << msgTypes[13];
+        emit pingSignal(CreateJObject(message));
         break;
     }
     case 14:
@@ -188,10 +188,7 @@ void clientconnection::onTextMessageReceived(QString message)
     }
 }
 
-void clientconnection::socketClose()
-{
-    clientSocket.close();
-}
+
 /*
 This function is triggered when the client successfully connected to the server. This function further links the socket properties with functions
 in this class. This function will also display connected if the debug mode is enabled. At the moment the function also sends Hello There to the server
@@ -205,8 +202,6 @@ void clientconnection::onConnected()
     connect(&clientSocket, &QWebSocket::textMessageReceived,
             this, &clientconnection::onTextMessageReceived);
     SendMessageToServer("Hello There");
-
-
 
 }
 
@@ -235,7 +230,7 @@ QString clientconnection::GenerateMessage(QString type)
 
     /* Note (Ivan Cuyler): The JFILES folder needs to be in the direct parent directory of
        the project. For some reason it won't work if it is in the same folder.*/
-    QString path = "../JFILES/";
+    QString path = ":/JFILES/";
     path = path + type + ".json";
     file.setFileName(path);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -279,5 +274,5 @@ void clientconnection::closed(int id)
     QJsonObject disc = CreateJObject(GenerateMessage("DISCONNECT_PLAYER"));
     disc["Id"] = id;
     SendMessageToServer(CreateJString(disc));
-//    socketClose();
+    clientSocket.close();
 }

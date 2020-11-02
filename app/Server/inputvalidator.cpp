@@ -49,14 +49,14 @@ bool InputValidator::isValidBid(int id, int val, int suit)
     {
         if(currentBid == NULL)
             return false;
-        if(currentBid->owner == (id + 2) % num_players || currentBid->suit > NT)
+        if(currentBid->owner == (id + 2) % num_players || currentBid->isDoubled || currentBid->isRedoubled)
             return false;
     }
     else if(suit == Redouble)
     {
         if(currentBid == NULL)
             return false;
-        if(!currentBid->isDoubled)
+        if(!currentBid->isDoubled || currentBid->isRedoubled)
             return false;
     }
     else if(suit != Pass)
@@ -101,9 +101,19 @@ bool InputValidator::isValidMove(int id, int val, int suit)
             return false;
         }
     }
+    else if(server->GS.getPlayerTurn() != id)
+        return false;
 
     if(!isValidFollowSuit(id, suit))
-        return false;
+    {
+        if(server->GS.getDeclarer() == id && server->GS.getPlayerTurn() == server->getTeamy(server->GS.getDeclarer()))
+        {
+            if(!isValidFollowSuit(server->getTeamy(server->GS.getDeclarer()), suit))
+                return false;
+        }
+        else
+            return false;
+    }
 
     //else
     return true;

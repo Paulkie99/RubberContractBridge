@@ -28,6 +28,7 @@ FORMS += \
     scoreboard.ui
 
 RESOURCES = application.qrc
+RESOURCES += jfiles.qrc
 
 
 # Default rules for deployment.

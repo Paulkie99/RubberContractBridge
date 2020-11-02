@@ -82,6 +82,8 @@ private:
 
     void Update_Play();
 
+    void Play_Start();
+    
 private slots:
     void acceptConnection();
     void ValidateInput(QString message);

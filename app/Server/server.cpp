@@ -779,6 +779,38 @@ Card* Server::GetBestCardInTrick()
  * If the deal is passed out (four passes in first bidding round), shuffle and redeal
  * Call Next_Bid otherwise
  * */
+void Server::Play_Start()
+{
+    GS.SetBidStage(false);
+    GS.setMoveStage(true);
+    GS.setDeclarer(GS.firstDenominationBids[GS.getCurrentBid()->suit][GS.getCurrentBid()->owner % 2]);
+    GS.setPlayerTurn((GS.getDeclarer() + 1) % num_players);
+
+    findHonors();
+
+    QJsonObject bid_end = Convert_Message_To_Json(GenerateMessage("BID_END"));
+    bid_end["Trump"] = GS.getCurrentBid()->SuitToString();
+    bid_end["Declarer"] = GS.getPlayerFromId(GS.getDeclarer());
+    bid_end["Dummy"] = GS.getPlayerFromId((GS.getDeclarer() + 2) % num_players);
+
+    QJsonObject contract;
+    contract["Suit"] = GS.getCurrentBid()->SuitToString();
+    contract["Rank"] = GS.getCurrentBid()->ValToString();
+    contract["IsDouble"] = GS.getCurrentBid()->isDoubled;
+    contract["IsRedouble"] = GS.getCurrentBid()->isRedoubled;
+
+    bid_end["Contract"] = contract;
+    BroadcastMessage(bid_end);
+
+    QJsonObject play_start = Convert_Message_To_Json(GenerateMessage("PLAY_START"));
+    QJsonArray dummy_cards = *Construct_Cards_Message((GS.getDeclarer() + 2) % num_players);
+    play_start["DummyCards"] = dummy_cards;
+    BroadcastMessage(play_start);
+
+    QJsonObject move_req = Convert_Message_To_Json(GenerateMessage("MOVE_REQUEST"));
+    SendMessage(GS.getPlayerTurn(), move_req);
+}
+
 void Server::Update_Bid(int id, int value, int suit)
 {
     Card* bid = new Card(value, suit);
@@ -815,34 +847,7 @@ void Server::Update_Bid(int id, int value, int suit)
         if(GS.getPassCount() == 3) // three consecutive passses, play should commence
         {// start play stage
             qInfo() << "Play starting";
-            GS.SetBidStage(false);
-            GS.setMoveStage(true);
-            GS.setDeclarer(GS.firstDenominationBids[GS.getCurrentBid()->suit][GS.getCurrentBid()->owner % 2]);
-            GS.setPlayerTurn((GS.getDeclarer() + 1) % num_players);
-
-            findHonors();
-
-            QJsonObject bid_end = Convert_Message_To_Json(GenerateMessage("BID_END"));
-            bid_end["Trump"] = GS.getCurrentBid()->SuitToString();
-            bid_end["Declarer"] = GS.getPlayerFromId(GS.getDeclarer());
-            bid_end["Dummy"] = GS.getPlayerFromId((GS.getDeclarer() + 2) % num_players);
-
-            QJsonObject contract;
-            contract["Suit"] = GS.getCurrentBid()->SuitToString();
-            contract["Rank"] = GS.getCurrentBid()->ValToString();
-            contract["IsDouble"] = GS.getCurrentBid()->isDoubled;
-            contract["IsRedouble"] = GS.getCurrentBid()->isRedoubled;
-
-            bid_end["Contract"] = contract;
-            BroadcastMessage(bid_end);
-
-            QJsonObject play_start = Convert_Message_To_Json(GenerateMessage("PLAY_START"));
-            QJsonArray dummy_cards = *Construct_Cards_Message((GS.getDeclarer() + 2) % num_players);
-            play_start["DummyCards"] = dummy_cards;
-            BroadcastMessage(play_start);
-
-            QJsonObject move_req = Convert_Message_To_Json(GenerateMessage("MOVE_REQUEST"));
-            SendMessage(GS.getPlayerTurn(), move_req);
+            Play_Start();
         }
         else
         {
@@ -858,6 +863,17 @@ void Server::Update_Bid(int id, int value, int suit)
             if(shuffle)
                 Shuffle();
             Deal();
+        }
+        else if(GS.getPassCount() == 3)
+        {
+            if(GS.getCurrentBid())
+            {
+                Play_Start();
+            }
+            else
+            {
+                Next_Bid();
+            }
         }
         else
         {

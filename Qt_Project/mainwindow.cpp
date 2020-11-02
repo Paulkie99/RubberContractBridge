@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Set the focus to the heading
     ui->lblHeading->setFocus();
 
-
 //    connect(&client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
 //    connect(&client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
 //    connect(&client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
