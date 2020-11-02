@@ -25,7 +25,7 @@ ServerInterface::ServerInterface(QWidget *parent, quint16 port)
             this, SLOT(messageReceived(QString)));
     connect(bridgeServer, SIGNAL(messageSent(QString)),
             this, SLOT(messageSent(QString)));
-    Info("Server listening on port: " + QString(port));
+    Info("Server listening on port: " + QString::number(port));
 }
 
 /*

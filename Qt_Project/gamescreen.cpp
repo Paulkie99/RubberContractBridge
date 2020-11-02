@@ -151,8 +151,9 @@ void GameScreen::connectSlots()
 // the user is taken back to the main screen.
 void GameScreen::on_GameScreen_finished(int result)
 {
-    clientgs->closed();
+    clientgs->closed(Userid);
     // Show the parent again, in this case main window
+    this->close();
     parentWidget()->show();
 }
 

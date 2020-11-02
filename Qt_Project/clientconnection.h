@@ -41,7 +41,8 @@ private:
 private Q_SLOTS:
     void onConnected();
     void onTextMessageReceived(QString message);
-    void closed();
+    void closed(int id);
+    void socketClose();
 
 signals:
 //    void customsignal();
