@@ -1,9 +1,0 @@
-{	"Type": "PLAY_START",
-	"Id": 32,
-	"DummyCards": [
-	{"Suit" : "H", "Rank" : ["J", "7"] },
-	{"Suit" : "S", "Rank" : ["7", "K"] },
-	{"Suit" : "C", "Rank" : ["9", "6", "A", "Q"] },
-	{"Suit" : "D", "Rank" : ["2", "9", "K", "A"] }
-	]
-}

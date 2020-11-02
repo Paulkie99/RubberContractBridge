@@ -49,6 +49,9 @@ QString opp1Username;
 QString opp2Pos;
 QString opp2Username;
 QString movemade = "";
+QJsonObject NSarray [50];
+QJsonObject EWarray [50] ;
+int ArrCount = 0;
 
 /* Helper function to load the player cards as well as the dummy's cards
  Once integrated it will receive the actual cards to load from server
@@ -163,14 +166,12 @@ void GameScreen::on_GameScreen_finished(int result)
 // Implemented by Jacques
 void GameScreen::on_pushButton_Score_clicked()
 {
-    /* // Create new instance of scoreBoard, set parent as this (Game Screen dialog)
     ScoreBoard scoreBoard(this);
-    // Use modal approach
-    scoreBoard.setModal(true);
-    scoreBoard.exec();
-    ScoreBoard *sb = new ScoreBoard(this);
-    sb->show();
-    sb->updateScores() */
+
+        scoreBoard.updateScores(NSarray,EWarray,ArrCount);
+        scoreBoard.setModal(true);
+
+        scoreBoard.exec();
 }
 
 // Once the auction is over, the pushButton_Play will be made visible.
@@ -1194,15 +1195,21 @@ void GameScreen::playEndSlot(QJsonObject play)
 // Implemented by Jacques
 void GameScreen::scoreSlot(QJsonObject scores)
 {
-//    ScoreBoard scoreBoard(this);
-//    // Use modal approach
-//    scoreBoard.setModal(true);
-//    scoreBoard.exec();
-//    scoreBoard.updateScores(scores);
+    QJsonObject NS = scores["NSscores"].toObject();
+             QJsonObject EW = scores["EWscores"].toObject();
 
-    ScoreBoard *sb = new ScoreBoard(this);
-    sb->show();
-    sb->updateScores(scores);
+             NSarray[ArrCount] = NS;
+             EWarray[ArrCount] = EW;
+             ArrCount++;
+             //qDebug()<<NSarray[0]["overtricks"];
+             // qDebug()<<scores["Type"].toString();
+              ScoreBoard scoreBoard(this);
+
+              scoreBoard.updateScores(NSarray,EWarray,ArrCount);
+              scoreBoard.setModal(true);
+
+              scoreBoard.exec();
+
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
