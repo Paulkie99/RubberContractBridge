@@ -21,51 +21,11 @@ AIPlayer::AIPlayer(const QUrl &url, QObject *parent) : QObject(parent), ConnectU
     bidReq = false;
     bidCount = 0;
 
+    myPlayCount = 0;
+    dummyPlayCount = 0;
+
     qInfo() << "Creating AIPlayer " << PID;
 
-    // Populate the cards in hand with known values
-    // value is the number on the card-2, with Jack = 9, Queen = 10, King = 11, Ace = 12
-    // suit is the suit, with Clubs = 0, Diamonds = 1, Hearts = 2, Spades = 3
-    /*
-    cards[0][0] = 5; // value
-    cards[0][1] = 2; // suit
-
-    cards[1][0] = 9; // value
-    cards[1][1] = 0; // suit
-
-    cards[2][0] = 11; // value
-    cards[2][1] = 2; // suit
-
-    cards[3][0] = 4; // value
-    cards[3][1] = 2; // suit
-
-    cards[4][0] = 5; // value
-    cards[4][1] = 3; // suit
-
-    cards[5][0] = 12; // value
-    cards[5][1] = 2; // suit
-
-    cards[6][0] = 10; // value
-    cards[6][1] = 3; // suit
-
-    cards[7][0] = 12; // value
-    cards[7][1] = 3; // suit
-
-    cards[8][0] = 10; // value
-    cards[8][1] = 2; // suit
-
-    cards[9][0] = 11; // value
-    cards[9][1] = 2; // suit
-
-    cards[10][0] = 9; // value
-    cards[10][1] = 3; // suit
-
-    cards[11][0] = 12; // value
-    cards[11][1] = 3; // suit
-
-    cards[12][0] = 11; // value
-    cards[12][1] = 3; // suit
-    */
 
     for (int i = 0; i < 4; i++)
     {
@@ -82,7 +42,7 @@ AIPlayer::AIPlayer(const QUrl &url, QObject *parent) : QObject(parent), ConnectU
 /*
  * A function to set the hand of the AI from the Server directly.
 */
-/*void AIPlayer::SetHand(Card* PH[13])
+void AIPlayer::SetHand(Card* PH[13])
 {
     for(int card = 0; card < hand_size; ++card)
     {
@@ -91,7 +51,7 @@ AIPlayer::AIPlayer(const QUrl &url, QObject *parent) : QObject(parent), ConnectU
     for (int i = 0; i < hand_size; i++) {
         CardsInHand.push_back(Player_Hand[i]);
     }
-};*/
+};
 
 void AIPlayer::SetHand()
 {
@@ -319,7 +279,7 @@ int AIPlayer::GetPID()
  */
 QString AIPlayer::Play(int trk[][2])
 {
-
+    cout << "\nPID is moving: " << PID << endl;
     for (int i = 0; i < int(CardsInHand.size()); i++)
     {
         cout << "Index: " << i;
@@ -327,6 +287,7 @@ QString AIPlayer::Play(int trk[][2])
         cout << "\tCard Suit: " << CardsInHand[i]->suit << endl;
     }
     cout << "\nTrump Suit " << TrumpSuit << endl;
+
     cout << "\nTrick Array:\n";
     for (int i = 0; i < 4; i++)
     {
@@ -403,19 +364,23 @@ QString AIPlayer::Play(int trk[][2])
 //            cout << "Min in Has Lead: " << MinIndex << endl;
 //            cout << "Max in Has Lead: " << MaxIndex << endl;
 
-            for (int i = 0; i < 4; i++){
+//            for (int i = 0; i < 4; i++){
+            int i = 0;
+            bool found = false;
+            while (i < 4 && !found){
                 if (trk[i][1] == CardsInHand[MaxIndex]->suit){
                     if (trk[i][0] >= CardsInHand[MaxIndex]->value){
                         SelectedCard = CardsInHand[MinIndex];
                         RemoveCard(MinIndex);
+                        found = true;
                     } else {
                         SelectedCard = CardsInHand[MaxIndex];
                         RemoveCard(MaxIndex);
+                        found = true;
                     }
                 }
+                i++;
             }
-//            SelectedCard = CardsInHand[MaxIndex];
-//            RemoveCard(MaxIndex);
         } else
         {
 
@@ -477,18 +442,8 @@ QString AIPlayer::Play(int trk[][2])
     // Create new object with updated Suit and Rank
     QJsonObject move2 = move["Move"].toObject();
 
-    if (SelectedCard->suit == 0){
-        move2["Suit"] = "C";
-    }else if (SelectedCard->suit == 1){
-        move2["Suit"] = "D";
-    }else if (SelectedCard->suit == 2){
-        move2["Suit"] = "H";
-    }else if (SelectedCard->suit == 3){
-        move2["Suit"] = "S";
-    }
-
-
-    move2["Rank"] = QString::number(SelectedCard->value);
+    move2["Suit"] = SelectedCard->SuitToString(SelectedCard->suit);
+    move2["Rank"] = SelectedCard->ValToString(SelectedCard->value);
     move["Move"] = move2;
     move["Id"] = PID;
 
@@ -505,7 +460,7 @@ QString AIPlayer::Play(int trk[][2])
  */
 QString AIPlayer::PlayDummy(int trk[][2])
 {
-
+    cout << "\nPID is " << PID << " playing dummy for PID " << (PID+2)%4 << endl;
     for (int i = 0; i < int(CardsInDummyHand.size()); i++)
     {
         cout << "Index: " << i;
@@ -538,7 +493,7 @@ QString AIPlayer::PlayDummy(int trk[][2])
             }
         }
         SelectedCard = CardsInDummyHand[MaxIndex];
-        RemoveCard(MaxIndex);
+        RemoveDummyCard(MaxIndex);
     } else {
         /*
          * If it is not the first to go, it should follow the lead suit, unless it can't,
@@ -591,20 +546,22 @@ QString AIPlayer::PlayDummy(int trk[][2])
 
 //            cout << "Min in Has Lead: " << MinIndex << endl;
 //            cout << "Max in Has Lead: " << MaxIndex << endl;
-
-            for (int i = 0; i < 4; i++){
+            int i = 0;
+            bool found = false;
+            while (i < 4 && !found){
                 if (trk[i][1] == CardsInDummyHand[MaxIndex]->suit){
                     if (trk[i][0] >= CardsInDummyHand[MaxIndex]->value){
                         SelectedCard = CardsInDummyHand[MinIndex];
-                        RemoveCard(MinIndex);
+                        RemoveDummyCard(MinIndex);
+                        found = true;
                     } else {
                         SelectedCard = CardsInDummyHand[MaxIndex];
-                        RemoveCard(MaxIndex);
+                        RemoveDummyCard(MaxIndex);
+                        found = true;
                     }
                 }
+                i++;
             }
-//            SelectedCard = CardsInHand[MaxIndex];
-//            RemoveCard(MaxIndex);
         } else
         {
             /*
@@ -640,7 +597,7 @@ QString AIPlayer::PlayDummy(int trk[][2])
             */
             if (MinIndex != -1) {
                 SelectedCard = CardsInDummyHand[MinIndex];
-                RemoveCard(MinIndex);
+                RemoveDummyCard(MinIndex);
             } else {
                 /*
                  * If no trump card is found, play the smallest card in the hand
@@ -653,7 +610,7 @@ QString AIPlayer::PlayDummy(int trk[][2])
                     }
                 }
                 SelectedCard = CardsInDummyHand[MinIndex];
-                RemoveCard(MinIndex);
+                RemoveDummyCard(MinIndex);
             }
         }
 
@@ -670,17 +627,9 @@ QString AIPlayer::PlayDummy(int trk[][2])
     // Create new object with updated Suit and Rank
     QJsonObject move2 = move["Move"].toObject();
 
-    if (SelectedCard->suit == 0){
-        move2["Suit"] = "C";
-    }else if (SelectedCard->suit == 1){
-        move2["Suit"] = "D";
-    }else if (SelectedCard->suit == 2){
-        move2["Suit"] = "H";
-    }else if (SelectedCard->suit == 3){
-        move2["Suit"] = "S";
-    }
 
-    move2["Rank"] = QString::number(SelectedCard->value);
+    move2["Suit"] = SelectedCard->SuitToString(SelectedCard->suit);
+    move2["Rank"] = SelectedCard->ValToString(SelectedCard->value);
     move["Move"] = move2;
     move["Id"] = PID;
 
@@ -763,24 +712,43 @@ QString AIPlayer::Bid()
 //        cout << "Batman\n";
     }
 
+
     /*
      * This is where the bidding logic takes place.
      * If the HandValues is less than or equal to 12, the AI should pass the bid as it is a bad hand.
      * The values above 12 is divided into 7 regions and the higher value a region is, the higher is the bid amount.
     */
-    if (HandValues <= 12) {
+//    if (HandValues <= 12) {
+//        BidValue = 0;
+//    } else if (HandValues <= 16) {
+//        BidValue = 1;
+//    } else if (HandValues <= 19) {
+//        BidValue = 2;
+//    } else if (HandValues <= 23) {
+//        BidValue = 3;
+//    } else if (HandValues <= 26) {
+//        BidValue = 4;
+//    } else if (HandValues <= 30) {
+//        BidValue = 5;
+//    } else if (HandValues <= 33) {
+//        BidValue = 6;
+//    } else if (HandValues <= 37) {
+//        BidValue = 7;
+//    }
+
+    if (HandValues <= 5) {
         BidValue = 0;
     } else if (HandValues <= 16) {
         BidValue = 1;
-    } else if (HandValues <= 19) {
+    } else if (HandValues <= 18) {
         BidValue = 2;
-    } else if (HandValues <= 23) {
+    } else if (HandValues <= 25) {
         BidValue = 3;
-    } else if (HandValues <= 26) {
-        BidValue = 4;
     } else if (HandValues <= 30) {
+        BidValue = 4;
+    } else if (HandValues <= 35) {
         BidValue = 5;
-    } else if (HandValues <= 33) {
+    } else if (HandValues <= 36) {
         BidValue = 6;
     } else if (HandValues <= 37) {
         BidValue = 7;
@@ -859,36 +827,6 @@ QString AIPlayer::Bid()
 };
 
 
-/*
- * Determine whether to play or bid, used for debugging
-*/
-/*QString AIPlayer::DetermineMove(GameState& gs)
-{
-    if (gs.GetBidStage())
-    {
-        if (gs.getBidRoundCount() < 1){
-            return Bid();
-        } else {
-            QString str = "Bid; Pass; Pass;";
-            return str;
-        }
-
-    }else
-    {
-        cout << "\nBLAH BLAH BLAH\n";
-        int trk[4][2] = {{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
-        for (int i = 0; i < int(gs.CurrentTrick.size()); i++){
-            trk[i][0] = gs.CurrentTrick[i]->value;
-            trk[i][1] = gs.CurrentTrick[i]->suit;
-        }
-        TrumpSuit = gs.trumpSuit;
-
-        return Play(trk);
-    }
-    return NULL;
-};*/
-
-
 
 /*********************************************************************************************************************************************************
 **********************************************************************************************************************************************************
@@ -950,7 +888,6 @@ void AIPlayer::onTextMessageReceived(QString message)
         {
             // LOBBY_UPDATE
             qDebug() << "Message Type: " << msgTypes[2];
-
             QString msg = GenerateMessage("PLAYER_READY");
             QJsonObject ready = CreateJObject(msg);
             ready["Id"] = PID;
@@ -980,41 +917,41 @@ void AIPlayer::onTextMessageReceived(QString message)
                     int suit = -1;
                     QString newSuit = v.toObject().value("Suit").toString();
                     if (newSuit == "C"){
-                        suit = 0;
+                        suit = Clubs;
                     } else if (newSuit == "D") {
-                        suit = 1;
+                        suit = Diamonds;
                     }else if (newSuit == "H") {
-                        suit = 2;
+                        suit = Hearts;
                     }else if (newSuit == "S") {
-                        suit = 3;
+                        suit = Spades;
                     }
                     QString newVal = v.toObject().value("Rank")[k].toString();
                     if (newVal == "2"){
-                        value = 1;
+                        value = Two;
                     }else if (newVal == "3") {
-                        value = 2;
+                        value = Three;
                     }else if (newVal == "4") {
-                        value = 3;
+                        value = Four;
                     }else if (newVal == "5") {
-                        value = 4;
+                        value = Five;
                     }else if (newVal == "6") {
-                        value = 5;
+                        value = Six;
                     }else if (newVal == "7") {
-                        value = 6;
+                        value = Seven;
                     }else if (newVal == "8") {
-                        value = 7;
+                        value = Eight;
                     }else if (newVal == "9") {
-                        value = 8;
+                        value = Nine;
                     }else if (newVal == "10") {
-                        value = 9;
+                        value = Ten;
                     }else if (newVal == "J") {
-                        value = 10;
+                        value = Jack;
                     }else if (newVal == "Q") {
-                        value = 11;
+                        value = Queen;
                     }else if (newVal == "K") {
-                        value = 12;
+                        value = King;
                     }else if (newVal == "A") {
-                        value = 13;
+                        value = Ace;
                     }
 
                     Player_Hand[count] = new Card(value, suit);
@@ -1022,6 +959,13 @@ void AIPlayer::onTextMessageReceived(QString message)
                 }
             }
             SetHand();
+            cout << "\nPlayer ID: " << PID << endl;
+            for (int i = 0; i < int(CardsInHand.size()); i++)
+            {
+                cout << "Index: " << i;
+                cout << "\tCard Value: " << CardsInHand[i]->value;
+                cout << "\tCard Suit: " << CardsInHand[i]->suit << endl;
+            }
             break;
         }
         case 4:
@@ -1162,6 +1106,47 @@ void AIPlayer::onTextMessageReceived(QString message)
                 PlayString = PlayDummy(trk);
             }
 
+
+
+//            if (msgr["MoveDummy"] == false) {
+//                QString mes = GenerateMessage("MOVE_SEND");
+//                QJsonObject move = CreateJObject(mes);
+//                // Create new object with updated Suit and Rank
+//                QJsonObject move2 = move["Move"].toObject();
+
+//                int MaxIndex = 0;
+//                for (int i = 0; i < hand_size; i++)
+//                {
+//                    if (Player_Hand[MaxIndex]->value <= Player_Hand[i]->value){
+//                        MaxIndex = i;
+//                    }
+//                }
+
+
+
+
+////                SelectedCard = CardsInHand[MaxIndex];
+
+//                move2["Suit"] = Player_Hand[myPlayCount]->SuitToString(Player_Hand[myPlayCount]->suit);
+//                move2["Rank"] = Player_Hand[myPlayCount]->ValToString(Player_Hand[myPlayCount]->value);
+//                myPlayCount++;
+//                move["Move"] = move2;
+//                move["Id"] = PID;
+//                PlayString = CreateJString(move);
+//            } else {
+//                QString mes = GenerateMessage("MOVE_SEND");
+//                QJsonObject move = CreateJObject(mes);
+//                // Create new object with updated Suit and Rank
+//                QJsonObject move2 = move["Move"].toObject();
+
+//                move2["Suit"] = Dummy_Hand[dummyPlayCount]->SuitToString(Dummy_Hand[dummyPlayCount]->suit);
+//                move2["Rank"] = Dummy_Hand[dummyPlayCount]->ValToString(Dummy_Hand[dummyPlayCount]->value);
+//                dummyPlayCount++;
+//                move["Move"] = move2;
+//                move["Id"] = PID;
+//                PlayString = CreateJString(move);
+//            }
+
             SendMessageToServer(PlayString);
 
             break;
@@ -1175,6 +1160,8 @@ void AIPlayer::onTextMessageReceived(QString message)
 //            QString cardplayed = Suit + Rank;
             int suit = -1;
             int value = -1;
+            dummyPlayCount = 0;
+            myPlayCount = 0;
 
             if (Suit == "C"){
                 suit = 0;
