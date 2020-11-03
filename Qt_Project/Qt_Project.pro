@@ -29,6 +29,7 @@ FORMS += \
 
 RESOURCES = application.qrc
 RESOURCES += jfiles.qrc
+RESOURCES += certs.qrc
 
 
 # Default rules for deployment.

@@ -43,6 +43,7 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) :
     }
 
     msgTypes << "CONNECT_REQUEST" << "BID_SEND" << "MOVE_SEND" << "PING" << "PONG" << "DISCONNECT_PLAYER" << "PLAYER_READY"; // Messages the server might receive
+
 }
 
 /*

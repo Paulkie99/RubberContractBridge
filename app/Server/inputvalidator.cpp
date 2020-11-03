@@ -85,35 +85,20 @@ bool InputValidator::isValidMove(int id, int val, int suit)
     if(!server->GS.getMoveStage())
         return false;
 
+    bool dummyTurn = false;
     if(server->GS.getPlayerTurn() != id)
+    {
         if(server->GS.getDeclarer() != id || server->GS.getPlayerTurn() != server->getTeamy(server->GS.getDeclarer()))
             return false;
-
-    if(!isValidCardInHand(id, val, suit))
-    {
-        if(server->GS.getDeclarer() == id && server->GS.getPlayerTurn() == server->getTeamy(id))
-        {
-            if(!isValidCardInHand(server->getTeamy(id), val, suit))
-                return false;
-        }
         else
-        {
-            return false;
-        }
+            dummyTurn = true;
     }
-    else if(server->GS.getPlayerTurn() != id)
+
+    if(!isValidCardInHand(dummyTurn ? server->getTeamy(server->GS.getDeclarer()) : id, val, suit))
         return false;
 
-    if(!isValidFollowSuit(id, suit))
-    {
-        if(server->GS.getDeclarer() == id && server->GS.getPlayerTurn() == server->getTeamy(server->GS.getDeclarer()))
-        {
-            if(!isValidFollowSuit(server->getTeamy(server->GS.getDeclarer()), suit))
-                return false;
-        }
-        else
-            return false;
-    }
+    if(!isValidFollowSuit(dummyTurn ? server->getTeamy(server->GS.getDeclarer()) : id, suit))
+        return false;
 
     //else
     return true;

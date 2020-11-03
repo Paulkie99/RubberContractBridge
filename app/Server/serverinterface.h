@@ -13,6 +13,8 @@
 
 #include <QDialog>
 #include <server.h>
+#include <QSslCertificate>
+#include <QSslKey>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Server_Dialog; }
@@ -25,9 +27,11 @@ class ServerInterface : public QDialog
     Q_OBJECT
 
 public:
-    ServerInterface(QWidget *parent = nullptr, quint16 port = 159);
+    ServerInterface(QWidget *parent = nullptr, quint16 port = 159, bool secure = false);
     ~ServerInterface();
     friend class TestServer;
+
+public slots:
     void Info(const QString& message);
 
 private slots:

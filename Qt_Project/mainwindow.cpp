@@ -126,7 +126,7 @@ void MainWindow::on_pushButton_Join_clicked()
 void MainWindow::on_pushButton_JoinServer_clicked()
 {
     // Establish a clientconnection object for communicating over the network
-    clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("ws://localhost:159")), true);
+    clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("wss://102.132.146.35:159")), true);
     client = client1;
 
     // Connect the various signals and slots

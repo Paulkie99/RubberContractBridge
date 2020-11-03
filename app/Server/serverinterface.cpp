@@ -14,18 +14,40 @@
 /*
  * Constructor for server interface, a port may be specified, default port is 159. Can also be specified whether the created server should shuffle its deck on creation.
  * */
-ServerInterface::ServerInterface(QWidget *parent, quint16 port)
+ServerInterface::ServerInterface(QWidget *parent, quint16 port, bool secure)
     : QDialog(parent)
     , ui(new Ui::Server_Dialog)
 {
     ui->setupUi(this);
-    bridgeServer = new Server("Bridge Server", QWebSocketServer::NonSecureMode, this);
-    bridgeServer->listen(QHostAddress::Any, port);
-    connect(bridgeServer, SIGNAL(messageReceived(QString)),
-            this, SLOT(messageReceived(QString)));
-    connect(bridgeServer, SIGNAL(messageSent(QString)),
-            this, SLOT(messageSent(QString)));
-    Info("Server listening on port: " + QString::number(port));
+    bridgeServer = new Server("Bridge Server", secure ? QWebSocketServer::SecureMode : QWebSocketServer::NonSecureMode, this);
+    if(secure)
+    {
+        QSslConfiguration conf;
+        QSslKey key;
+        QSslCertificate cert;
+        QFile certFile(QStringLiteral(":/localhost.cert"));
+        QFile keyFile(QStringLiteral(":/localhost.key"));
+        certFile.open(QIODevice::ReadOnly);
+        keyFile.open(QIODevice::ReadOnly);
+        cert = QSslCertificate(&certFile, QSsl::Pem);
+        key = QSslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+        certFile.close();
+        keyFile.close();
+        conf.setPeerVerifyMode(QSslSocket::VerifyNone);
+        conf.setLocalCertificate(cert);
+        conf.setPrivateKey(key);
+        bridgeServer->setSslConfiguration(conf);
+    }
+    if(bridgeServer->listen(QHostAddress::Any, port))
+    {
+        connect(bridgeServer, SIGNAL(messageReceived(QString)),
+                this, SLOT(messageReceived(QString)));
+        connect(bridgeServer, SIGNAL(messageSent(QString)),
+                this, SLOT(messageSent(QString)));
+        connect(bridgeServer, SIGNAL(Info(QString)),
+                this, SLOT(Info(QString)));
+        Info("Server listening on port: " + QString::number(port));
+    }
 }
 
 /*

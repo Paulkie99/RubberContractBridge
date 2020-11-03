@@ -20,12 +20,18 @@ clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent)
     if (debugOn)
         qDebug() << "WebSocket server:" << url;
     connect(&clientSocket, &QWebSocket::connected, this, &clientconnection::onConnected);
+    connect(&clientSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
+            this, &clientconnection::onSslErrors);
 //    connect(&clientSocket, &QWebSocket::disconnected, this, &clientconnection::closed);
-   // QList<QSslCertificate> cert = QSslCertificate::fromPath(QLatin1String("C:/Users/User/localhost.cert"));
-    //QSslError certerror(QSslError::SelfSignedCertificate, cert.at(0));
-    //QList<QSslError> expect;
-    //expect.append(certerror);
-   // clientSocket.ignoreSslErrors(expect);
+//    QList<QSslCertificate> cert = QSslCertificate::fromPath(QLatin1String(":/localhost.cert"));
+//    QSslError certerror(QSslError::SelfSignedCertificate, cert.at(0));
+//    QList<QSslError> expect;
+//    expect.append(certerror);
+//    clientSocket.ignoreSslErrors(expect);
+    QSslConfiguration conf = clientSocket.sslConfiguration();
+    conf.setPeerVerifyMode(QSslSocket::VerifyPeer);
+    clientSocket.setSslConfiguration(conf);
+    clientSocket.ignoreSslErrors();
     clientSocket.open(QUrl(url));
 }
 
@@ -275,4 +281,11 @@ void clientconnection::closed(int id)
     disc["Id"] = id;
     SendMessageToServer(CreateJString(disc));
     clientSocket.close();
+}
+
+void clientconnection::onSslErrors(const QList<QSslError> &errors)
+{
+    Q_UNUSED(errors);
+
+    clientSocket.ignoreSslErrors();
 }

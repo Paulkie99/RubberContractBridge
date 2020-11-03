@@ -15,6 +15,7 @@
 #include <QObject>
 #include "mainwindow.h"
 #include "clientconnection.h"
+#include<QThread>
 class MainWindow;
 
 
@@ -149,6 +150,41 @@ signals:
 
 private:
     Ui::GameScreen *ui;
-};
+    /* Declare a pointer clientconnection object that points to the original
+       client object established in mainwindow.*/
+    clientconnection* clientgs = NULL;
+    // cards is the user's cards
+    QString cards[13];
+    // cardsDummy is the dummy's cards
+    QString cardsDummy[13];
+    QString currentBidSuit = "";
+    QString currentBidRank = "";
+    int counter = 0;
+    int row = 0;
+    int Userid = 0;
+    QString Username = "";
+    QString NorthAlias = "";
+    QString SouthAlias = "";
+    QString WestAlias = "";
+    QString EastAlias = "";
+    QString UserPosition = "";
+    QString Declarer = "";
+    QString Dummy = "not set";
+    QString Trump = "";
+    bool Double = false;
+    bool Redouble = false;
+    QString Contract = "";
+    // moveCounter holds how many cards have been played in the current round
+    int moveCounter = 0;
+    QString teamPos = "";
+    QString teamUsername = "";
+    QString opp1Pos = "";
+    QString opp1Username = "";
+    QString opp2Pos = "";
+    QString opp2Username = "";
+    QString movemade = "";
+    QJsonObject NSarray [50];
+    QJsonObject EWarray [50] ;
+    int ArrCount = 0;};
 
 #endif // GAMESCREEN_H

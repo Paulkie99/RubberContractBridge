@@ -29,6 +29,7 @@ FORMS += \
     dialog.ui
 
 RESOURCES = application.qrc
+RESOURCES += certs.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

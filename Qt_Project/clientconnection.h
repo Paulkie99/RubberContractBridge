@@ -42,6 +42,7 @@ private Q_SLOTS:
     void onConnected();
     void onTextMessageReceived(QString message);
     void closed(int id);
+    void onSslErrors(const QList<QSslError>& errors);
 
 signals:
 //    void customsignal();

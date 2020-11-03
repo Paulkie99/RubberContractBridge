@@ -17,7 +17,6 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
-
 #include <random>       // std::default_random_engine
 #include <inputvalidator.h>
 #include <gamestate.h>
@@ -43,6 +42,7 @@ public:
 signals:
     void messageReceived(QString); //signal to the server-interface that a message has been received
     void messageSent(QString);
+    void Info(QString);
 
 private:
     ServerClient ConnectedClients[num_players];
