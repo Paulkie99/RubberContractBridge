@@ -25,8 +25,8 @@ ServerInterface::ServerInterface(QWidget *parent, quint16 port, bool secure)
         QSslConfiguration conf;
         QSslKey key;
         QSslCertificate cert;
-        QFile certFile(QStringLiteral(":/localhost.cert"));
-        QFile keyFile(QStringLiteral(":/localhost.key"));
+        QFile certFile(QStringLiteral(":/public.pem"));
+        QFile keyFile(QStringLiteral(":/private.pem"));
         certFile.open(QIODevice::ReadOnly);
         keyFile.open(QIODevice::ReadOnly);
         cert = QSslCertificate(&certFile, QSsl::Pem);
@@ -47,7 +47,7 @@ ServerInterface::ServerInterface(QWidget *parent, quint16 port, bool secure)
                 this, SLOT(messageSent(QString)));
         connect(bridgeServer, SIGNAL(Info(QString)),
                 this, SLOT(Info(QString)));
-        Info("Server listening on port: " + QString::number(port));
+        Info("Server listening on port: " + QString::number(port) + (secure ? ", secure" : ", not secure"));
     }
 }
 

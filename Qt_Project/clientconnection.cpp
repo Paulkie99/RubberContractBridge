@@ -30,7 +30,8 @@ clientconnection::clientconnection(const QUrl &url, bool debug, QObject *parent)
 //    expect.append(certerror);
 //    clientSocket.ignoreSslErrors(expect);
     QSslConfiguration conf = clientSocket.sslConfiguration();
-    conf.setPeerVerifyMode(QSslSocket::VerifyPeer);
+    conf.setPeerVerifyMode(QSslSocket::VerifyNone);
+    conf.setProtocol(QSsl::TlsV1_0);
     clientSocket.setSslConfiguration(conf);
     clientSocket.ignoreSslErrors();
     clientSocket.open(QUrl(url));
