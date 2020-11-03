@@ -81,6 +81,7 @@ private:
     bool bidReq;
     int bidCount;
 
+    QString lastBid[2];
 
     QString Play(int trk[][2]);
     QString PlayDummy(int trk[][2]);

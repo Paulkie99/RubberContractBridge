@@ -918,7 +918,7 @@ QString AIPlayer::Bid()
 
 
 /*
- * Determine whether to play or bid
+ * Determine whether to play or bid, used for debugging
 */
 /*QString AIPlayer::DetermineMove(GameState& gs)
 {
@@ -1107,7 +1107,6 @@ void AIPlayer::onTextMessageReceived(QString message)
         {
             // BID_UPDATE
             qDebug() << "Message Type: " << msgTypes[5];
-    //        emit bidUpdateSignal(CreateJObject(message));
             break;
         }
         case 6:
