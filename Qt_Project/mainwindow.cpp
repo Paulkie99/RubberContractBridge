@@ -87,7 +87,7 @@ void MainWindow::on_pushButton_Join_clicked()
 
 void MainWindow::on_pushButton_JoinServer_clicked()
 {
-    if (ui->cbAI->isChecked() == true)
+    if (ui->cbAI->isChecked() == true && ui->cbAIvPlayer->isChecked() == false)
     {
         AIPlayer *bot1 = new AIPlayer();
         AIPlayer *bot2 = new AIPlayer();
@@ -95,8 +95,25 @@ void MainWindow::on_pushButton_JoinServer_clicked()
         AIPlayer *bot4 = new AIPlayer();
     }
 
+    if(ui->cbAIvPlayer->isChecked() == true)
+    {
+        QString s = "ws://localhost:159";
+        clientconnection *client1 = new clientconnection(QUrl(s), false);
+        client = client1;
+        // Connect the various signals and slots
+        connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+        connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+        connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+        connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+        AIPlayer *bot1 = new AIPlayer();
+        AIPlayer *bot2 = new AIPlayer();
+        AIPlayer *bot3 = new AIPlayer();
+
+
+    }
+
     // Establish a clientconnection object for communicating over the network
-    if (ui->cbAI->isChecked() == false && ui->leditHostIP->text() == "")
+    if (ui->cbAI->isChecked() == false && ui->leditHostIP->text() == "" && ui->cbAIvPlayer->isChecked() == false)
     {
         clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("wss://102.132.146.35:159")), false);
         client = client1;
@@ -106,7 +123,7 @@ void MainWindow::on_pushButton_JoinServer_clicked()
         connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
         connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
     }
-    else if (ui->cbAI->isChecked() == false && ui->leditHostIP->text() != "")
+    else if (ui->cbAI->isChecked() == false && ui->leditHostIP->text() != "" && ui->cbAIvPlayer->isChecked() == false)
     {
         QString s = ui->leditHostIP->text();
         clientconnection *client1 = new clientconnection(QUrl(s), false);
@@ -216,4 +233,3 @@ void MainWindow::connectUnsuccessfulSlot(QJsonObject conunsuc)
     err.critical(0,"Could not connect",conunsuc["Description"].toString());
     err.setFixedSize(500,200);
 }
-

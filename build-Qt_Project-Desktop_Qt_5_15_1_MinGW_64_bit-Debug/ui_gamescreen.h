@@ -987,7 +987,7 @@ public:
         lblNamePlayer->raise();
         pushButton_Score->raise();
         pushButton_Abandon->raise();
-        layoutWidget1->raise();
+        layoutWidget->raise();
         lblRoundInfo->raise();
         pushButton_BackAuction->raise();
         pb_Move_1->raise();

@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="HomeScreen">
      <widget class="QPushButton" name="pushButton_Join">
@@ -316,6 +316,24 @@
       </property>
       <property name="text">
        <string>AI only</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbAIvPlayer">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>290</y>
+        <width>141</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>AI vs Player</string>
       </property>
      </widget>
     </widget>

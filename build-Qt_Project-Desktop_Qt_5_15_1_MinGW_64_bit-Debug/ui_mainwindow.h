@@ -49,6 +49,7 @@ public:
     QLabel *lblBackJoin;
     QPushButton *pushButton_BackJoin;
     QCheckBox *cbAI;
+    QCheckBox *cbAIvPlayer;
     QWidget *ConfigureServer;
     QLineEdit *leditCreatePassword;
     QLabel *lblCreatePassword;
@@ -158,6 +159,10 @@ public:
         cbAI->setObjectName(QString::fromUtf8("cbAI"));
         cbAI->setGeometry(QRect(70, 260, 141, 22));
         cbAI->setFont(font4);
+        cbAIvPlayer = new QCheckBox(JoinGame);
+        cbAIvPlayer->setObjectName(QString::fromUtf8("cbAIvPlayer"));
+        cbAIvPlayer->setGeometry(QRect(70, 290, 141, 22));
+        cbAIvPlayer->setFont(font4);
         stackedWidget->addWidget(JoinGame);
         ConfigureServer = new QWidget();
         ConfigureServer->setObjectName(QString::fromUtf8("ConfigureServer"));
@@ -217,7 +222,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -238,6 +243,7 @@ public:
         lblBackJoin->setText(QCoreApplication::translate("MainWindow", "Back To Home Screen", nullptr));
         pushButton_BackJoin->setText(QCoreApplication::translate("MainWindow", "<", nullptr));
         cbAI->setText(QCoreApplication::translate("MainWindow", "AI only", nullptr));
+        cbAIvPlayer->setText(QCoreApplication::translate("MainWindow", "AI vs Player", nullptr));
         lblCreatePassword->setText(QCoreApplication::translate("MainWindow", "Password:", nullptr));
         lblAI->setText(QCoreApplication::translate("MainWindow", "Number of AI Players:", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "To allow others to join, give them your IP address, port number & password (available on the next screen)", nullptr));
