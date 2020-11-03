@@ -87,24 +87,37 @@ void MainWindow::on_pushButton_Join_clicked()
 
 void MainWindow::on_pushButton_JoinServer_clicked()
 {
-    // Establish a clientconnection object for communicating over the network
-    if (ui->leditHostIP->text() == "")
+    if (ui->cbAI->isChecked() == true)
     {
-        clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("wss://102.132.146.35:47651")), false);
-        client = client1;
+        AIPlayer *bot1 = new AIPlayer();
+        AIPlayer *bot2 = new AIPlayer();
+        AIPlayer *bot3 = new AIPlayer();
+        AIPlayer *bot4 = new AIPlayer();
     }
-    else
+
+    // Establish a clientconnection object for communicating over the network
+    if (ui->cbAI->isChecked() == false && ui->leditHostIP->text() == "")
+    {
+        clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("wss://102.132.146.35:159")), false);
+        client = client1;
+        // Connect the various signals and slots
+        connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+        connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+        connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+        connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+    }
+    else if (ui->cbAI->isChecked() == false && ui->leditHostIP->text() != "")
     {
         QString s = ui->leditHostIP->text();
         clientconnection *client1 = new clientconnection(QUrl(s), false);
         client = client1;
-    }
 
-    // Connect the various signals and slots
-    connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
-    connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
-    connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
-    connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+        // Connect the various signals and slots
+        connect(client, SIGNAL(connectSuccessfullSignal(QJsonObject)), this, SLOT(connectSuccessfulSlot(QJsonObject)));
+        connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
+        connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
+        connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
+    }
 }
 
 // The user opts to create a new server

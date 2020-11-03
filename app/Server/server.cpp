@@ -1021,6 +1021,8 @@ void Server::ValidateInput(QString message)
             {
                 qInfo() << "Bid Invalid";
                 emit messageReceived("Bid Invalid");
+                QJsonObject bid_request = Convert_Message_To_Json(GenerateMessage("BID_REQUEST"));
+                SendMessage(GS.getPlayerTurn(), bid_request);
             }
         }
         break;

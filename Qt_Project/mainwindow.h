@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "gamescreen.h"
 #include "clientconnection.h"
+#include "aiplayer.h"
 
 //class clientconnection;
 class GameScreen;

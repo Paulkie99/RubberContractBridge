@@ -10,6 +10,8 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    aiplayer.cpp \
+    card.cpp \
     clientconnection.cpp \
     gamescreen.cpp \
     main.cpp \
@@ -17,6 +19,8 @@ SOURCES += \
     scoreboard.cpp
 
 HEADERS += \
+    aiplayer.h \
+    card.h \
     clientconnection.h \
     gamescreen.h \
     mainwindow.h \
