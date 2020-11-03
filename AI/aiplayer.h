@@ -25,7 +25,7 @@
 //#include <QWebSocket>
 //#include <QWebSocketServer>
 #include "card.h"
-#include "gamestate.h"
+//#include "gamestate.h"
 #include "serverclient.h"
 //#include "testcustom.h"
 
@@ -41,7 +41,7 @@ class AIPlayer : public QObject
     Q_OBJECT
 public:
     explicit AIPlayer(const QUrl &url = QUrl(QStringLiteral("ws://localhost:159")), QObject *parent = nullptr);
-    QString DetermineMove(GameState& gs);
+//    QString DetermineMove(GameState& gs);
 //    QString DetermineMove(bool bid, int trk[][2]);
 
     void SetHand(Card* PH[13]);
@@ -73,7 +73,7 @@ public:
 
 private:
     int PID;
-    GameState *gamestate = NULL;
+//    GameState *gamestate = NULL;
 //    Card* Player_Hand[hand_size];
     std::array<Card, deck_size> Deck;
     bool Vulnerable;
