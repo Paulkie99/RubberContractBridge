@@ -893,7 +893,6 @@ void Server::Update_Play()
 {
     if(GS.CurrentTrick.size() == num_players) // end trick
     {
-
         Card* best_card = GetBestCardInTrick();
 
         QString winning_partnership = GS.getTeamFromId(best_card->owner);

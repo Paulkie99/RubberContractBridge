@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <iostream>
 #include <QThread>
+#include "windows.h"
 using namespace std;
 
 
@@ -374,7 +375,7 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
 void GameScreen::bidStartSlot(QJsonObject cardsdealt)
 {
     ui->tableSequence->clearContents();
-    ui->lblVulnerable->setText("");
+   // ui->lblVulnerable->setText("");
     ui->lblContractPlay->setVisible(false);
     ui->lblPoints->setVisible(false);
 
@@ -983,7 +984,6 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
         loadCards(ui->pb_Move_4, ":/Cards/" + Suit + Rank);
         moveCounter++;
     }
-
    // QThread::sleep(2);
 }
 
@@ -992,19 +992,11 @@ void GameScreen::moveUpdateSlot(QJsonObject move)
 void GameScreen::trickEndSlot(QJsonObject trick)
 {
     //QThread::sleep(2);
-
+    //Sleep(1000);
     // Reset move counter of current trick
     moveCounter = 0;
 
-    // Reset move buttons
-    ui->pb_Move_1->setIcon(QIcon());
-    ui->pb_Move_1->setVisible(false);
-    ui->pb_Move_2->setIcon(QIcon());
-    ui->pb_Move_2->setVisible(false);
-    ui->pb_Move_3->setIcon(QIcon());
-    ui->pb_Move_3->setVisible(false);
-    ui->pb_Move_4->setIcon(QIcon());
-    ui->pb_Move_4->setVisible(false);
+
 
     // Disable all cards
     disableCards(2);
@@ -1023,6 +1015,16 @@ void GameScreen::trickEndSlot(QJsonObject trick)
 
     ui->lblTricksWonEW->setText("Tricks won by EW: " + QString::number(countEWtricks));
     ui->lblTricksWonNS->setText("Tricks won by NS: " + QString::number(countNStricks));
+
+    // Reset move buttons
+    ui->pb_Move_1->setIcon(QIcon());
+    ui->pb_Move_1->setVisible(false);
+    ui->pb_Move_2->setIcon(QIcon());
+    ui->pb_Move_2->setVisible(false);
+    ui->pb_Move_3->setIcon(QIcon());
+    ui->pb_Move_3->setVisible(false);
+    ui->pb_Move_4->setIcon(QIcon());
+    ui->pb_Move_4->setVisible(false);
 }
 
 /* Slot for "PLAY_END". The user will return to the bidding screen and new cards dealt. The relevent GUI
@@ -1030,6 +1032,8 @@ void GameScreen::trickEndSlot(QJsonObject trick)
 // PLAY_END received
 void GameScreen::playEndSlot(QJsonObject play)
 {
+    countEWtricks = 0;
+    countNStricks = 0;
     Dummy ="not set";
     // Make ALL card buttons visible again. Including dummy cards (for now)
     visibleAll(true);
@@ -1294,6 +1298,7 @@ void GameScreen::playStartSlot(QJsonObject ob)
 // MOVE_REQUEST received
 void GameScreen::moveRequestSlot(QJsonObject request)
 {
+    //Sleep(1000);
     ui->lblRoundInfo->setVisible(false);
 
     // Check where the card played should be from

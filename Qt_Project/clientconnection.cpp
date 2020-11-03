@@ -6,6 +6,7 @@
 #include <QList>
 #include <QSslError>
 #include <iostream>
+#include "windows.h"
 /*
  The following function is the constructor of the clientconnection class. This constructor creates a clientconnection object.
  The constructor receives a url, debug and parent parameter. The url that is passed in is the url of the server that will be connected to.
@@ -131,6 +132,7 @@ void clientconnection::onTextMessageReceived(QString message)
     {
         // TRICK_END
         qDebug() << "Message Type: " << msgTypes[10];
+        //Sleep(1000);
         emit trickEndSignal(CreateJObject(message));
       break;
     }

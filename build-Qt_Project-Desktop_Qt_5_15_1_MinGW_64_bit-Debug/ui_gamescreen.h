@@ -1002,7 +1002,7 @@ public:
 
         retranslateUi(GameScreen);
 
-        stackedWidget->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(GameScreen);
