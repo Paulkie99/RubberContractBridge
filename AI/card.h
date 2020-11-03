@@ -21,6 +21,7 @@ using namespace std;
 
 enum Card_Vals
 {
+    One,
     Two,
     Three,
     Four,

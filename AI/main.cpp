@@ -21,9 +21,10 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     cout << "Hello World!\n";
 
-    AIPlayer* AI = new AIPlayer(1);
+    AIPlayer* AI = new AIPlayer();
     cout << endl;
     GameState gs;
+    cout << "AI player ID: " << AI->GetPID();
 
 //    GameState gs2 = gs;
     cout << "gs: \n";
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
     }
 //    AIHand[0]->print();
 
+    /*
     AI->SetHand(AIHand);
     cout << "\nMain CardsInHand: \n";
     for (int i = 0; i < int(AI->CardsInHand.size()); i++) {
@@ -74,11 +76,11 @@ int main(int argc, char *argv[])
     Card* playedCard = AI->CardsInHand[5];
     cout << "\nPlayed Card: ";
     playedCard->print();
-    AI->RemoveCard(5);
-    AI->RemoveCard(2);
-    AI->RemoveCard(5);
-    AI->RemoveCard(3);
-    AI->RemoveCard(0);
+//    AI->RemoveCard(5);
+//    AI->RemoveCard(2);
+//    AI->RemoveCard(5);
+//    AI->RemoveCard(3);
+//    AI->RemoveCard(0);
     cout << "\n\nAfter Remove Hand: \n";
     AI->PrintHand();
     cout << "\nPlayed Card After Remove: ";
@@ -96,12 +98,14 @@ int main(int argc, char *argv[])
 //    cout << AI->Player_Hand[1] << endl;
 
 //    cout << AI->DetermineMove(true, NULL).toStdString();
+
+    cout << "Hello World!\n";
     cout << AI->DetermineMove(gs).toStdString();
     cout << endl;
-
+    cout << "\nBye World!\n";
     cout << "\nChange to play stage\n\n";
     gs.SetBidStage(false);
-    gs.trumpSuit = 3;
+    gs.trumpSuit = 1;
 //    gs->PrintGS();
 
     // Trick cards in form [value][suit]
@@ -109,6 +113,13 @@ int main(int argc, char *argv[])
 //    AI->TrumpSuit = 0;
 
 //    cout << AI->DetermineMove(false, trick).toStdString();
+
+    Card* card1 = new Card(8, 1);
+    gs.CurrentTrick.push_back(card1);
+    Card* card2 = new Card(12, 2);
+    gs.CurrentTrick.push_back(card2);
+//    Card* card3 = new Card(8, 2);
+//    gs.CurrentTrick.push_back(card3);
     cout << AI->DetermineMove(gs).toStdString();
 
 //    AI->PrintHand();
@@ -116,6 +127,18 @@ int main(int argc, char *argv[])
     cout << "\n\n";
     cout << "Bye World!\n" << endl;
     delete AI;
+    */
+
+
+    QString str1 = "H";
+    QString suits[4] = {"C","D","H","S"};
+    if (str1 == "H"){
+        cout << "\nEqual\n";
+    } else {
+        cout << "\nFalse\n";
+    }
+
+    cout << "AI player ID: " << AI->GetPID() << endl;
 
     MainWindow w;
     w.show();
