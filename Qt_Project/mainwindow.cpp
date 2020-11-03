@@ -16,7 +16,6 @@ using namespace std;
 
 // Establish a clientconnection object for communicating over the network
 clientconnection *client;
-//clientconnection client(QStringLiteral("ws://localhost:159"), true);
 int id = 0;
 bool connected = false;
 
@@ -48,7 +47,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 // The client is connected to the server and may begin sending messages.
 // CONNECT_SUCCESSFUL received
 void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
@@ -72,19 +70,12 @@ void MainWindow::connectSuccessfulSlot(QJsonObject connectSuc)
 
     //Send the updated message to the server
     client->SendMessageToServer(client->CreateJString(request));
-
-    // Temp debug code to test successful login
-//    mes = client->GenerateMessage("AUTH_SUCCESSFUL");
-//    client->onTextMessageReceived(mes);
 }
 
 /* If the user wishes to join an existing game, the stacked widget's
  index will be updated to allow the user to enter the server credentials. */
 void MainWindow::on_pushButton_Join_clicked()
 {
-    // DEBUG code. Set the user's username to "P4"
-//    ui->leditUsername->setText("P4");
-
     // Go to Join game page
     ui->stackedWidget->setCurrentIndex(1);
     // Update the title of the window
@@ -94,22 +85,18 @@ void MainWindow::on_pushButton_Join_clicked()
 
 }
 
-/* Preliminary client-side logic to receive input from the user.
- Once integration starts, these values will be communicated to the game server
- and appropriate steps followed from there. The pushButton_JoinServer is used
- when the user elects to join an existing game. */
 void MainWindow::on_pushButton_JoinServer_clicked()
 {
     // Establish a clientconnection object for communicating over the network
     if (ui->leditHostIP->text() == "")
     {
-        clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("wss://102.132.146.35:159")), true);
+        clientconnection *client1 = new clientconnection(QUrl(QStringLiteral("wss://102.132.146.35:47651")), false);
         client = client1;
     }
     else
     {
         QString s = ui->leditHostIP->text();
-        clientconnection *client1 = new clientconnection(QUrl(s), true);
+        clientconnection *client1 = new clientconnection(QUrl(s), false);
         client = client1;
     }
 
