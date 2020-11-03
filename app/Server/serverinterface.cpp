@@ -34,6 +34,7 @@ ServerInterface::ServerInterface(QWidget *parent, quint16 port, bool secure)
         certFile.close();
         keyFile.close();
         conf.setPeerVerifyMode(QSslSocket::VerifyNone);
+        conf.setProtocol(QSsl::TlsV1_0);
         conf.setLocalCertificate(cert);
         conf.setPrivateKey(key);
         bridgeServer->setSslConfiguration(conf);
