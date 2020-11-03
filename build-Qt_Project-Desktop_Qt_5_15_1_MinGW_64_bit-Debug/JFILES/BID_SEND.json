@@ -1,0 +1,5 @@
+{
+	"Type": "BID_SEND",
+	"Id": 22,
+	"Bid": {"Suit" : "H", "Rank" : "5" }
+}
