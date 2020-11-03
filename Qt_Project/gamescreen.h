@@ -39,8 +39,6 @@ private slots:
 
     void on_pushButton_Play_clicked();
 
-    void connectSlots();
-
     void loadCards(QPushButton *, QString);
 
     void on_pushButton_Abandon_clicked();
@@ -182,9 +180,12 @@ private:
     QString opp1Username = "";
     QString opp2Pos = "";
     QString opp2Username = "";
-    QString movemade = "";
+    //QString movemade = "";
     QJsonObject NSarray [50];
     QJsonObject EWarray [50] ;
-    int ArrCount = 0;};
+    int ArrCount = 0;
+    int countNStricks = 0;
+    int countEWtricks = 0;
+};
 
 #endif // GAMESCREEN_H
