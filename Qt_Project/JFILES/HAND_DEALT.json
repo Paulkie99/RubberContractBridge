@@ -1,0 +1,10 @@
+{	"Type": "HAND_DEALT",
+	"Id": 32,
+	"Cards": [
+	{"Suit" : "H", "Rank" : ["2", "7"] },
+	{"Suit" : "S", "Rank" : ["5", "A"] },
+	{"Suit" : "C", "Rank" : ["4", "6", "J", "Q"] },
+	{"Suit" : "D", "Rank" : ["2", "9", "10", "A"] }
+	],
+	"Dealer" : false
+}

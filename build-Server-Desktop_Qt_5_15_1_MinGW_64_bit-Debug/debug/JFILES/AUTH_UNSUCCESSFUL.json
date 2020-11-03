@@ -1,0 +1,5 @@
+{
+	"Type": "AUTH_UNSUCCESSFUL",
+	"Id": 3,
+	"Description": "Username already taken"
+}
