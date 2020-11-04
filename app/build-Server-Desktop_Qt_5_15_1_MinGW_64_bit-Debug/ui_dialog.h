@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QListWidget>
 
@@ -20,6 +21,7 @@ class Ui_Server_Dialog
 {
 public:
     QListWidget *listWidget;
+    QCheckBox *checkBox;
 
     void setupUi(QDialog *Server_Dialog)
     {
@@ -28,7 +30,11 @@ public:
         Server_Dialog->resize(800, 600);
         listWidget = new QListWidget(Server_Dialog);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(15, 11, 771, 581));
+        listWidget->setGeometry(QRect(15, 11, 771, 541));
+        checkBox = new QCheckBox(Server_Dialog);
+        checkBox->setObjectName(QString::fromUtf8("checkBox"));
+        checkBox->setGeometry(QRect(670, 560, 70, 17));
+        checkBox->setChecked(true);
 
         retranslateUi(Server_Dialog);
 
@@ -38,6 +44,7 @@ public:
     void retranslateUi(QDialog *Server_Dialog)
     {
         Server_Dialog->setWindowTitle(QCoreApplication::translate("Server_Dialog", "Server Interface", nullptr));
+        checkBox->setText(QCoreApplication::translate("Server_Dialog", "Secure", nullptr));
     } // retranslateUi
 
 };

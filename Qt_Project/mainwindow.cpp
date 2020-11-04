@@ -14,11 +14,6 @@
 #include <iostream>
 using namespace std;
 
-// Establish a clientconnection object for communicating over the network
-clientconnection *client;
-int id = 0;
-bool connected = false;
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)

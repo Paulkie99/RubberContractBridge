@@ -54,5 +54,9 @@ private:
     GameScreen *gameScreen;
     int numAI = 0;
     AIPlayer* AI_Instances[4];
+    // Establish a clientconnection object for communicating over the network
+    clientconnection *client;
+    int id = 0;
+    bool connected = false;
 };
 #endif // MAINWINDOW_H

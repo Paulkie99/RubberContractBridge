@@ -17,8 +17,10 @@
 ServerInterface::ServerInterface(QWidget *parent, quint16 port, bool secure)
     : QDialog(parent)
     , ui(new Ui::Server_Dialog)
+    , port(port)
 {
     ui->setupUi(this);
+    connect(ui->checkBox, SIGNAL(stateChanged(int)), this, SLOT(tickUpdate(int)));
     bridgeServer = new Server("Bridge Server", secure ? QWebSocketServer::SecureMode : QWebSocketServer::NonSecureMode, this);
     if(secure)
     {
@@ -65,6 +67,41 @@ ServerInterface::~ServerInterface()
 void ServerInterface::messageReceived(const QString &message)
 {
     ui->listWidget->addItem("Message received: " + message); // add an item to the list widget so that the message may be displayed
+}
+
+void ServerInterface::tickUpdate(int)
+{
+    delete bridgeServer;
+    bridgeServer = new Server("Bridge Server", ui->checkBox->isChecked() ? QWebSocketServer::SecureMode : QWebSocketServer::NonSecureMode, this);
+    if(ui->checkBox->isChecked())
+    {
+        QSslConfiguration conf;
+        QSslKey key;
+        QSslCertificate cert;
+        QFile certFile(QStringLiteral(":/public.pem"));
+        QFile keyFile(QStringLiteral(":/private.pem"));
+        certFile.open(QIODevice::ReadOnly);
+        keyFile.open(QIODevice::ReadOnly);
+        cert = QSslCertificate(&certFile, QSsl::Pem);
+        key = QSslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+        certFile.close();
+        keyFile.close();
+        conf.setPeerVerifyMode(QSslSocket::VerifyNone);
+        conf.setProtocol(QSsl::TlsV1_0);
+        conf.setLocalCertificate(cert);
+        conf.setPrivateKey(key);
+        bridgeServer->setSslConfiguration(conf);
+    }
+    if(bridgeServer->listen(QHostAddress::Any, port))
+    {
+        connect(bridgeServer, SIGNAL(messageReceived(QString)),
+                this, SLOT(messageReceived(QString)));
+        connect(bridgeServer, SIGNAL(messageSent(QString)),
+                this, SLOT(messageSent(QString)));
+        connect(bridgeServer, SIGNAL(Info(QString)),
+                this, SLOT(Info(QString)));
+        Info("Server listening on port: " + QString::number(bridgeServer->serverPort()) + (ui->checkBox->isChecked() ? ", secure" : ", not secure"));
+    }
 }
 
 void ServerInterface::messageSent(const QString &message)

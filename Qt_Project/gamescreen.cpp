@@ -348,6 +348,8 @@ void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientco
     Username = usern;
     ui->lblInfo->setText("IP: " + ip + " Password: " + pass);
     ui->lblInfoPlay->setText("IP: " + ip + " Password: " + pass);
+    if(clientgs)
+            delete clientgs;
     clientgs = client1;
 
     // Connect all relevant signals and slots
@@ -1063,12 +1065,12 @@ void GameScreen::playEndSlot(QJsonObject play)
     ui->lblTricksWonNS->setVisible(false);
     ui->lblPoints->setVisible(false);
 
-    if(play["Id"].toInt() == Userid)
-    {
-        QMessageBox over;
-        over.information(0,"Round Over",play["WinningPartnership"].toString() + " won the round");
-        over.setFixedSize(500,200);
-    }
+//    if(play["Id"].toInt() == Userid)
+//    {
+//        QMessageBox over;
+//        over.information(0,"Round Over",play["WinningPartnership"].toString() + " won the round");
+//        over.setFixedSize(500,200);
+//    }
 }
 
 // Implemented by Jacques
