@@ -1,0 +1,9 @@
+{	"Type": "LOBBY_UPDATE",
+	"Id": 6,
+	"PlayerPositions": [
+	{ "Position": "N", "Alias": "P1" },
+	{ "Position": "E", "Alias": "P2" },
+	{ "Position": "W", "Alias": "P3" },
+	{ "Position": "S", "Alias": "P4" }
+	]
+}

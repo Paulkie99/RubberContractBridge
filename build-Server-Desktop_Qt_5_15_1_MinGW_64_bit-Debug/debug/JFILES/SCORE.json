@@ -1,0 +1,27 @@
+{
+	"Type": "SCORE",
+	"Id": 60,
+	"NSscores": {
+	"overtricks" : 100,
+	"undertricks" : 0,
+	"honors" : 0,
+	"vulnerable" : 0,
+	"double" : 0,
+	"redouble" : 0,
+	"slam" : 0,
+	"unfinished" : 0,
+	"trickScore" : 50
+	},
+	"EWscores": {
+	"overtricks" : 0,
+	"undertricks" : 0,
+	"honors" : 0,
+	"vulnerable" : 0,
+	"double" : 0,
+	"redouble" : 0,
+	"slam" : 0,
+	"unfinished" : 0,
+	"trickScore" : 0
+	}
+	
+}
