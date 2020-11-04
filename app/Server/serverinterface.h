@@ -37,11 +37,12 @@ public slots:
 private slots:
     void messageSent(const QString& message);
     void messageReceived(const QString &message);
+    void tickUpdate(int);
 
 private:
     Ui::Server_Dialog *ui;
     Server* bridgeServer;
-
+    quint16 port = 159;
 };
 
 #endif // SERVERINTERFACE_H

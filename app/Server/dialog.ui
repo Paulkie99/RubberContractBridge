@@ -19,8 +19,21 @@
      <x>15</x>
      <y>11</y>
      <width>771</width>
-     <height>581</height>
+     <height>541</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="geometry">
+    <rect>
+     <x>670</x>
+     <y>560</y>
+     <width>70</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Secure</string>
    </property>
   </widget>
  </widget>
