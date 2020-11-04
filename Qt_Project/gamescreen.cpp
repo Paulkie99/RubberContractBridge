@@ -39,6 +39,8 @@ GameScreen::GameScreen(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    scoreboard = new ScoreBoard(this);
+
     // Prevent the window from being resized
     QWidget::setFixedSize(size());
     // Set QDialog flags to that of a normal window, and not a dialog
@@ -92,7 +94,14 @@ GameScreen::~GameScreen()
 // the user is taken back to the main screen.
 void GameScreen::on_GameScreen_finished(int result)
 {
-    clientgs->closed(Userid);
+    Q_UNUSED(result);
+//    clientgs->closed(Userid);
+    if(clientgs)
+        delete clientgs;
+    if(scoreboard)
+        delete scoreboard;
+    scoreboard = NULL;
+    clientgs = NULL;
     // Show the parent again, in this case main window
     this->close();
     parentWidget()->show();
@@ -105,12 +114,12 @@ void GameScreen::on_GameScreen_finished(int result)
 // Implemented by Jacques
 void GameScreen::on_pushButton_Score_clicked()
 {
-    ScoreBoard scoreBoard(this);
+//    ScoreBoard scoreBoard(this);
 
-        scoreBoard.updateScores(NSarray,EWarray,ArrCount);
-        scoreBoard.setModal(true);
+//        scoreboard->updateScores(NSarray,EWarray,ArrCount);
+//        scoreBoard.setModal(true);
 
-        scoreBoard.exec();
+        scoreboard->show();
 }
 
 // Once the auction is over, the pushButton_Play will be made visible.
@@ -344,12 +353,11 @@ void GameScreen::sendMove(QString Suit, QString Rank)
 the clientconnection object is received through here.*/
 void GameScreen::serverInfoSlot(QString ip, QString port, QString pass, clientconnection *client1, QString usern, int ID)
 {
+    Q_UNUSED(port);
     Userid = ID;
     Username = usern;
     ui->lblInfo->setText("IP: " + ip + " Password: " + pass);
     ui->lblInfoPlay->setText("IP: " + ip + " Password: " + pass);
-    if(clientgs)
-            delete clientgs;
     clientgs = client1;
 
     // Connect all relevant signals and slots
@@ -1034,6 +1042,7 @@ void GameScreen::trickEndSlot(QJsonObject trick)
 // PLAY_END received
 void GameScreen::playEndSlot(QJsonObject play)
 {
+    Q_UNUSED(play);
     countEWtricks = 0;
     countNStricks = 0;
     Dummy ="not set";
@@ -1079,9 +1088,8 @@ void GameScreen::scoreSlot(QJsonObject scores)
     QJsonObject NS = scores["NSscores"].toObject();
     QJsonObject EW = scores["EWscores"].toObject();
 
-    NSarray[ArrCount] = NS;
-    EWarray[ArrCount] = EW;
-    ArrCount++;
+//    NSarray[ArrCount] = NS;
+//    EWarray[ArrCount] = EW;
 
     QString vul = "";
     QString nvul = "None";
@@ -1099,23 +1107,23 @@ void GameScreen::scoreSlot(QJsonObject scores)
     ui->lblVulnerable->setVisible(true);
     ui->lblVulnerable->setText("Vulnerable: " + vul + nvul);
 
-    ScoreBoard scoreBoard(this);
+//    ScoreBoard scoreBoard(this);
 
-    scoreBoard.updateScores(NSarray,EWarray,ArrCount);
-    scoreBoard.setModal(true);
+    scoreboard->updateScores(NS, EW);
+//    scoreBoard.setModal(true);
 
-    scoreBoard.exec();
+    scoreboard->show();
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
 // DISCONNECTED_PLAYER received
 void GameScreen::disconnectPlayerSlot(QJsonObject disc)
 {
+    Q_UNUSED(disc);
 //    QString playerdisc = disc["PlayerPos"].toString();
 //    QMessageBox over;
 //    over.critical(0,"Player Disconnect",playerdisc + " was disconnected. Leaving the game.");
 //    over.setFixedSize(500,200);
-
     UserPosition = "";
     Username = "";
     ui->tableSequence->clear();

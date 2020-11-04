@@ -33,6 +33,8 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) :
         for(int value = Two; value <= Ace; value++)
             Deck[count++] = Card(value, suit);
 
+    Shuffle();
+
     //Initialise Player_Hands entries to NULL
     for(int card = 0; card < hand_size; ++card)
     {

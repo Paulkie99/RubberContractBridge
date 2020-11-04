@@ -49,13 +49,13 @@ signals:
     void serverInfoSignal(QString, QString, QString, clientconnection *, QString, int);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *ui = NULL;
     // Create instance of GameScreen
-    GameScreen *gameScreen;
+    GameScreen *gameScreen = NULL;
     int numAI = 0;
     AIPlayer* AI_Instances[4];
     // Establish a clientconnection object for communicating over the network
-    clientconnection *client;
+    clientconnection *client = NULL;
     int id = 0;
     bool connected = false;
 };

@@ -1250,6 +1250,10 @@ void AIPlayer::onTextMessageReceived(QString message)
             // DISCONNECT_PLAYER
             qDebug() << "Message Type: " << msgTypes[15];
     //        emit disconnectPlayerSignal(CreateJObject(message));
+            QString mes = GenerateMessage("DISCONNECT_PLAYER");
+            QJsonObject bid = CreateJObject(mes);
+            bid["Id"] = PID;
+            SendMessageToServer(CreateJString(bid));
           break;
         }
         case 16:

@@ -35,11 +35,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->sbPort->setVisible(false);
     ui->lblPort->setVisible(false);
     ui->pushButton_Create->setVisible(false);
+
+    for(int i = 0; i < 4; ++i)
+        AI_Instances[i] = NULL;
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    if(client)
+        delete client;
+    if(gameScreen)
+        delete gameScreen;
 }
 
 // The client is connected to the server and may begin sending messages.
@@ -163,6 +170,18 @@ void MainWindow::on_cbShowPassword_clicked()
 void MainWindow::on_pushButton_BackJoin_clicked()
 {
     // Go to Home Screen page
+    if(client)
+        delete client;
+    if(gameScreen)
+       delete gameScreen;
+
+    client = NULL;
+    gameScreen = NULL;
+    connected = false;
+    numAI = 0;
+    id = 0;
+    for(int i = 0; i < 4; ++i)
+        AI_Instances[i] = NULL;
     ui->stackedWidget->setCurrentIndex(0);
     ui->menuBridge->setTitle("Home Screen");
     ui->lblHeading->setFocus();
@@ -173,6 +192,18 @@ void MainWindow::on_pushButton_BackJoin_clicked()
 void MainWindow::on_pushButton_BackConf_clicked()
 {
     // Go to Home Screen page
+    if(client)
+        delete client;
+    if(gameScreen)
+       delete gameScreen;
+
+    client = NULL;
+    gameScreen = NULL;
+    connected = false;
+    numAI = 0;
+    id = 0;
+    for(int i = 0; i < 4; ++i)
+        AI_Instances[i] = NULL;
     ui->stackedWidget->setCurrentIndex(0);
     ui->menuBridge->setTitle("Home Screen");
     ui->lblHeading->setFocus();

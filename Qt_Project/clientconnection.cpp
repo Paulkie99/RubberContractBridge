@@ -280,10 +280,11 @@ QString clientconnection::CreateJString(QJsonObject &jobj)
 
 void clientconnection::closed(int id)
 {
+    Q_UNUSED(id);
     QJsonObject disc = CreateJObject(GenerateMessage("DISCONNECT_PLAYER"));
     disc["Id"] = id;
     SendMessageToServer(CreateJString(disc));
-    clientSocket.close();
+//    clientSocket.close();
 }
 
 void clientconnection::onSslErrors(const QList<QSslError> &errors)

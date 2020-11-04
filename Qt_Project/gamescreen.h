@@ -16,6 +16,7 @@
 #include "mainwindow.h"
 #include "clientconnection.h"
 #include<QThread>
+#include <scoreboard.h>
 class MainWindow;
 
 
@@ -147,7 +148,7 @@ signals:
     void pingSignal(QJsonObject);
 
 private:
-    Ui::GameScreen *ui;
+    Ui::GameScreen *ui = NULL;
     /* Declare a pointer clientconnection object that points to the original
        client object established in mainwindow.*/
     clientconnection* clientgs = NULL;
@@ -186,6 +187,7 @@ private:
     int ArrCount = 0;
     int countNStricks = 0;
     int countEWtricks = 0;
+    ScoreBoard* scoreboard = NULL;
 };
 
 #endif // GAMESCREEN_H
