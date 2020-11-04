@@ -35,11 +35,10 @@ void GameScreen::loadCards(QPushButton *pb, QString path)
 // Constructor
 GameScreen::GameScreen(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::GameScreen)
+    ui(new Ui::GameScreen),
+    scoreboard(new ScoreBoard(this))
 {
     ui->setupUi(this);
-
-    scoreboard = new ScoreBoard(this);
 
     // Prevent the window from being resized
     QWidget::setFixedSize(size());
@@ -118,8 +117,8 @@ void GameScreen::on_pushButton_Score_clicked()
 
 //        scoreboard->updateScores(NSarray,EWarray,ArrCount);
 //        scoreBoard.setModal(true);
-
-        scoreboard->show();
+    if(this->scoreboard)
+        this->scoreboard->show();
 }
 
 // Once the auction is over, the pushButton_Play will be made visible.
@@ -1108,11 +1107,16 @@ void GameScreen::scoreSlot(QJsonObject scores)
     ui->lblVulnerable->setText("Vulnerable: " + vul + nvul);
 
 //    ScoreBoard scoreBoard(this);
-
-    scoreboard->updateScores(NS, EW);
+    if(this->scoreboard)
+        this->scoreboard->updateScores(NS, EW);
+    else
+    {
+        this->scoreboard = new ScoreBoard(this);
+        this->scoreboard->updateScores(NS, EW);
+    }
 //    scoreBoard.setModal(true);
 
-    scoreboard->show();
+    this->scoreboard->show();
 }
 
 // Slot for DISCONNECT_PLAYER. All players will leave the match.
@@ -1467,5 +1471,5 @@ void GameScreen::on_pb_26_clicked()
 
 void GameScreen::on_GameScreen_destroyed()
 {
-    on_GameScreen_finished(0);
+//    on_GameScreen_finished(0);
 }

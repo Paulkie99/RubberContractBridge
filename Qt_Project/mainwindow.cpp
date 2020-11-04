@@ -94,6 +94,8 @@ void MainWindow::on_pushButton_JoinServer_clicked()
         numAI = 4;
         for(int i = 0; i < numAI; ++i)
         {
+            if(AI_Instances[i])
+                delete AI_Instances[i];
             AI_Instances[i] = new AIPlayer();
         }
 //        AIPlayer *bot1 = new AIPlayer();
@@ -114,6 +116,8 @@ void MainWindow::on_pushButton_JoinServer_clicked()
         numAI = 3;
         for(int i = 0; i < numAI; ++i)
         {
+            if(AI_Instances[i])
+                delete AI_Instances[i];
             AI_Instances[i] = new AIPlayer();
         }
 //        AIPlayer *bot1 = new AIPlayer();
@@ -253,6 +257,8 @@ void MainWindow::authSuccessfulSlot()
 
     // Create a new instance of GameScreen
     // Set parent of gameScreen as this class (main window)
+    if(gameScreen)
+        delete gameScreen;
     gameScreen = new GameScreen(this);
     gameScreen->show();
 

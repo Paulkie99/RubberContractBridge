@@ -23,7 +23,7 @@ private slots:
     void on_ScoreBoard_finished(int result);
 
 private:
-    Ui::ScoreBoard *ui;
+    Ui::ScoreBoard *ui = NULL;
     int EWtotal=0;
     int NStotal = 0;
     int NS100=0;
