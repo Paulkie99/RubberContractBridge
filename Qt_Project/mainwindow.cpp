@@ -89,15 +89,19 @@ void MainWindow::on_pushButton_JoinServer_clicked()
 {
     if (ui->cbAI->isChecked() == true && ui->cbAIvPlayer->isChecked() == false)
     {
-        AIPlayer *bot1 = new AIPlayer();
-        AIPlayer *bot2 = new AIPlayer();
-        AIPlayer *bot3 = new AIPlayer();
-        AIPlayer *bot4 = new AIPlayer();
+        numAI = 4;
+        for(int i = 0; i < numAI; ++i)
+        {
+            AI_Instances[i] = new AIPlayer();
+        }
+//        AIPlayer *bot1 = new AIPlayer();
+//        AIPlayer *bot2 = new AIPlayer();
+//        AIPlayer *bot3 = new AIPlayer();
+//        AIPlayer *bot4 = new AIPlayer();
     }
-
-    if(ui->cbAIvPlayer->isChecked() == true)
+    else if(ui->cbAIvPlayer->isChecked() == true && ui->cbAI->isChecked() == false)
     {
-        QString s = "ws://localhost:159";
+        QString s = ui->leditHostIP->text() == "" ? "ws://localhost:159" : ui->leditHostIP->text();
         clientconnection *client1 = new clientconnection(QUrl(s), false);
         client = client1;
         // Connect the various signals and slots
@@ -105,11 +109,14 @@ void MainWindow::on_pushButton_JoinServer_clicked()
         connect(client, &clientconnection::authSuccessfulSignal, this, &MainWindow::authSuccessfulSlot);
         connect(client, SIGNAL(authUnsuccessfulSignal(QJsonObject)), this, SLOT(authUnsuccessfulSlot(QJsonObject)));
         connect(client, SIGNAL(connectUnsuccessfulSignal(QJsonObject)), this, SLOT(connectUnsuccessfulSlot(QJsonObject)));
-        AIPlayer *bot1 = new AIPlayer();
-        AIPlayer *bot2 = new AIPlayer();
-        AIPlayer *bot3 = new AIPlayer();
-
-
+        numAI = 3;
+        for(int i = 0; i < numAI; ++i)
+        {
+            AI_Instances[i] = new AIPlayer();
+        }
+//        AIPlayer *bot1 = new AIPlayer();
+//        AIPlayer *bot2 = new AIPlayer();
+//        AIPlayer *bot3 = new AIPlayer();
     }
 
     // Establish a clientconnection object for communicating over the network

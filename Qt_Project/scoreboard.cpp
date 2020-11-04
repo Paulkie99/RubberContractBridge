@@ -40,9 +40,9 @@ void ScoreBoard::updateScores(QJsonObject NSscores [50],QJsonObject EWscores [50
          ui->txtNSlog->append("overtricks:"+(QString::number(NSscores[loops]["overtricks"].toInt())));
          ui->txtNSlog->append("undertricks:"+QString::number(NSscores[loops]["undertricks"].toInt()));
          ui->txtNSlog->append("honors:"+QString::number(NSscores[loops]["honors"].toInt()));
-//         ui->txtNSlog->append("vulnerable:"+QString::number(NSscores[loops]["vulnerable"].toInt()));
-//         ui->txtNSlog->append("double:"+QString::number(NSscores[loops]["double"].toInt()));
-//         ui->txtNSlog->append("redouble:"+QString::number(NSscores[loops]["redouble"].toInt()));
+         ui->txtNSlog->append("vulnerable:"+QString::number(NSscores[loops]["vulnerable"].toInt()));
+         ui->txtNSlog->append("double:"+QString::number(NSscores[loops]["double"].toInt()));
+         ui->txtNSlog->append("redouble:"+QString::number(NSscores[loops]["redouble"].toInt()));
          ui->txtNSlog->append("slam:"+QString::number(NSscores[loops]["slam"].toInt()));
          ui->txtNSlog->append("unfinished:"+QString::number(NSscores[loops]["unfinished"].toInt()));
          ui->txtNSlog->append("trickScore:"+QString::number(NSscores[loops]["trickScore"].toInt()));
@@ -53,9 +53,9 @@ void ScoreBoard::updateScores(QJsonObject NSscores [50],QJsonObject EWscores [50
          ui->txtEWlog->append("overtricks:"+(QString::number(EWscores[loops]["overtricks"].toInt())));
          ui->txtEWlog->append("undertricks:"+QString::number(EWscores[loops]["undertricks"].toInt()));
          ui->txtEWlog->append("honors:"+QString::number(EWscores[loops]["honors"].toInt()));
-//         ui->txtEWlog->append("vulnerable:"+QString::number(EWscores[loops]["vulnerable"].toInt()));
-//         ui->txtEWlog->append("double:"+QString::number(EWscores[loops]["double"].toInt()));
-//         ui->txtEWlog->append("redouble:"+QString::number(EWscores[loops]["redouble"].toInt()));
+         ui->txtEWlog->append("vulnerable:"+QString::number(EWscores[loops]["vulnerable"].toInt()));
+         ui->txtEWlog->append("double:"+QString::number(EWscores[loops]["double"].toInt()));
+         ui->txtEWlog->append("redouble:"+QString::number(EWscores[loops]["redouble"].toInt()));
          ui->txtEWlog->append("slam:"+QString::number(EWscores[loops]["slam"].toInt()));
          ui->txtEWlog->append("unfinished:"+QString::number(EWscores[loops]["unfinished"].toInt()));
          ui->txtEWlog->append("trickScore:"+QString::number(EWscores[loops]["trickScore"].toInt()));
@@ -81,17 +81,17 @@ void ScoreBoard::updateScores(QJsonObject NSscores [50],QJsonObject EWscores [50
          }
          if(NSscores[loops]["vulnerable"].toInt() >0)
          {
-             ui->txtNSBonus->append(QString::number(NSscores[loops]["vulnerable"].toInt()));
+//             ui->txtNSBonus->append(QString::number(NSscores[loops]["vulnerable"].toInt()));
 //               NStotal=NStotal+NSscores[loops]["vulnerable"].toInt();
          }
          if(NSscores[loops]["double"].toInt() >0)
          {
-             ui->txtNSBonus->append(QString::number(NSscores[loops]["double"].toInt()));
+//             ui->txtNSBonus->append(QString::number(NSscores[loops]["double"].toInt()));
 //               NStotal=NStotal+NSscores[loops]["double"].toInt();
          }
          if(NSscores[loops]["redouble"].toInt() >0)
          {
-             ui->txtNSBonus->append(QString::number(NSscores[loops]["redouble"].toInt()));
+//             ui->txtNSBonus->append(QString::number(NSscores[loops]["redouble"].toInt()));
 //               NStotal=NStotal+NSscores[loops]["redouble"].toInt();
 
          }
@@ -152,17 +152,17 @@ void ScoreBoard::updateScores(QJsonObject NSscores [50],QJsonObject EWscores [50
          }
          if(EWscores[loops]["vulnerable"].toInt() >0)
          {
-             ui->txtEWBonus->append(QString::number(EWscores[loops]["vulnerable"].toInt()));
+//             ui->txtEWBonus->append(QString::number(EWscores[loops]["vulnerable"].toInt()));
 //               EWtotal=EWtotal+EWscores[loops]["vulnerable"].toInt();
          }
          if(EWscores[loops]["double"].toInt() >0)
          {
-             ui->txtEWBonus->append(QString::number(EWscores[loops]["double"].toInt()));
+//             ui->txtEWBonus->append(QString::number(EWscores[loops]["double"].toInt()));
 //               EWtotal=EWtotal+EWscores[loops]["double"].toInt();
          }
          if(EWscores[loops]["redouble"].toInt() >0)
          {
-             ui->txtEWBonus->append(QString::number(EWscores[loops]["redouble"].toInt()));
+//             ui->txtEWBonus->append(QString::number(EWscores[loops]["redouble"].toInt()));
 //               EWtotal=EWtotal+EWscores[loops]["redouble"].toInt();
 
          }

@@ -52,5 +52,7 @@ private:
     Ui::MainWindow *ui;
     // Create instance of GameScreen
     GameScreen *gameScreen;
+    int numAI = 0;
+    AIPlayer* AI_Instances[4];
 };
 #endif // MAINWINDOW_H

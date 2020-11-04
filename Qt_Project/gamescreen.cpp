@@ -1063,9 +1063,12 @@ void GameScreen::playEndSlot(QJsonObject play)
     ui->lblTricksWonNS->setVisible(false);
     ui->lblPoints->setVisible(false);
 
-    QMessageBox over;
-    over.information(0,"Round Over",play["WinningPartnership"].toString() + " won the round");
-    over.setFixedSize(500,200);
+    if(play["Id"].toInt() == Userid)
+    {
+        QMessageBox over;
+        over.information(0,"Round Over",play["WinningPartnership"].toString() + " won the round");
+        over.setFixedSize(500,200);
+    }
 }
 
 // Implemented by Jacques
@@ -1080,12 +1083,12 @@ void GameScreen::scoreSlot(QJsonObject scores)
 
     QString vul = "";
     QString nvul = "None";
-    if (NS["vulnerable"] == 1)
+    if(scores["NSscores"].toObject()["vulnerable"].toInt() == 1)
     {
         vul = vul + "NS";
         nvul = "";
     }
-    if (EW["vulnerable"] == 1)
+    if(scores["EWscores"].toObject()["vulnerable"].toInt() == 1)
     {
         vul = vul + "EW";
         nvul = "";
@@ -1106,10 +1109,10 @@ void GameScreen::scoreSlot(QJsonObject scores)
 // DISCONNECTED_PLAYER received
 void GameScreen::disconnectPlayerSlot(QJsonObject disc)
 {
-    QString playerdisc = disc["PlayerPos"].toString();
-    QMessageBox over;
-    over.critical(0,"Player Disconnect",playerdisc + " was disconnected. Leaving the game.");
-    over.setFixedSize(500,200);
+//    QString playerdisc = disc["PlayerPos"].toString();
+//    QMessageBox over;
+//    over.critical(0,"Player Disconnect",playerdisc + " was disconnected. Leaving the game.");
+//    over.setFixedSize(500,200);
 
     UserPosition = "";
     Username = "";
@@ -1128,6 +1131,7 @@ void GameScreen::disconnectPlayerSlot(QJsonObject disc)
 // LOBBY_UPDATE received
 void GameScreen::lobbyUpdateSlot(QJsonObject update)
 {
+    ui->lblVulnerable->setText("Vulnerable: None");
     ui->lblPosition->setVisible(true);
     QJsonValue value = update.value("PlayerPositions");
     QJsonArray arr = value.toArray();

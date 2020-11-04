@@ -44,6 +44,8 @@ Server::Server(const QString &serverName, SslMode secureMode, QObject *parent) :
 
     msgTypes << "CONNECT_REQUEST" << "BID_SEND" << "MOVE_SEND" << "PING" << "PONG" << "DISCONNECT_PLAYER" << "PLAYER_READY"; // Messages the server might receive
 
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Server::timerDone);
 }
 
 /*
@@ -889,65 +891,70 @@ void Server::Update_Bid(int id, int value, int suit)
  * If thirteen tricks have ended broadcast play_end and call Score_Deal
  * Call Next_Deal otherwise
  * */
+void Server::End_Trick()
+{
+    Card* best_card = GetBestCardInTrick();
+
+    QString winning_partnership = GS.getTeamFromId(best_card->owner);
+    GS.TrickScore[best_card->owner % 2] += 1;
+
+    QJsonObject trick_end = Convert_Message_To_Json(GenerateMessage("TRICK_END"));
+    trick_end["WinningPartnership"] = winning_partnership;
+    BroadcastMessage(trick_end);
+
+    GS.setTrickCount(GS.getTrickCount() + 1);
+
+    GS.CurrentTrick.clear();
+
+//        PrintHands();
+
+    if(GS.getTrickCount() == hand_size) // end play
+    {
+        QJsonObject play_end = Convert_Message_To_Json(GenerateMessage("PLAY_END"));
+
+        if(GS.TrickScore[NS] > GS.TrickScore[EW])
+        {
+            play_end["WinningPartnership"] = "NS";
+            play_end["TricksWon"] = GS.TrickScore[NS];
+        }
+        else
+        {
+            play_end["WinningPartnership"] = "EW";
+            play_end["TricksWon"] = GS.TrickScore[EW];
+        }
+
+        BroadcastMessage(play_end);
+
+        // scoring
+        Score_Deal();
+
+        if(GS.isGameOver)
+        {
+            GameState newGS;
+            GS = newGS; // reinitialise GS
+
+            for(int i = 0; i < num_players; ++i)
+                socketDisconnect(i);
+        }
+        else
+        {
+            if(shuffle)
+                Shuffle();
+            Deal();
+        }
+    }
+    else
+    {
+        GS.setPlayerTurn(best_card->owner);
+        Next_Move();
+    }
+}
+
 void Server::Update_Play()
 {
     if(GS.CurrentTrick.size() == num_players) // end trick
     {
-        Card* best_card = GetBestCardInTrick();
-
-        QString winning_partnership = GS.getTeamFromId(best_card->owner);
-        GS.TrickScore[best_card->owner % 2] += 1;
-
-        QJsonObject trick_end = Convert_Message_To_Json(GenerateMessage("TRICK_END"));
-        trick_end["WinningPartnership"] = winning_partnership;
-        BroadcastMessage(trick_end);
-
-        GS.setTrickCount(GS.getTrickCount() + 1);
-
-        GS.CurrentTrick.clear();
-
-//        PrintHands();
-
-        if(GS.getTrickCount() == hand_size) // end play
-        {
-            QJsonObject play_end = Convert_Message_To_Json(GenerateMessage("PLAY_END"));
-
-            if(GS.TrickScore[NS] > GS.TrickScore[EW])
-            {
-                play_end["WinningPartnership"] = "NS";
-                play_end["TricksWon"] = GS.TrickScore[NS];
-            }
-            else
-            {
-                play_end["WinningPartnership"] = "EW";
-                play_end["TricksWon"] = GS.TrickScore[EW];
-            }
-
-            BroadcastMessage(play_end);
-
-            // scoring
-            Score_Deal();
-
-            if(GS.isGameOver)
-            {
-                GameState newGS;
-                GS = newGS; // reinitialise GS
-
-                for(int i = 0; i < num_players; ++i)
-                    socketDisconnect(i);
-            }
-            else
-            {
-                if(shuffle)
-                    Shuffle();
-                Deal();
-            }
-        }
-        else
-        {
-            GS.setPlayerTurn(best_card->owner);
-            Next_Move();
-        }
+        timer->start(1500);
     }
     else
     {
@@ -1149,4 +1156,10 @@ void Server::socketDisconnect(int id)
         GameState newGs;
         GS = newGs;
     }
+}
+
+void Server::timerDone()
+{
+    End_Trick();
+    timer->stop();
 }

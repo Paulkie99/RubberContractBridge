@@ -20,6 +20,7 @@
 #include <random>       // std::default_random_engine
 #include <inputvalidator.h>
 #include <gamestate.h>
+#include <QTimer>
 
 class AI;               // AI Class to be integrated
 
@@ -50,7 +51,7 @@ private:
     Card* Player_Hands[hand_size][num_players];
     GameState  GS;
     InputValidator validator;
-
+    QTimer* timer;
     bool shuffle = true;
 
     std::array<Card, deck_size> Deck;
@@ -84,10 +85,13 @@ private:
 
     void Play_Start();
     
+    void End_Trick();
+
 private slots:
     void acceptConnection();
     void ValidateInput(QString message);
     void socketDisconnect(int);
+    void timerDone();
 };
 
 #endif // SERVER_H

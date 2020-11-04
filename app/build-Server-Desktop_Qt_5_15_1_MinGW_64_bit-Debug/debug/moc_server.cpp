@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_Server_t {
-    QByteArrayData data[9];
-    char stringdata0[97];
+    QByteArrayData data[10];
+    char stringdata0[107];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -40,12 +40,13 @@ QT_MOC_LITERAL(4, 36, 4), // "Info"
 QT_MOC_LITERAL(5, 41, 16), // "acceptConnection"
 QT_MOC_LITERAL(6, 58, 13), // "ValidateInput"
 QT_MOC_LITERAL(7, 72, 7), // "message"
-QT_MOC_LITERAL(8, 80, 16) // "socketDisconnect"
+QT_MOC_LITERAL(8, 80, 16), // "socketDisconnect"
+QT_MOC_LITERAL(9, 97, 9) // "timerDone"
 
     },
     "Server\0messageReceived\0\0messageSent\0"
     "Info\0acceptConnection\0ValidateInput\0"
-    "message\0socketDisconnect"
+    "message\0socketDisconnect\0timerDone"
 };
 #undef QT_MOC_LITERAL
 
@@ -55,7 +56,7 @@ static const uint qt_meta_data_Server[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -63,14 +64,15 @@ static const uint qt_meta_data_Server[] = {
        3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   44,    2, 0x06 /* Public */,
-       3,    1,   47,    2, 0x06 /* Public */,
-       4,    1,   50,    2, 0x06 /* Public */,
+       1,    1,   49,    2, 0x06 /* Public */,
+       3,    1,   52,    2, 0x06 /* Public */,
+       4,    1,   55,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       5,    0,   53,    2, 0x08 /* Private */,
-       6,    1,   54,    2, 0x08 /* Private */,
-       8,    1,   57,    2, 0x08 /* Private */,
+       5,    0,   58,    2, 0x08 /* Private */,
+       6,    1,   59,    2, 0x08 /* Private */,
+       8,    1,   62,    2, 0x08 /* Private */,
+       9,    0,   65,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString,    2,
@@ -81,6 +83,7 @@ static const uint qt_meta_data_Server[] = {
     QMetaType::Void,
     QMetaType::Void, QMetaType::QString,    7,
     QMetaType::Void, QMetaType::Int,    2,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -97,6 +100,7 @@ void Server::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 3: _t->acceptConnection(); break;
         case 4: _t->ValidateInput((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 5: _t->socketDisconnect((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 6: _t->timerDone(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -154,13 +158,13 @@ int Server::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }
